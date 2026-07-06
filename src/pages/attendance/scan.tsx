@@ -196,7 +196,7 @@ export default function ScanAttendance() {
         <div className="bg-primary/5 p-3 text-center border-b border-primary/10">
           <p className="text-sm font-medium text-primary">Position QR code in frame</p>
         </div>
-        <div id="qr-reader" className="w-full bg-black min-h-[300px] [&_video]:object-cover" />
+        <div id="qr-reader" className="w-full" />
       </Card>
 
       {/* Manual Entry */}
