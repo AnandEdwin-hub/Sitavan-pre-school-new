@@ -117,7 +117,7 @@ export default function Settings() {
             </div>
             <div className="space-y-2">
               <Label>Academic Year</Label>
-              <Input defaultValue="2023-2024" disabled className="bg-gray-50" />
+              <Input defaultValue="2026-2027" disabled className="bg-gray-50" />
             </div>
             <Button onClick={saveSettings} disabled={isSaving} className="w-full mt-2"><Save className="w-4 h-4 mr-2" /> Save Details</Button>
           </CardContent>
