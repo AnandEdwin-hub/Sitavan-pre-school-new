@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, CheckCircle2, AlertTriangle, XCircle, Clock, CalendarOff } from 'lucide-react';
+import { Search, CheckCircle2, AlertTriangle, Clock, CalendarOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AttendanceStatus, STATUS_CODE } from '@/types/database';
 
@@ -176,7 +176,7 @@ export default function ScanAttendance() {
     }
   }
 
-  function handleScanError(err: any) {
+  function handleScanError() {
     // Ignore normal scan errors (empty frames)
   }
 

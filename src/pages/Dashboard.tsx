@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, } from 'date-fns';
 
 export default function Dashboard() {
   const today = new Date();
