@@ -9,7 +9,6 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
-  Menu,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -25,7 +24,6 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const [attendanceOpen, setAttendanceOpen] = React.useState(true);
 
   const isActive = (path: string) => location.pathname === path;
-  const isParentActive = (pathPrefix: string) => location.pathname.startsWith(pathPrefix);
 
   const navItemClass = (active: boolean) =>
     `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${

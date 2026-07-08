@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { Save, Calendar as CalendarIcon, } from 'lucide-react';
 import { AttendanceStatus } from '@/types/database';
 
 export default function ManualAttendance() {
@@ -25,7 +25,7 @@ export default function ManualAttendance() {
     }
   });
 
-  const { data: existingAttendance = [], refetch } = useQuery({
+  const { refetch } = useQuery({
     queryKey: ['attendance-date', date],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];

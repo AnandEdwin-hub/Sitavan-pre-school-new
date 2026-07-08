@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Student } from '@/types/database';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Printer, Download, Phone, MapPin, Edit, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Printer, Phone, Edit, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

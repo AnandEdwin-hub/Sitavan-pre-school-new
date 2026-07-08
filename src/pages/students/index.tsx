@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Student } from '@/types/database';
 import { 
-  Search, Plus, Download, Eye, Edit, Trash2, Filter
+  Search, Plus, Download, Eye, Edit
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
