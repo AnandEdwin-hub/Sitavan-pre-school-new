@@ -51,9 +51,8 @@ export default function ManualAttendance() {
   const markAll = (status: string) => {
     const newMap = { ...localAttendance };
     students.forEach(s => {
-      if (!newMap[s.id]) { // only overwrite empty ones, or force all if you prefer
+      // always overwrite// only overwrite empty ones, or force all if you prefer
         newMap[s.id] = status;
-      }
     });
     setLocalAttendance(newMap);
   };

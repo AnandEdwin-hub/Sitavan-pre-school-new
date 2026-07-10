@@ -235,13 +235,13 @@ export const STATUS_CODE: Record<AttendanceStatus, string> = {
 
 // Attendance status -> Tailwind colour class, used across calendar/manual/scan views
 export const STATUS_COLOR: Record<AttendanceStatus, string> = {
-  'Present': 'bg-green-500 text-transparent',
-  'Late': 'bg-amber-500 text-transparent',
-  'Very Late': 'bg-orange-500 text-transparent',
-  'Absent': 'bg-red-500 text-transparent',
-  'Sick': 'bg-purple-500 text-transparent',
-  'Half Day': 'bg-blue-500 text-transparent',
-  'Holiday': 'bg-gray-400 text-transparent',
-  'Weekly Holiday': 'bg-gray-300 text-transparent',
-  'Forced Closure': 'bg-gray-800 text-transparent',
+  'Present': 'bg-green-500 text-white',
+  'Late': 'bg-amber-500 text-white',
+  'Very Late': 'bg-orange-500 text-white',
+  'Absent': 'bg-red-500 text-white',
+  'Sick': 'bg-purple-500 text-white',
+  'Half Day': 'bg-blue-500 text-white',
+  'Holiday': 'bg-gray-400 text-white',
+  'Weekly Holiday': 'bg-gray-300 text-gray-600',
+  'Forced Closure': 'bg-gray-800 text-white',
 };
