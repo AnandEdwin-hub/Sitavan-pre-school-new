@@ -4,3 +4,4 @@ dist
 pnpm-lock.yaml
 tsconfig.tsbuildinfo
 .replit-artifact
+supabase/.temp
