@@ -22,6 +22,7 @@ export default function Settings() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  const [closeTime, setCloseTime] = useState('11:00');
   const [centerName, setCenterName] = useState('Sitavan Pre-School');
   const [location, setLocation] = useState(DEFAULT_SETTINGS.location);
   const [startTime, setStartTime] = useState(DEFAULT_SETTINGS.school_start_time);
@@ -45,9 +46,10 @@ export default function Settings() {
   useEffect(() => {
     if (settingsRow) {
       setLocation(settingsRow.location);
-      setStartTime(settingsRow.school_start_time.slice(0, 5)); // 'HH:MM:SS' -> 'HH:MM'
+      setStartTime(settingsRow.school_start_time.slice(0, 5));
       setLateMins(settingsRow.late_threshold_minutes);
       setVeryLateMins(settingsRow.very_late_threshold_minutes);
+      setCloseTime(settingsRow.attendance_close_time?.slice(0, 5) ?? '11:00');
     }
   }, [settingsRow]);
 
@@ -63,6 +65,7 @@ export default function Settings() {
         school_start_time: startTime,
         late_threshold_minutes: lateMins,
         very_late_threshold_minutes: veryLateMins,
+        attendance_close_time: closeTime,
         location,
         updated_by: user?.id ?? null,
         updated_at: new Date().toISOString(),
@@ -155,6 +158,18 @@ export default function Settings() {
                     onChange={(e) => setVeryLateMins(Number(e.target.value))}
                     disabled={isLoading}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Attendance Window Closes</Label>
+                  <Input 
+                    type="time" 
+                    value={closeTime} 
+                    onChange={(e) => setCloseTime(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Students not scanned by this time will be automatically marked Absent.
+                  </p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
