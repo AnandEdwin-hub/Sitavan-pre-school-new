@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { AttendanceStatus, STATUS_CODE, STATUS_COLOR } from '@/types/database';
+import * as XLSX from 'xlsx';
 
 export default function CalendarAttendance() {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -90,6 +91,31 @@ export default function CalendarAttendance() {
 
   const getStatusLetter = (status?: AttendanceStatus) =>
     status ? STATUS_CODE[status] : '';
+
+  const handleExport = () => {
+    const header = ['Roll No', 'Name', 'Class', ...daysInMonth.map(d => format(d, 'd'))];
+    const rows = filteredStudents.map(student => {
+      const row: (string | number)[] = [student.roll_no, student.full_name, student.class];
+      daysInMonth.forEach(day => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const status = getEffectiveStatus(student.id, day, dateStr);
+        row.push(getStatusLetter(status));
+      });
+      return row;
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    worksheet['!cols'] = [
+      { wch: 10 }, { wch: 20 }, { wch: 8 },
+      ...daysInMonth.map(() => ({ wch: 4 }))
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, format(currentMonth, 'MMM yyyy'));
+
+    const fileName = `Attendance_${classFilter === 'all' ? 'AllClasses' : classFilter}_${format(currentMonth, 'MMM-yyyy')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
   return (
     <div className="space-y-6">
