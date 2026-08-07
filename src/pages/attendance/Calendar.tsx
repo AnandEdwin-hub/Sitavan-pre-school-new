@@ -149,7 +149,7 @@ export default function CalendarAttendance() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline" className="bg-white">
+          <Button variant="outline" className="bg-white" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
