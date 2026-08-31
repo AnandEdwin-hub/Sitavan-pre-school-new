@@ -175,6 +175,7 @@ export type Database = {
           school_start_time: string;
           late_threshold_minutes: number;
           very_late_threshold_minutes: number;
+          attendance_close_time: string;
           location: string;
           updated_by: string | null;
           updated_at: string;
@@ -185,6 +186,7 @@ export type Database = {
           school_start_time?: string;
           late_threshold_minutes?: number;
           very_late_threshold_minutes?: number;
+          attendance_close_time?: string;
           location?: string;
           updated_by?: string | null;
           updated_at?: string;
@@ -195,9 +197,145 @@ export type Database = {
           school_start_time?: string;
           late_threshold_minutes?: number;
           very_late_threshold_minutes?: number;
+          attendance_close_time?: string;
           location?: string;
           updated_by?: string | null;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      staff: {
+        Row: {
+          id: string;
+          staff_code: string;
+          full_name: string;
+          designation: string | null;
+          mobile: string | null;
+          email: string | null;
+          qualification: string | null;
+          doj: string | null;
+          photo_url: string | null;
+          center_id: string | null;
+          status: 'Active' | 'Inactive' | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_code: string;
+          full_name: string;
+          designation?: string | null;
+          mobile?: string | null;
+          email?: string | null;
+          qualification?: string | null;
+          doj?: string | null;
+          photo_url?: string | null;
+          center_id?: string | null;
+          status?: 'Active' | 'Inactive' | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          staff_code?: string;
+          full_name?: string;
+          designation?: string | null;
+          mobile?: string | null;
+          email?: string | null;
+          qualification?: string | null;
+          doj?: string | null;
+          photo_url?: string | null;
+          center_id?: string | null;
+          status?: 'Active' | 'Inactive' | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      volunteers: {
+        Row: {
+          id: string;
+          volunteer_code: string;
+          full_name: string;
+          mobile: string | null;
+          email: string | null;
+          organization: string | null;
+          role: string | null;
+          school_class: string | null;
+          doj: string | null;
+          photo_url: string | null;
+          center_id: string | null;
+          status: 'Active' | 'Inactive' | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          volunteer_code: string;
+          full_name: string;
+          mobile?: string | null;
+          email?: string | null;
+          organization?: string | null;
+          role?: string | null;
+          school_class?: string | null;
+          doj?: string | null;
+          photo_url?: string | null;
+          center_id?: string | null;
+          status?: 'Active' | 'Inactive' | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          volunteer_code?: string;
+          full_name?: string;
+          mobile?: string | null;
+          email?: string | null;
+          organization?: string | null;
+          role?: string | null;
+          school_class?: string | null;
+          doj?: string | null;
+          photo_url?: string | null;
+          center_id?: string | null;
+          status?: 'Active' | 'Inactive' | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      staff_attendance: {
+        Row: {
+          id: string;
+          person_id: string;
+          person_type: 'staff' | 'volunteer';
+          date: string;
+          status: 'Present' | 'Absent' | 'Late' | 'Very Late' | 'Half Day';
+          scanned_in_at: string | null;
+          scanned_out_at: string | null;
+          center_id: string | null;
+          marked_by: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          person_id: string;
+          person_type: 'staff' | 'volunteer';
+          date: string;
+          status?: 'Present' | 'Absent' | 'Late' | 'Very Late' | 'Half Day';
+          scanned_in_at?: string | null;
+          scanned_out_at?: string | null;
+          center_id?: string | null;
+          marked_by?: string | null;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          person_id?: string;
+          person_type?: 'staff' | 'volunteer';
+          date?: string;
+          status?: 'Present' | 'Absent' | 'Late' | 'Very Late' | 'Half Day';
+          scanned_in_at?: string | null;
+          scanned_out_at?: string | null;
+          center_id?: string | null;
+          marked_by?: string | null;
+          notes?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -219,6 +357,24 @@ export type HolidayType = 'Holiday' | 'Forced Closure';
 export type StudentStatus = 'Active' | 'Inactive' | 'On Leave';
 export type StudentClass = '0' | 'NUR' | 'LKG' | 'HKG' | '1' | '2';
 export type StudentGroup = 'BEG' | 'ADV';
+
+export type Staff = Database['public']['Tables']['staff']['Row'];
+export type Volunteer = Database['public']['Tables']['volunteers']['Row'];
+export type StaffAttendanceRecord = Database['public']['Tables']['staff_attendance']['Row'];
+export type PersonRole = 'student' | 'staff' | 'volunteer';
+export type StaffAttendanceStatus = 'Present' | 'Absent' | 'Late' | 'Very Late' | 'Half Day';
+
+// Code prefixes used to tell apart a scanned/entered ID at a glance
+export const STAFF_CODE_PREFIX = 'SITST';
+export const VOLUNTEER_CODE_PREFIX = 'SITVL';
+
+export function identifyPersonRole(code: string): PersonRole | null {
+  const upper = code.trim().toUpperCase();
+  if (upper.startsWith(STAFF_CODE_PREFIX)) return 'staff';
+  if (upper.startsWith(VOLUNTEER_CODE_PREFIX)) return 'volunteer';
+  if (upper.length > 0) return 'student'; // students use plain roll numbers like SIT26001
+  return null;
+}
 
 // Attendance status -> letter code mapping, used across calendar/manual/scan views
 export const STATUS_CODE: Record<AttendanceStatus, string> = {

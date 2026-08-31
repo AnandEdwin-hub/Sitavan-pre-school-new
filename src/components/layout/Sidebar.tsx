@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
+  UserCog,
+  HeartHandshake,
   CalendarCheck,
   QrCode,
   Settings,
@@ -21,6 +23,8 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [studentsOpen, setStudentsOpen] = React.useState(true);
+  const [staffOpen, setStaffOpen] = React.useState(false);
+  const [volunteersOpen, setVolunteersOpen] = React.useState(false);
   const [attendanceOpen, setAttendanceOpen] = React.useState(true);
 
   const isActive = (path: string) => location.pathname === path;
@@ -68,6 +72,54 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                 Overview
               </Link>
               <Link to="/students/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/students/new'))}>
+                Add New
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Staff Group */}
+        <div className="pt-2">
+          <button
+            onClick={() => setStaffOpen(!staffOpen)}
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <UserCog className="w-5 h-5" />
+              <span>Staff</span>
+            </div>
+            {staffOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+          {staffOpen && (
+            <div className="mt-1 space-y-1 pl-10">
+              <Link to="/staff" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/staff'))}>
+                Overview
+              </Link>
+              <Link to="/staff/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/staff/new'))}>
+                Add New
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Volunteers Group */}
+        <div className="pt-2">
+          <button
+            onClick={() => setVolunteersOpen(!volunteersOpen)}
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <HeartHandshake className="w-5 h-5" />
+              <span>Volunteers</span>
+            </div>
+            {volunteersOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+          {volunteersOpen && (
+            <div className="mt-1 space-y-1 pl-10">
+              <Link to="/volunteers" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/volunteers'))}>
+                Overview
+              </Link>
+              <Link to="/volunteers/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/volunteers/new'))}>
                 Add New
               </Link>
             </div>

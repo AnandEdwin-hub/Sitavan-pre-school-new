@@ -11,6 +11,10 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const StudentsOverview = lazy(() => import('@/pages/students/index'));
 const StudentProfile = lazy(() => import('@/pages/students/[id]'));
 const AddStudent = lazy(() => import('@/pages/students/new'));
+const StaffOverview = lazy(() => import('@/pages/staff/index'));
+const AddStaff = lazy(() => import('@/pages/staff/new'));
+const VolunteersOverview = lazy(() => import('@/pages/volunteers/index'));
+const AddVolunteer = lazy(() => import('@/pages/volunteers/new'));
 const ScanAttendance = lazy(() => import('@/pages/attendance/Scan'));
 const ManualAttendance = lazy(() => import('@/pages/attendance/Manual'));
 const CalendarAttendance = lazy(() => import('@/pages/attendance/Calendar'));
@@ -52,6 +56,16 @@ function App() {
                   <Route index element={<StudentsOverview />} />
                   <Route path="new" element={<AddStudent />} />
                   <Route path=":id" element={<StudentProfile />} />
+                </Route>
+
+                <Route path="/staff">
+                  <Route index element={<StaffOverview />} />
+                  <Route path="new" element={<AddStaff />} />
+                </Route>
+
+                <Route path="/volunteers">
+                  <Route index element={<VolunteersOverview />} />
+                  <Route path="new" element={<AddVolunteer />} />
                 </Route>
 
                 <Route path="/attendance">
