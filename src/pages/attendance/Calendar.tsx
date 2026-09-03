@@ -15,7 +15,10 @@ type ViewType = 'students' | 'staff' | 'volunteers';
 const EXTRA_STATUS_CODE: Record<string, string> = { 'Half Day': 'HD' };
 const EXTRA_STATUS_COLOR: Record<string, string> = { 'Half Day': 'bg-indigo-400' };
 
-const getLetter = (status?: string) => (status ? (STATUS_CODE as any)[status] || EXTRA_STATUS_CODE[status] || status : '');
+const getLetter = (status?: string) => {
+  if (status === 'Weekly Holiday') return 'SUN';
+  return status ? (STATUS_CODE as any)[status] || EXTRA_STATUS_CODE[status] || status : '';
+};
 const getColor = (status?: string) => (status ? (STATUS_COLOR as any)[status] || EXTRA_STATUS_COLOR[status] || 'bg-gray-400' : 'bg-gray-50 text-transparent border border-gray-100');
 
 interface PersonRow {
@@ -307,7 +310,7 @@ export default function CalendarAttendance() {
         <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-purple-500"></div> S - Sick</div>
         <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-indigo-400"></div> HD - Half Day</div>
         <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-400"></div> H - Holiday</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-300"></div> W - Weekly Off</div>
+        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-300"></div> SUN - Sunday</div>
         <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-800"></div> FC - Forced Closure</div>
       </div>
     </div>
