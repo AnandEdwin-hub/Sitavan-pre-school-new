@@ -172,11 +172,14 @@ export default function ScanAttendance() {
     return { id: student.id, code: student.roll_no, full_name: student.full_name, subtitle: `${student.class || ''} ${student.group || ''}`.trim(), role: 'student' };
   };
 
-  const directoryReady = students.length > 0 || staff.length > 0 || volunteers.length > 0;
+  const directoryReadyRef = React.useRef(false);
+  useEffect(() => {
+    directoryReadyRef.current = students.length > 0 || staff.length > 0 || volunteers.length > 0;
+  }, [students, staff, volunteers]);
 
-const processCode = async (rawCode: string) => {
+  const processCode = async (rawCode: string) => {
     if (isProcessing || closureReason) return;
-    if (!directoryReady) {
+    if (!directoryReadyRef.current) {
       toast({ variant: 'destructive', title: 'Still loading', description: 'The directory is still loading — wait a second and try again.' });
       return;
     }
@@ -383,12 +386,13 @@ const processCode = async (rawCode: string) => {
         <Card className="overflow-hidden border-2 border-primary/20 shadow-md">
           <div className="bg-primary/5 p-3 text-center border-b border-primary/10">
             <p className="text-sm font-medium text-primary">
-  {directoryReady ? 'Position QR code in frame — students, staff, or volunteers' : 'Loading directory, please wait...'}
+  {(students.length > 0 || staff.length > 0 || volunteers.length > 0) ? 'Position QR code in frame — students, staff, or volunteers' : 'Loading directory, please wait...'}
 </p>
           </div>
           <div id="qr-reader" className="w-full" />
         </Card>
       )}
+      
 
       <Card>
         <CardContent className="p-4">
