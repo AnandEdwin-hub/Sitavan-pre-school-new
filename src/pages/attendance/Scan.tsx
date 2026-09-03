@@ -66,7 +66,7 @@ export default function ScanAttendance() {
   const veryLateMins = settings?.very_late_threshold_minutes ?? DEFAULT_VERY_LATE_MINS;
 
   // Fetch all three groups for lookup
-  const { data: students = [] } = useQuery({
+  const { data: students = [], isSuccess: studentsLoaded } = useQuery({
     queryKey: ['students-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
@@ -75,7 +75,7 @@ export default function ScanAttendance() {
     }
   });
 
-  const { data: staff = [] } = useQuery({
+  const { data: staff = [], isSuccess: staffLoaded } = useQuery({
     queryKey: ['staff-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
@@ -84,7 +84,7 @@ export default function ScanAttendance() {
     }
   });
 
-  const { data: volunteers = [] } = useQuery({
+  const { data: volunteers = [], isSuccess: volunteersLoaded } = useQuery({
     queryKey: ['volunteers-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
@@ -119,6 +119,12 @@ export default function ScanAttendance() {
       return data || [];
     }
   });
+
+  const directoryFullyLoaded = studentsLoaded && staffLoaded && volunteersLoaded;
+  const directoryReadyRef = React.useRef(false);
+  useEffect(() => {
+    directoryReadyRef.current = directoryFullyLoaded;
+  }, [directoryFullyLoaded]);
 
   useEffect(() => {
     if (closureReason) return;
@@ -171,11 +177,6 @@ export default function ScanAttendance() {
     if (!student) return null;
     return { id: student.id, code: student.roll_no, full_name: student.full_name, subtitle: `${student.class || ''} ${student.group || ''}`.trim(), role: 'student' };
   };
-
-  const directoryReadyRef = React.useRef(false);
-  useEffect(() => {
-    directoryReadyRef.current = students.length > 0 || staff.length > 0 || volunteers.length > 0;
-  }, [students, staff, volunteers]);
 
   const processCode = async (rawCode: string) => {
     if (isProcessing || closureReason) return;
@@ -386,13 +387,12 @@ export default function ScanAttendance() {
         <Card className="overflow-hidden border-2 border-primary/20 shadow-md">
           <div className="bg-primary/5 p-3 text-center border-b border-primary/10">
             <p className="text-sm font-medium text-primary">
-  {(students.length > 0 || staff.length > 0 || volunteers.length > 0) ? 'Position QR code in frame — students, staff, or volunteers' : 'Loading directory, please wait...'}
-</p>
+              {directoryFullyLoaded ? 'Position QR code in frame — students, staff, or volunteers' : 'Loading directory, please wait...'}
+            </p>
           </div>
           <div id="qr-reader" className="w-full" />
         </Card>
       )}
-      
 
       <Card>
         <CardContent className="p-4">
