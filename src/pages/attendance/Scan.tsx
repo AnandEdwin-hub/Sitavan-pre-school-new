@@ -157,26 +157,57 @@ export default function ScanAttendance() {
 
   // Looks up a scanned/typed code across students, staff, and volunteers
   const findPerson = (code: string): ScannedPerson | null => {
-    const role = identifyPersonRole(code);
-    const upperCode = code.trim().toUpperCase();
+  const upperCode = code.trim().toUpperCase();
 
-    if (role === 'staff') {
-      const person = staff.find((s: any) => s.staff_code?.toUpperCase() === upperCode);
-      if (!person) return null;
-      return { id: person.id, code: person.staff_code, full_name: person.full_name, subtitle: person.designation || 'Staff', role: 'staff' };
-    }
+  // Check staff
+  const staffPerson = staff.find(
+    (s: any) => s.staff_code?.trim().toUpperCase() === upperCode
+  );
 
-    if (role === 'volunteer') {
-      const person = volunteers.find((v: any) => v.volunteer_code?.toUpperCase() === upperCode);
-      if (!person) return null;
-      return { id: person.id, code: person.volunteer_code, full_name: person.full_name, subtitle: `${person.organization || 'Volunteer'}${person.school_class ? ' • ' + person.school_class : ''}`, role: 'volunteer' };
-    }
+  if (staffPerson) {
+    return {
+      id: staffPerson.id,
+      code: staffPerson.staff_code,
+      full_name: staffPerson.full_name,
+      subtitle: staffPerson.designation || 'Staff',
+      role: 'staff',
+    };
+  }
 
-    // default: student
-    const student = students.find((s: any) => s.roll_no?.toUpperCase() === upperCode);
-    if (!student) return null;
-    return { id: student.id, code: student.roll_no, full_name: student.full_name, subtitle: `${student.class || ''} ${student.group || ''}`.trim(), role: 'student' };
-  };
+  // Check volunteers
+  const volunteerPerson = volunteers.find(
+    (v: any) => v.volunteer_code?.trim().toUpperCase() === upperCode
+  );
+
+  if (volunteerPerson) {
+    return {
+      id: volunteerPerson.id,
+      code: volunteerPerson.volunteer_code,
+      full_name: volunteerPerson.full_name,
+      subtitle: `${volunteerPerson.organization || 'Volunteer'}${
+        volunteerPerson.school_class ? ' • ' + volunteerPerson.school_class : ''
+      }`,
+      role: 'volunteer',
+    };
+  }
+
+  // Check students
+  const studentPerson = students.find(
+    (s: any) => s.roll_no?.trim().toUpperCase() === upperCode
+  );
+
+  if (studentPerson) {
+    return {
+      id: studentPerson.id,
+      code: studentPerson.roll_no,
+      full_name: studentPerson.full_name,
+      subtitle: `${studentPerson.class || ''} ${studentPerson.group || ''}`.trim(),
+      role: 'student',
+    };
+  }
+
+  return null;
+};
 
   const processCode = async (rawCode: string) => {
     if (isProcessing || closureReason) return;
