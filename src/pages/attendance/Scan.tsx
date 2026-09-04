@@ -70,7 +70,8 @@ export default function ScanAttendance() {
     queryKey: ['students-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group');
+      const { data, error } = await supabase.from('students').select('id, roll_no, full_name, class, group');
+      if (error) throw error;
       return data || [];
     }
   });
@@ -79,7 +80,8 @@ export default function ScanAttendance() {
     queryKey: ['staff-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation');
+      const { data, error } = await supabase.from('staff').select('id, staff_code, full_name, designation');
+      if (error) throw error;
       return data || [];
     }
   });
@@ -88,7 +90,8 @@ export default function ScanAttendance() {
     queryKey: ['volunteers-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class');
+      const { data, error } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class');
+      if (error) throw error;
       return data || [];
     }
   });
