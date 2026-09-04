@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Save, Calendar as CalendarIcon } from 'lucide-react';
 import { AttendanceStatus } from '@/types/database';
 
@@ -28,11 +29,20 @@ const STUDENT_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Sick', 'Hal
 const STAFF_VOLUNTEER_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Half Day'];
 
 export default function ManualAttendance() {
+  const { isAdmin } = useAuth();
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [view, setView] = useState<ViewType>('students');
   const [localAttendance, setLocalAttendance] = useState<Record<string, LocalEntry>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  const handleViewChange = (v: ViewType) => {
+    if (v === 'staff' && !isAdmin) {
+      toast({ variant: 'destructive', title: 'Not Allowed', description: 'Only an admin can view or edit staff attendance.' });
+      return;
+    }
+    setView(v);
+  };
 
   const statusOptions = view === 'students' ? STUDENT_STATUSES : STAFF_VOLUNTEER_STATUSES;
 
@@ -115,6 +125,10 @@ export default function ManualAttendance() {
   };
 
   const handleSave = async () => {
+    if (view === 'staff' && !isAdmin) {
+      toast({ variant: 'destructive', title: 'Not Allowed', description: 'Only an admin can save staff attendance.' });
+      return;
+    }
     setIsSaving(true);
     try {
       if (!isSupabaseConfigured) {
@@ -182,13 +196,13 @@ export default function ManualAttendance() {
           <p className="text-muted-foreground text-sm">Bulk update attendance records for a specific day</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Select value={view} onValueChange={(v) => setView(v as ViewType)}>
+          <Select value={view} onValueChange={(v) => handleViewChange(v as ViewType)}>
             <SelectTrigger className="w-[130px] bg-white">
               <SelectValue placeholder="View" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="students">Students</SelectItem>
-              <SelectItem value="staff">Staff</SelectItem>
+              <SelectItem value="staff" disabled={!isAdmin}>Staff{!isAdmin ? ' (Admin only)' : ''}</SelectItem>
               <SelectItem value="volunteers">Volunteers</SelectItem>
             </SelectContent>
           </Select>
