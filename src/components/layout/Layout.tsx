@@ -13,7 +13,7 @@ export function Layout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse flex flex-col items-center">
-          <span className="text-4xl mb-4">📚</span>
+          <img src="/logo.png" alt="Sitavan Pre-School" className="w-14 h-14 rounded-full object-cover mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>

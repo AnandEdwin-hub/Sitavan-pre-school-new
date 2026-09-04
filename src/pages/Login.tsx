@@ -44,7 +44,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-2">
-            <span className="text-5xl">📚</span>
+            <img src="/logo.png" alt="Sitavan Pre-School" className="w-16 h-16 rounded-full object-cover" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
             Sitavan Pre-School
