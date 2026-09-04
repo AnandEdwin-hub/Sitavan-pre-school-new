@@ -129,6 +129,18 @@ export default function ScanAttendance() {
     directoryReadyRef.current = directoryFullyLoaded;
   }, [directoryFullyLoaded]);
 
+  const studentsRef = React.useRef(students);
+  const staffRef = React.useRef(staff);
+  const volunteersRef = React.useRef(volunteers);
+  const todayAttendanceRef = React.useRef(todayAttendance);
+  const todayStaffAttendanceRef = React.useRef(todayStaffAttendance);
+
+  useEffect(() => { studentsRef.current = students; }, [students]);
+  useEffect(() => { staffRef.current = staff; }, [staff]);
+  useEffect(() => { volunteersRef.current = volunteers; }, [volunteers]);
+  useEffect(() => { todayAttendanceRef.current = todayAttendance; }, [todayAttendance]);
+  useEffect(() => { todayStaffAttendanceRef.current = todayStaffAttendance; }, [todayStaffAttendance]);
+
   useEffect(() => {
     if (closureReason) return;
 
@@ -161,6 +173,9 @@ export default function ScanAttendance() {
   // Looks up a scanned/typed code across students, staff, and volunteers
   const findPerson = (code: string): ScannedPerson | null => {
   const upperCode = code.trim().toUpperCase();
+  const staff = staffRef.current;
+  const volunteers = volunteersRef.current;
+  const students = studentsRef.current;
 
   // Check staff
   const staffPerson = staff.find(
@@ -232,7 +247,7 @@ export default function ScanAttendance() {
       const nowIso = new Date().toISOString();
 
       if (person.role === 'student') {
-        const alreadyScanned = todayAttendance.find((a: any) => a.student_id === person.id);
+        const alreadyScanned = todayAttendanceRef.current.find((a: any) => a.student_id === person.id);
         if (alreadyScanned) {
           setScanResult({ person, status: 'Already Scanned', time: nowIso, type: 'warning' });
           clearResultAfterDelay();
@@ -250,7 +265,7 @@ export default function ScanAttendance() {
         refetchAttendance();
       } else {
         // staff or volunteer
-        const alreadyScanned = todayStaffAttendance.find(
+        const alreadyScanned = todayStaffAttendanceRef.current.find(
           (a: any) => a.person_id === person.id && a.person_type === person.role
         );
         if (alreadyScanned) {
