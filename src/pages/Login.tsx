@@ -43,10 +43,10 @@ export default function Login() {
     <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
-            <img src="/logo.png" alt="Sitavan Pre-School" className="w-16 h-16 rounded-full object-cover" />
+          <div className="flex justify-center mb-1">
+            <img src="/logo.png" alt="Sitavan Pre-School" className="w-28 h-28 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
+          <CardTitle className="text-xl font-bold tracking-tight text-foreground">
             Sitavan Pre-School
           </CardTitle>
           <CardDescription>
