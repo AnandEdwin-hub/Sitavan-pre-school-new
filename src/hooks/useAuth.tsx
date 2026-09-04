@@ -43,5 +43,8 @@ export function useAuth() {
     };
   }, []);
 
-  return { session, user, loading };
+  const ADMIN_EMAILS = ['admin@sitavan.edu'];
+  const isAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email);
+
+  return { session, user, loading, isAdmin };
 }

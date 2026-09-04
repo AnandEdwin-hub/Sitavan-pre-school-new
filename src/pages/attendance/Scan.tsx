@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, CheckCircle2, AlertTriangle, Clock, CalendarOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { AttendanceStatus, STATUS_CODE, identifyPersonRole, PersonRole } from '@/types/database';
 
 const DEFAULT_START_TIME = '09:00';
@@ -27,6 +28,7 @@ export default function ScanAttendance() {
   const [manualInput, setManualInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   const today = new Date();
   const todayDateStr = format(today, 'yyyy-MM-dd');
@@ -259,6 +261,11 @@ export default function ScanAttendance() {
 
       if (!person) {
         toast({ variant: 'destructive', title: 'Unknown QR', description: `No record found for code ${rawCode}` });
+        return;
+      }
+
+      if (person.role === 'staff' && !isAdmin) {
+        toast({ variant: 'destructive', title: 'Not Allowed', description: 'Only an admin can take staff attendance.' });
         return;
       }
 
