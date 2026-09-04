@@ -37,7 +37,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Hero half — rounded top only */}
         <div className="bg-sidebar rounded-t-3xl pt-10 pb-12 px-6 flex flex-col items-center">
-          <div className="w-32 h-32 rounded-full bg-card flex items-center justify-center shadow-md mb-4 overflow-hidden">
+          <div className="w-40 h-40 rounded-full bg-card flex items-center justify-center shadow-md mb-4 overflow-hidden">
             <img src="/logo.png" alt="Sitavan Pre-School" className="w-full h-full object-contain scale-110" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-sidebar-foreground text-center">
