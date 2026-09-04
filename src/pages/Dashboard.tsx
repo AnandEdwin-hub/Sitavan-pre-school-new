@@ -100,7 +100,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground">{format(today, 'EEEE, d MMMM yyyy')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button asChild variant="outline" className="bg-white">
+          <Button asChild variant="outline">
             <Link to="/students/new">Add Student</Link>
           </Button>
           <Button asChild>
@@ -148,10 +148,10 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Monthly Avg</CardTitle>
-            <TrendingUp className="w-4 h-4 text-blue-500" />
+            <TrendingUp className="w-4 h-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{monthAvg}%</div>
+            <div className="text-2xl font-bold text-primary">{monthAvg}%</div>
             <p className="text-xs text-muted-foreground mt-1">Attendance this month</p>
           </CardContent>
         </Card>
@@ -166,17 +166,17 @@ export default function Dashboard() {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                   <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                   <Tooltip 
-                    cursor={{fill: '#F1F5F9'}} 
+                    cursor={{fill: 'hsl(var(--muted))'}} 
                     contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
                     formatter={(value: number) => [`${value}%`, 'Attendance']}
                   />
                   <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={40}>
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.pct < 75 ? '#EF4444' : '#4F46E5'} />
+                      <Cell key={`cell-${index}`} fill={entry.pct < 75 ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'} />
                     ))}
                   </Bar>
                 </BarChart>

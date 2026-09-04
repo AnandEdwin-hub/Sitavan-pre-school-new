@@ -33,23 +33,23 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background">
-      {/* Hero panel */}
-      <div className="relative bg-sidebar pt-14 pb-20 px-4 flex flex-col items-center rounded-b-[2.5rem] shadow-sm">
-        <div className="w-24 h-24 rounded-full bg-card flex items-center justify-center shadow-md mb-4">
-          <img src="/logo.png" alt="Sitavan Pre-School" className="w-16 h-16 object-contain" />
+    <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md">
+        {/* Hero half — rounded top only */}
+        <div className="bg-sidebar rounded-t-3xl pt-10 pb-12 px-6 flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full bg-card flex items-center justify-center shadow-md mb-4">
+            <img src="/logo.png" alt="Sitavan Pre-School" className="w-16 h-16 object-contain" />
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-sidebar-foreground text-center">
+            Sitavan Pre-School
+          </h1>
+          <p className="text-sm text-sidebar-foreground/70 mt-1 text-center">
+            Sign in to manage your school
+          </p>
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-sidebar-foreground">
-          Sitavan Pre-School
-        </h1>
-        <p className="text-sm text-sidebar-foreground/70 mt-1">
-          Sign in to manage your school
-        </p>
-      </div>
 
-      {/* Form card, overlapping the hero panel */}
-      <div className="flex-1 flex justify-center px-4 -mt-10">
-        <div className="w-full max-w-md bg-card rounded-2xl shadow-lg p-6 sm:p-8 h-fit">
+        {/* Form half — rounded bottom only, sits flush against hero */}
+        <div className="bg-card rounded-b-3xl shadow-lg px-6 sm:px-8 py-8">
           {!isSupabaseConfigured && (
             <div className="mb-6 p-4 bg-amber-50 text-amber-800 rounded-xl text-sm">
               <p className="font-semibold mb-1">Setup Required</p>
@@ -64,7 +64,7 @@ export default function Login() {
                 id="email"
                 type="email"
                 placeholder="teacher@sitavansps.edu"
-                className="rounded-full px-4 h-11"
+                className="rounded-full px-4 h-11 border-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -75,7 +75,7 @@ export default function Login() {
               <Input
                 id="password"
                 type="password"
-                className="rounded-full px-4 h-11"
+                className="rounded-full px-4 h-11 border-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
