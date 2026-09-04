@@ -61,9 +61,27 @@ export default function ScanAttendance() {
     : isSunday ? 'Weekly Holiday'
     : null;
 
-  const startTime = settings?.school_start_time?.slice(0, 5) || DEFAULT_START_TIME;
-  const lateMins = settings?.late_threshold_minutes ?? DEFAULT_LATE_MINS;
-  const veryLateMins = settings?.very_late_threshold_minutes ?? DEFAULT_VERY_LATE_MINS;
+  const getTimingForRole = (role: PersonRole) => {
+    if (role === 'staff') {
+      return {
+        startTime: settings?.staff_start_time?.slice(0, 5) || DEFAULT_START_TIME,
+        lateMins: settings?.staff_late_threshold_minutes ?? DEFAULT_LATE_MINS,
+        veryLateMins: settings?.staff_very_late_threshold_minutes ?? DEFAULT_VERY_LATE_MINS,
+      };
+    }
+    if (role === 'volunteer') {
+      return {
+        startTime: settings?.volunteer_start_time?.slice(0, 5) || DEFAULT_START_TIME,
+        lateMins: settings?.volunteer_late_threshold_minutes ?? DEFAULT_LATE_MINS,
+        veryLateMins: settings?.volunteer_very_late_threshold_minutes ?? DEFAULT_VERY_LATE_MINS,
+      };
+    }
+    return {
+      startTime: settings?.school_start_time?.slice(0, 5) || DEFAULT_START_TIME,
+      lateMins: settings?.late_threshold_minutes ?? DEFAULT_LATE_MINS,
+      veryLateMins: settings?.very_late_threshold_minutes ?? DEFAULT_VERY_LATE_MINS,
+    };
+  };
 
   // Fetch all three groups for lookup
   const { data: students = [], isSuccess: studentsLoaded } = useQuery({
@@ -158,7 +176,8 @@ export default function ScanAttendance() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closureReason]);
 
-  const getStatusForTime = (): AttendanceStatus => {
+  const getStatusForTime = (role: PersonRole): AttendanceStatus => {
+    const { startTime, lateMins, veryLateMins } = getTimingForRole(role);
     const now = new Date();
     const [startHour, startMin] = startTime.split(':').map(Number);
     const startTotalMins = startHour * 60 + startMin;
@@ -243,7 +262,7 @@ export default function ScanAttendance() {
         return;
       }
 
-      const status = getStatusForTime();
+      const status = getStatusForTime(person.role);
       const nowIso = new Date().toISOString();
 
       if (person.role === 'student') {

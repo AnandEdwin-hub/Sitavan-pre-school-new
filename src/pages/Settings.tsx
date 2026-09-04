@@ -15,6 +15,14 @@ const DEFAULT_SETTINGS = {
   late_threshold_minutes: 5,
   very_late_threshold_minutes: 10,
   location: 'Mt Abu, Rajasthan',
+  staff_start_time: '09:00',
+  staff_late_threshold_minutes: 5,
+  staff_very_late_threshold_minutes: 10,
+  staff_attendance_close_time: '11:00',
+  volunteer_start_time: '09:00',
+  volunteer_late_threshold_minutes: 5,
+  volunteer_very_late_threshold_minutes: 10,
+  volunteer_attendance_close_time: '11:00',
 };
 
 export default function Settings() {
@@ -28,6 +36,17 @@ export default function Settings() {
   const [startTime, setStartTime] = useState(DEFAULT_SETTINGS.school_start_time);
   const [lateMins, setLateMins] = useState(DEFAULT_SETTINGS.late_threshold_minutes);
   const [veryLateMins, setVeryLateMins] = useState(DEFAULT_SETTINGS.very_late_threshold_minutes);
+
+  const [staffStartTime, setStaffStartTime] = useState(DEFAULT_SETTINGS.staff_start_time);
+  const [staffLateMins, setStaffLateMins] = useState(DEFAULT_SETTINGS.staff_late_threshold_minutes);
+  const [staffVeryLateMins, setStaffVeryLateMins] = useState(DEFAULT_SETTINGS.staff_very_late_threshold_minutes);
+  const [staffCloseTime, setStaffCloseTime] = useState(DEFAULT_SETTINGS.staff_attendance_close_time);
+
+  const [volunteerStartTime, setVolunteerStartTime] = useState(DEFAULT_SETTINGS.volunteer_start_time);
+  const [volunteerLateMins, setVolunteerLateMins] = useState(DEFAULT_SETTINGS.volunteer_late_threshold_minutes);
+  const [volunteerVeryLateMins, setVolunteerVeryLateMins] = useState(DEFAULT_SETTINGS.volunteer_very_late_threshold_minutes);
+  const [volunteerCloseTime, setVolunteerCloseTime] = useState(DEFAULT_SETTINGS.volunteer_attendance_close_time);
+
   const [isSaving, setIsSaving] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
 
@@ -50,6 +69,16 @@ export default function Settings() {
       setLateMins(settingsRow.late_threshold_minutes);
       setVeryLateMins(settingsRow.very_late_threshold_minutes);
       setCloseTime(settingsRow.attendance_close_time?.slice(0, 5) ?? '11:00');
+
+      setStaffStartTime(settingsRow.staff_start_time?.slice(0, 5) ?? DEFAULT_SETTINGS.staff_start_time);
+      setStaffLateMins(settingsRow.staff_late_threshold_minutes ?? DEFAULT_SETTINGS.staff_late_threshold_minutes);
+      setStaffVeryLateMins(settingsRow.staff_very_late_threshold_minutes ?? DEFAULT_SETTINGS.staff_very_late_threshold_minutes);
+      setStaffCloseTime(settingsRow.staff_attendance_close_time?.slice(0, 5) ?? DEFAULT_SETTINGS.staff_attendance_close_time);
+
+      setVolunteerStartTime(settingsRow.volunteer_start_time?.slice(0, 5) ?? DEFAULT_SETTINGS.volunteer_start_time);
+      setVolunteerLateMins(settingsRow.volunteer_late_threshold_minutes ?? DEFAULT_SETTINGS.volunteer_late_threshold_minutes);
+      setVolunteerVeryLateMins(settingsRow.volunteer_very_late_threshold_minutes ?? DEFAULT_SETTINGS.volunteer_very_late_threshold_minutes);
+      setVolunteerCloseTime(settingsRow.volunteer_attendance_close_time?.slice(0, 5) ?? DEFAULT_SETTINGS.volunteer_attendance_close_time);
     }
   }, [settingsRow]);
 
@@ -67,6 +96,14 @@ export default function Settings() {
         very_late_threshold_minutes: veryLateMins,
         attendance_close_time: closeTime,
         location,
+        staff_start_time: staffStartTime,
+        staff_late_threshold_minutes: staffLateMins,
+        staff_very_late_threshold_minutes: staffVeryLateMins,
+        staff_attendance_close_time: staffCloseTime,
+        volunteer_start_time: volunteerStartTime,
+        volunteer_late_threshold_minutes: volunteerLateMins,
+        volunteer_very_late_threshold_minutes: volunteerVeryLateMins,
+        volunteer_attendance_close_time: volunteerCloseTime,
         updated_by: user?.id ?? null,
         updated_at: new Date().toISOString(),
       };
@@ -177,6 +214,66 @@ export default function Settings() {
               </p>
               <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
                 {isSaving ? 'Saving...' : 'Save Attendance Rules'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Attendance Rules</CardTitle>
+              <CardDescription>Timing rules for staff check-in</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Staff Start Time</Label>
+                <Input type="time" value={staffStartTime} onChange={(e) => setStaffStartTime(e.target.value)} disabled={isLoading} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Late (L) after (mins)</Label>
+                  <Input type="number" min={1} value={staffLateMins} onChange={(e) => setStaffLateMins(Number(e.target.value))} disabled={isLoading} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Very Late (LL) after (mins)</Label>
+                  <Input type="number" min={1} value={staffVeryLateMins} onChange={(e) => setStaffVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Attendance Window Closes</Label>
+                  <Input type="time" value={staffCloseTime} onChange={(e) => setStaffCloseTime(e.target.value)} disabled={isLoading} />
+                </div>
+              </div>
+              <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
+                {isSaving ? 'Saving...' : 'Save Staff Rules'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Volunteer Attendance Rules</CardTitle>
+              <CardDescription>Timing rules for volunteer check-in</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Volunteer Start Time</Label>
+                <Input type="time" value={volunteerStartTime} onChange={(e) => setVolunteerStartTime(e.target.value)} disabled={isLoading} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Late (L) after (mins)</Label>
+                  <Input type="number" min={1} value={volunteerLateMins} onChange={(e) => setVolunteerLateMins(Number(e.target.value))} disabled={isLoading} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Very Late (LL) after (mins)</Label>
+                  <Input type="number" min={1} value={volunteerVeryLateMins} onChange={(e) => setVolunteerVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Attendance Window Closes</Label>
+                  <Input type="time" value={volunteerCloseTime} onChange={(e) => setVolunteerCloseTime(e.target.value)} disabled={isLoading} />
+                </div>
+              </div>
+              <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
+                {isSaving ? 'Saving...' : 'Save Volunteer Rules'}
               </Button>
             </CardContent>
           </Card>
