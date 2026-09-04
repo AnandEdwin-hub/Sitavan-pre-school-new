@@ -4,7 +4,6 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,14 +22,8 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login');
@@ -40,22 +33,25 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-1">
-            <img src="/logo.png" alt="Sitavan Pre-School" className="w-28 h-28 object-contain" />
-          </div>
-          <CardTitle className="text-xl font-bold tracking-tight text-foreground">
-            Sitavan Pre-School
-          </CardTitle>
-          <CardDescription>
-            Enter your credentials to access the system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-[100dvh] flex flex-col bg-background">
+      {/* Hero panel */}
+      <div className="relative bg-sidebar pt-14 pb-20 px-4 flex flex-col items-center rounded-b-[2.5rem] shadow-sm">
+        <div className="w-24 h-24 rounded-full bg-card flex items-center justify-center shadow-md mb-4">
+          <img src="/logo.png" alt="Sitavan Pre-School" className="w-16 h-16 object-contain" />
+        </div>
+        <h1 className="text-xl font-bold tracking-tight text-sidebar-foreground">
+          Sitavan Pre-School
+        </h1>
+        <p className="text-sm text-sidebar-foreground/70 mt-1">
+          Sign in to manage your school
+        </p>
+      </div>
+
+      {/* Form card, overlapping the hero panel */}
+      <div className="flex-1 flex justify-center px-4 -mt-10">
+        <div className="w-full max-w-md bg-card rounded-2xl shadow-lg p-6 sm:p-8 h-fit">
           {!isSupabaseConfigured && (
-            <div className="mb-6 p-4 bg-amber-50 text-amber-800 rounded-md text-sm">
+            <div className="mb-6 p-4 bg-amber-50 text-amber-800 rounded-xl text-sm">
               <p className="font-semibold mb-1">Setup Required</p>
               <p>Supabase environment variables are missing. You can click Login to view the app UI without backend connectivity.</p>
             </div>
@@ -68,6 +64,7 @@ export default function Login() {
                 id="email"
                 type="email"
                 placeholder="teacher@sitavansps.edu"
+                className="rounded-full px-4 h-11"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -78,6 +75,7 @@ export default function Login() {
               <Input
                 id="password"
                 type="password"
+                className="rounded-full px-4 h-11"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -88,12 +86,12 @@ export default function Login() {
               <div className="text-sm text-destructive font-medium">{error}</div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full rounded-full h-11 mt-2" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

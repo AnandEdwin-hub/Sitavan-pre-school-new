@@ -12,9 +12,14 @@ export function Layout() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse flex flex-col items-center">
-          <img src="/logo.png" alt="Sitavan Pre-School" className="w-14 h-14 rounded-full object-cover mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+        <div className="flex flex-col items-center">
+          <div className="relative flex items-center justify-center w-28 h-28 mb-4">
+            <span className="absolute inset-0 rounded-full bg-primary/15 animate-ping" />
+            <div className="relative w-20 h-20 rounded-full bg-card shadow-md flex items-center justify-center">
+              <img src="/logo.png" alt="Sitavan Pre-School" className="w-14 h-14 object-contain" />
+            </div>
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">Loading Sitavan Pre-School...</p>
         </div>
       </div>
     );
