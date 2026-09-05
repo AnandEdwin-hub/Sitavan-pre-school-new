@@ -43,8 +43,8 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
   const navContent = (
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border w-64 text-sidebar-foreground">
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-20 h-20 rounded-full bg-card flex items-center justify-center flex-shrink-0 shadow-sm p-2 overflow-hidden">
+      <div className="p-6 flex flex-col items-center gap-3 text-center">
+        <div className="w-32 h-32 rounded-full bg-card flex items-center justify-center flex-shrink-0 shadow-sm p-2 overflow-hidden">
           <img src="/logo.png" alt="Sitavan Pre-School" className="w-full h-full object-contain" />
         </div>
         <span className="text-lg font-bold tracking-tight leading-[1.15]">Sitavan Pre-School</span>
