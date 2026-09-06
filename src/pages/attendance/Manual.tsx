@@ -25,8 +25,7 @@ interface LocalEntry {
   notes: string;
 }
 
-const STUDENT_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Sick', 'Half Day', 'Holiday', 'Weekly Holiday', 'Forced Closure'];
-const STAFF_VOLUNTEER_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Half Day'];
+const ALL_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Sick', 'Half Day', 'Holiday', 'Weekly Holiday', 'Forced Closure'];
 
 export default function ManualAttendance() {
   const { isAdmin } = useAuth();
@@ -44,7 +43,7 @@ export default function ManualAttendance() {
     setView(v);
   };
 
-  const statusOptions = view === 'students' ? STUDENT_STATUSES : STAFF_VOLUNTEER_STATUSES;
+  const statusOptions = ALL_STATUSES;
 
   // ---- People lists ----
   const { data: students = [] } = useQuery({
