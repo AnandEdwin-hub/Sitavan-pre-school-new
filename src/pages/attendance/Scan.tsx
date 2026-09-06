@@ -473,7 +473,7 @@ export default function ScanAttendance() {
         <CardContent className="p-4">
           <form onSubmit={handleManualSubmit} className="flex gap-2">
             <Input
-              placeholder="Or type Roll/Staff/Volunteer Code..."
+              placeholder="Enter Roll Number"
               value={manualInput}
               onChange={(e) => setManualInput(e.target.value)}
               className="flex-1 font-mono uppercase"
