@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Save, UserPlus, School } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -46,6 +47,8 @@ export default function Settings() {
   const [volunteerLateMins, setVolunteerLateMins] = useState(DEFAULT_SETTINGS.volunteer_late_threshold_minutes);
   const [volunteerVeryLateMins, setVolunteerVeryLateMins] = useState(DEFAULT_SETTINGS.volunteer_very_late_threshold_minutes);
   const [volunteerCloseTime, setVolunteerCloseTime] = useState(DEFAULT_SETTINGS.volunteer_attendance_close_time);
+
+  const [rulesRole, setRulesRole] = useState<'student' | 'staff' | 'volunteer'>('student');
 
   const [isSaving, setIsSaving] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -168,112 +171,115 @@ export default function Settings() {
             <CardHeader>
               <CardTitle>Attendance Rules</CardTitle>
               <CardDescription>Shared across all staff devices</CardDescription>
+              <div className="pt-2">
+                <Select value={rulesRole} onValueChange={(v) => setRulesRole(v as 'student' | 'staff' | 'volunteer')}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Students</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
+                    <SelectItem value="volunteer">Volunteers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>School Start Time</Label>
-                <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isLoading} />
-                <p className="text-xs text-muted-foreground">Scans within the "Present" window below count as on time.</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Late (L) after (mins)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={lateMins}
-                    onChange={(e) => setLateMins(Number(e.target.value))}
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Very Late (LL) after (mins)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={veryLateMins}
-                    onChange={(e) => setVeryLateMins(Number(e.target.value))}
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Attendance Window Closes</Label>
-                  <Input 
-                    type="time" 
-                    value={closeTime} 
-                    onChange={(e) => setCloseTime(e.target.value)}
-                    disabled={isLoading}
-                  />
+              {rulesRole === 'student' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>School Start Time</Label>
+                    <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isLoading} />
+                    <p className="text-xs text-muted-foreground">Scans within the "Present" window below count as on time.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Late (L) after (mins)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={lateMins}
+                        onChange={(e) => setLateMins(Number(e.target.value))}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Very Late (LL) after (mins)</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={veryLateMins}
+                        onChange={(e) => setVeryLateMins(Number(e.target.value))}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Attendance Window Closes</Label>
+                      <Input
+                        type="time"
+                        value={closeTime}
+                        onChange={(e) => setCloseTime(e.target.value)}
+                        disabled={isLoading}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Students not scanned by this time will be automatically marked Absent.
+                      </p>
+                    </div>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Students not scanned by this time will be automatically marked Absent.
+                    e.g. start {startTime}, Late {lateMins} min → P until {lateMins} min past start, L until {veryLateMins} min past start, LL after that.
                   </p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                e.g. start {startTime}, Late {lateMins} min → P until {lateMins} min past start, L until {veryLateMins} min past start, LL after that.
-              </p>
+                </>
+              )}
+
+              {rulesRole === 'staff' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Staff Start Time</Label>
+                    <Input type="time" value={staffStartTime} onChange={(e) => setStaffStartTime(e.target.value)} disabled={isLoading} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Late (L) after (mins)</Label>
+                      <Input type="number" min={1} value={staffLateMins} onChange={(e) => setStaffLateMins(Number(e.target.value))} disabled={isLoading} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Very Late (LL) after (mins)</Label>
+                      <Input type="number" min={1} value={staffVeryLateMins} onChange={(e) => setStaffVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Attendance Window Closes</Label>
+                      <Input type="time" value={staffCloseTime} onChange={(e) => setStaffCloseTime(e.target.value)} disabled={isLoading} />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {rulesRole === 'volunteer' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Volunteer Start Time</Label>
+                    <Input type="time" value={volunteerStartTime} onChange={(e) => setVolunteerStartTime(e.target.value)} disabled={isLoading} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Late (L) after (mins)</Label>
+                      <Input type="number" min={1} value={volunteerLateMins} onChange={(e) => setVolunteerLateMins(Number(e.target.value))} disabled={isLoading} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Very Late (LL) after (mins)</Label>
+                      <Input type="number" min={1} value={volunteerVeryLateMins} onChange={(e) => setVolunteerVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Attendance Window Closes</Label>
+                      <Input type="time" value={volunteerCloseTime} onChange={(e) => setVolunteerCloseTime(e.target.value)} disabled={isLoading} />
+                    </div>
+                  </div>
+                </>
+              )}
+
               <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
                 {isSaving ? 'Saving...' : 'Save Attendance Rules'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Staff Attendance Rules</CardTitle>
-              <CardDescription>Timing rules for staff check-in</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Staff Start Time</Label>
-                <Input type="time" value={staffStartTime} onChange={(e) => setStaffStartTime(e.target.value)} disabled={isLoading} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Late (L) after (mins)</Label>
-                  <Input type="number" min={1} value={staffLateMins} onChange={(e) => setStaffLateMins(Number(e.target.value))} disabled={isLoading} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Very Late (LL) after (mins)</Label>
-                  <Input type="number" min={1} value={staffVeryLateMins} onChange={(e) => setStaffVeryLateMins(Number(e.target.value))} disabled={isLoading} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Attendance Window Closes</Label>
-                  <Input type="time" value={staffCloseTime} onChange={(e) => setStaffCloseTime(e.target.value)} disabled={isLoading} />
-                </div>
-              </div>
-              <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
-                {isSaving ? 'Saving...' : 'Save Staff Rules'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Volunteer Attendance Rules</CardTitle>
-              <CardDescription>Timing rules for volunteer check-in</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Volunteer Start Time</Label>
-                <Input type="time" value={volunteerStartTime} onChange={(e) => setVolunteerStartTime(e.target.value)} disabled={isLoading} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Late (L) after (mins)</Label>
-                  <Input type="number" min={1} value={volunteerLateMins} onChange={(e) => setVolunteerLateMins(Number(e.target.value))} disabled={isLoading} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Very Late (LL) after (mins)</Label>
-                  <Input type="number" min={1} value={volunteerVeryLateMins} onChange={(e) => setVolunteerVeryLateMins(Number(e.target.value))} disabled={isLoading} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Attendance Window Closes</Label>
-                  <Input type="time" value={volunteerCloseTime} onChange={(e) => setVolunteerCloseTime(e.target.value)} disabled={isLoading} />
-                </div>
-              </div>
-              <Button onClick={saveSettings} disabled={isSaving} variant="secondary" className="w-full">
-                {isSaving ? 'Saving...' : 'Save Volunteer Rules'}
               </Button>
             </CardContent>
           </Card>
