@@ -49,6 +49,7 @@ export default function Settings() {
   const [volunteerCloseTime, setVolunteerCloseTime] = useState(DEFAULT_SETTINGS.volunteer_attendance_close_time);
 
   const [rulesRole, setRulesRole] = useState<'student' | 'staff' | 'volunteer'>('student');
+  const [academicYear, setAcademicYear] = useState('2026-2027');
 
   const [isSaving, setIsSaving] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -68,6 +69,7 @@ export default function Settings() {
   useEffect(() => {
     if (settingsRow) {
       setLocation(settingsRow.location);
+      setAcademicYear(settingsRow.academic_year ?? '2026-2027');
       setStartTime(settingsRow.school_start_time.slice(0, 5));
       setLateMins(settingsRow.late_threshold_minutes);
       setVeryLateMins(settingsRow.very_late_threshold_minutes);
@@ -99,6 +101,7 @@ export default function Settings() {
         very_late_threshold_minutes: veryLateMins,
         attendance_close_time: closeTime,
         location,
+        academic_year: academicYear,
         staff_start_time: staffStartTime,
         staff_late_threshold_minutes: staffLateMins,
         staff_very_late_threshold_minutes: staffVeryLateMins,
@@ -160,7 +163,7 @@ export default function Settings() {
             </div>
             <div className="space-y-2">
               <Label>Academic Year</Label>
-              <Input defaultValue="2026-2027" disabled className="bg-gray-50" />
+              <Input value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} placeholder="2026-2027" />
             </div>
             <Button onClick={saveSettings} disabled={isSaving} className="w-full mt-2"><Save className="w-4 h-4 mr-2" /> Save Details</Button>
           </CardContent>
