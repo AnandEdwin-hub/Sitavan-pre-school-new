@@ -85,6 +85,7 @@ interface BadgePerson {
   id: string;
   code: string; // QR value: roll_no / staff_code / volunteer_code
   full_name: string;
+  photo_url?: string | null;
   line1: string; // e.g. "Class: LKG (BEG)" or "Designation: Teacher" or "School: Kendriya Vidyalaya"
   detailLabel: string; // e.g. "Mother's Name" or "Mobile No" or "Contact"
   detailValue: string;
@@ -122,9 +123,18 @@ function Badge({ person, role, index }: { person: BadgePerson; role: BadgeRole; 
 
         <div className="relative px-4 py-3 space-y-2.5">
           <div className="flex gap-3 items-start">
-            <div className={`w-16 h-16 rounded-xl ${avatarColor} border-2 border-sky-300 shadow-sm flex items-center justify-center text-white text-xl font-bold shrink-0`}>
-              {initials}
-            </div>
+            {person.photo_url ? (
+              <img
+                src={person.photo_url}
+                alt={person.full_name}
+                className="w-16 h-16 rounded-xl object-cover border-2 border-sky-300 shadow-sm shrink-0"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            ) : (
+              <div className={`w-16 h-16 rounded-xl ${avatarColor} border-2 border-sky-300 shadow-sm flex items-center justify-center text-white text-xl font-bold shrink-0`}>
+                {initials}
+              </div>
+            )}
             <div className="min-w-0 pt-0.5">
               <h3 className="font-extrabold text-gray-900 text-base leading-tight truncate">{person.full_name}</h3>
               <p className="text-[11px] font-semibold text-gray-400 tracking-wide">{role}</p>
@@ -165,7 +175,7 @@ export default function QRBadges() {
     queryKey: ['students-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile').eq('status', 'Active').order('class').order('roll_no');
+      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile, photo_url').eq('status', 'Active').order('class').order('roll_no');
       return data || [];
     }
   });
@@ -174,7 +184,7 @@ export default function QRBadges() {
     queryKey: ['staff-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification').eq('status', 'Active').order('staff_code');
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url').eq('status', 'Active').order('staff_code');
       return data || [];
     }
   });
@@ -183,7 +193,7 @@ export default function QRBadges() {
     queryKey: ['volunteers-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile').eq('status', 'Active').order('volunteer_code');
+      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile, photo_url').eq('status', 'Active').order('volunteer_code');
       return data || [];
     }
   });
@@ -200,6 +210,7 @@ export default function QRBadges() {
             id: s.id,
             code: s.roll_no,
             full_name: s.full_name,
+            photo_url: s.photo_url,
             line1: s.class ? `Class: ${s.class}${s.group ? ` (${s.group})` : ''}` : '',
             detailLabel: "Mother's Name",
             detailValue: s.mother_name || '',
@@ -214,6 +225,7 @@ export default function QRBadges() {
             id: s.id,
             code: s.staff_code,
             full_name: s.full_name,
+            photo_url: s.photo_url,
             line1: s.designation ? `Designation: ${s.designation}` : '',
             detailLabel: 'Mobile No',
             detailValue: s.mobile || '',
@@ -227,6 +239,7 @@ export default function QRBadges() {
             id: v.id,
             code: v.volunteer_code,
             full_name: v.full_name,
+            photo_url: v.photo_url,
             line1: v.school_class ? `Class: ${v.school_class}` : '',
             detailLabel: 'School',
             detailValue: v.organization || '',
