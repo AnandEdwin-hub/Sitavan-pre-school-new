@@ -5,6 +5,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 
+const ASSETS = 'https://thsvlzxckrvpxduhbykk.supabase.co/storage/v1/object/public/card-assets';
+const LOGO_URL = 'https://thsvlzxckrvpxduhbykk.supabase.co/storage/v1/object/public/card-assets/logo.png';
+
 // ---- Original decorative artwork (hand-built SVG, not copied from any existing brand) ----
 
 const SunMascot = ({ className = '' }: { className?: string }) => (
@@ -91,6 +94,93 @@ interface BadgePerson {
   detailValue: string;
   detailLabel2?: string;
   detailValue2?: string;
+}
+
+function StudentBadge({ person, index }: { person: BadgePerson; index: number }) {
+  const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+
+  return (
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-[#FBF3E3] border-[3px] border-[#C99A3A] shadow-sm" />
+
+      <div className="relative bg-[#FBF3E3] rounded-[22px] border-[3px] border-[#C99A3A] shadow-md overflow-hidden pt-4">
+        <div className="flex justify-center gap-[3px] px-3 pb-2">
+          {['#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A'].map((c, i) => (
+            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
+          ))}
+        </div>
+
+        <div className="relative px-4 pb-2 flex items-center gap-2">
+          <img src={LOGO_URL} alt="Sitavan Pre-School" className="w-10 h-10 rounded-full object-cover shrink-0" />
+          <div>
+            <p className="text-[15px] leading-tight font-bold text-[#2E4A28]">Sitavan Pre-School</p>
+            <p className="text-[9px] font-semibold text-[#7A6A45] tracking-wide">NURTURING DREAMS, ENRICHING LIVES</p>
+          </div>
+          <img src={`${ASSETS}/bee.png`} alt="" className="absolute top-1 right-3 w-7 h-7 rotate-6" />
+        </div>
+
+        <div className="relative px-4 pt-1 pb-2 flex justify-center">
+          <img src={`${ASSETS}/rainbow_sun.png`} alt="" className="absolute -top-2 -right-1 w-16 opacity-90" />
+          <img src={`${ASSETS}/apple_tree.png`} alt="" className="absolute top-0 left-1/2 -translate-x-1/2 w-40 opacity-[0.14] pointer-events-none" />
+
+          {person.photo_url ? (
+            <img
+              src={person.photo_url}
+              alt={person.full_name}
+              className="relative w-24 h-24 rounded-full object-cover object-top border-[3px] border-[#C99A3A] shadow-sm bg-white"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          ) : (
+            <div className={`relative w-24 h-24 rounded-full ${avatarColor} border-[3px] border-[#C99A3A] shadow-sm flex items-center justify-center text-white text-2xl font-bold`}>
+              {initials}
+            </div>
+          )}
+
+          <img src={`${ASSETS}/deer.png`} alt="" className="absolute bottom-0 left-2 w-12" />
+          <img src={`${ASSETS}/bear.png`} alt="" className="absolute bottom-0 right-2 w-12" />
+        </div>
+
+        <div className="relative text-center px-4">
+          <h3 className="font-bold text-[#2E4A28] text-lg leading-tight truncate">{person.full_name}</h3>
+          <span className="inline-block mt-1 text-[10px] font-bold text-[#412402] bg-[#C99A3A] px-3 py-1 rounded-full tracking-wide">
+            STUDENT
+          </span>
+        </div>
+
+        <div className="relative mx-4 mt-3 bg-white rounded-xl border border-[#E4D3A8] grid grid-cols-2 divide-x divide-[#E4D3A8]">
+          <div className="p-2.5 border-b border-[#E4D3A8]">
+            <p className="text-[9px] font-semibold text-[#7A6A45]">Roll No</p>
+            <p className="text-[13px] font-bold text-[#2E4A28]">{person.code}</p>
+          </div>
+          <div className="p-2.5 border-b border-[#E4D3A8]">
+            <p className="text-[9px] font-semibold text-[#7A6A45]">Class</p>
+            <p className="text-[13px] font-bold text-[#2E4A28]">{person.line1.replace('Class: ', '') || '—'}</p>
+          </div>
+          <div className="p-2.5">
+            <p className="text-[9px] font-semibold text-[#7A6A45]">Mother's Name</p>
+            <p className="text-[13px] font-bold text-[#2E4A28] truncate">{person.detailValue || '—'}</p>
+          </div>
+          <div className="p-2.5">
+            <p className="text-[9px] font-semibold text-[#7A6A45]">Mobile No</p>
+            <p className="text-[13px] font-bold text-[#2E4A28]">{person.detailValue2 || '—'}</p>
+          </div>
+        </div>
+
+        <div className="relative flex justify-center py-3">
+          <div className="bg-white p-1.5 rounded-lg border border-[#E4D3A8] shadow-sm">
+            <QRCodeSVG value={person.code} size={72} level="H" />
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-[3px] px-3 pb-3">
+          {['#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A'].map((c, i) => (
+            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Badge({ person, role, index }: { person: BadgePerson; role: BadgeRole; index: number }) {
@@ -282,7 +372,9 @@ export default function QRBadges() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 print:grid-cols-2 print:gap-6 print:p-4">
           {badgeData.map(({ person, role }, index) => (
-            <Badge key={person.id} person={person} role={role} index={index} />
+            role === 'STUDENT'
+              ? <StudentBadge key={person.id} person={person} index={index} />
+              : <Badge key={person.id} person={person} role={role} index={index} />
           ))}
         </div>
       )}
