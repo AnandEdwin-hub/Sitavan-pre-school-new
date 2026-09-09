@@ -150,85 +150,74 @@ function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role:
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
       <div
-        className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 w-12 h-5 rounded-full border-[3px] shadow-sm"
-        style={{ backgroundColor: s.bg, borderColor: s.border }}
+        className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 w-12 h-5 rounded-full bg-white border-[3px] shadow-sm"
+        style={{ borderColor: s.pillBg }}
       />
 
-      <div
-        className="relative rounded-[22px] border-[3px] shadow-md overflow-hidden pt-3 aspect-[2.125/3.375] flex flex-col"
-        style={{ backgroundColor: s.bg, borderColor: s.border }}
-      >
-        <div className="flex justify-center gap-[3px] px-3 pb-2">
-          {s.barColors.concat(s.barColors).slice(0, 8).map((c, i) => (
-            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
-          ))}
-        </div>
+      <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <img src={LOGO_URL} alt="Sitavan Pre-School" className="w-9 h-9 rounded-full object-cover shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[13px] leading-tight font-bold" style={{ color: s.nameColor }}>Sitavan Pre-School</p>
-            <p className="text-[8px] font-semibold tracking-wide" style={{ color: s.labelColor }}>MOUNT ABU, RAJASTHAN</p>
+        <div className="relative w-full shrink-0" style={{ height: '32%', backgroundColor: s.pillBg }}>
+          <svg viewBox="0 0 300 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+            <path d="M0,70 C60,100 120,45 180,68 C240,90 270,55 300,62 L300,100 L0,100 Z" fill="rgba(255,255,255,0.14)" />
+            <path d="M0,85 C80,55 160,100 300,75 L300,100 L0,100 Z" fill="rgba(255,255,255,0.09)" />
+          </svg>
+          <div className="absolute top-2.5 left-3 grid grid-cols-4 gap-[3px] opacity-40">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="w-[3px] h-[3px] rounded-full bg-white" />
+            ))}
           </div>
+          <img src={LOGO_URL} alt="" className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white p-0.5 shadow" />
         </div>
 
-        <div className="px-4 pb-2 flex items-start gap-3">
+        <div className="relative flex justify-center" style={{ marginTop: '-34px' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="w-[72px] h-[72px] rounded-xl object-cover shrink-0 border-2 shadow-sm bg-white"
-              style={{ borderColor: s.border }}
+              className="w-[68px] h-[68px] rounded-full object-cover border-4 border-white shadow-md bg-white"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div
-              className={`w-[72px] h-[72px] rounded-xl ${avatarColor} border-2 shadow-sm flex items-center justify-center text-white text-xl font-bold shrink-0`}
-              style={{ borderColor: s.border }}
-            >
+            <div className={`w-[68px] h-[68px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-lg font-bold`}>
               {initials}
             </div>
           )}
-          <div className="min-w-0 pt-1">
-            <h3 className="font-bold text-[15px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
-            <span
-              className="inline-block mt-1 text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide"
-              style={{ backgroundColor: s.pillBg, color: s.pillText }}
-            >
-              {role}
-            </span>
-            {person.line1 && (
-              <p className="text-[10px] font-semibold mt-1 truncate" style={{ color: s.labelColor }}>{person.line1}</p>
-            )}
-          </div>
         </div>
 
-        <div className="relative mx-4 mt-1 bg-white rounded-xl border grid grid-cols-2 divide-x" style={{ borderColor: s.border }}>
-          <div className="p-2 border-b" style={{ borderColor: s.border }}>
-            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>ID No</p>
-            <p className="text-[13px] font-bold" style={{ color: s.nameColor }}>{person.code}</p>
-          </div>
-          <div className="p-2 border-b" style={{ borderColor: s.border }}>
-            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>{person.detailLabel}</p>
-            <p className="text-[13px] font-bold truncate" style={{ color: s.nameColor }}>{person.detailValue || '—'}</p>
-          </div>
-          <div className="p-2 col-span-2">
-            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>{person.detailLabel2 || 'Contact'}</p>
-            <p className="text-[13px] font-bold" style={{ color: s.nameColor }}>{person.detailValue2 || '—'}</p>
-          </div>
+        <div className="text-center px-3 pt-1.5">
+          <h3 className="font-bold text-[15px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
+          <span
+            className="inline-block mt-1 text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide"
+            style={{ backgroundColor: `${s.pillBg}1A`, color: s.pillBg }}
+          >
+            {role}
+          </span>
+        </div>
+
+        <div className="px-4 pt-2 text-center space-y-1">
+          <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+            ID No: <span className="font-bold" style={{ color: s.nameColor }}>{person.code}</span>
+          </p>
+          {person.line1 && (
+            <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>{person.line1}</p>
+          )}
+          <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+            {person.detailLabel}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue || '—'}</span>
+          </p>
+          {person.detailLabel2 && (
+            <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+              {person.detailLabel2}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue2 || '—'}</span>
+            </p>
+          )}
         </div>
 
         <div className="relative flex justify-center py-2 mt-auto">
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
-            <QRCodeSVG value={person.code} size={60} level="H" />
+            <QRCodeSVG value={person.code} size={56} level="H" />
           </div>
         </div>
 
-        <div className="flex justify-center gap-[3px] px-3 pb-2">
-          {s.barColors.concat(s.barColors).slice(0, 8).map((c, i) => (
-            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
-          ))}
-        </div>
+        <div className="h-2 w-full shrink-0" style={{ backgroundColor: s.pillBg }} />
       </div>
     </div>
   );
