@@ -29,6 +29,10 @@ const ROLE_STYLES: Record<string, {
     border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
     pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
   },
+  STAFF_LEGACY: {
+    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
+    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
+  },
   VOLUNTEER: {
     border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
     pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
@@ -42,6 +46,8 @@ const ROLE_STYLES: Record<string, {
     pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
   },
 };
+
+const LEGACY_STAFF_CODES = ['SITST2604', 'SITST2605'];
 
 interface BadgePerson {
   id: string;
@@ -145,7 +151,7 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
 function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role: BadgeRole; index: number }) {
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
-  const s = ROLE_STYLES[role] || ROLE_STYLES.STAFF;
+  const s = LEGACY_STAFF_CODES.includes(person.code) ? ROLE_STYLES.STAFF_LEGACY : (ROLE_STYLES[role] || ROLE_STYLES.STAFF);
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
@@ -169,16 +175,16 @@ function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role:
           <img src={LOGO_URL} alt="" className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white p-0.5 shadow" />
         </div>
 
-        <div className="relative flex justify-center" style={{ marginTop: '-34px' }}>
+        <div className="relative flex justify-center" style={{ marginTop: '-68px' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="w-[68px] h-[68px] rounded-full object-cover border-4 border-white shadow-md bg-white"
+              className="w-[136px] h-[136px] rounded-full object-cover border-4 border-white shadow-md bg-white"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className={`w-[68px] h-[68px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-lg font-bold`}>
+            <div className={`w-[136px] h-[136px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
               {initials}
             </div>
           )}
