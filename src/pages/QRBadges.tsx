@@ -256,7 +256,7 @@ function Badge({ person, role, index }: { person: BadgePerson; role: BadgeRole; 
   );
 }
 
-type Tab = 'students' | 'staff' | 'volunteers';
+type Tab = 'students' | 'staff' | 'volunteers' | 'directors';
 
 export default function QRBadges() {
   const [tab, setTab] = useState<Tab>('students');
@@ -274,7 +274,16 @@ export default function QRBadges() {
     queryKey: ['staff-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url').eq('status', 'Active').order('staff_code');
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category').eq('status', 'Active').in('staff_category', ['Staff', 'Helper']).order('staff_code');
+      return data || [];
+    }
+  });
+
+  const { data: directors = [], isLoading: directorsLoading } = useQuery({
+    queryKey: ['directors-badges'],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return [];
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category').eq('status', 'Active').in('staff_category', ['Director', 'Adviser']).order('staff_code');
       return data || [];
     }
   });
@@ -290,7 +299,7 @@ export default function QRBadges() {
 
   const handlePrintAll = () => window.print();
 
-  const isLoading = tab === 'students' ? studentsLoading : tab === 'staff' ? staffLoading : volunteersLoading;
+  const isLoading = tab === 'students' ? studentsLoading : tab === 'staff' ? staffLoading : tab === 'volunteers' ? volunteersLoading : directorsLoading;
 
   const badgeData: { person: BadgePerson; role: BadgeRole }[] =
     tab === 'students'
@@ -310,7 +319,7 @@ export default function QRBadges() {
         }))
       : tab === 'staff'
       ? staff.map((s: any) => ({
-          role: 'STAFF' as BadgeRole,
+          role: (s.staff_category === 'Helper' ? 'HELPER' : 'STAFF') as BadgeRole,
           person: {
             id: s.id,
             code: s.staff_code,
@@ -323,7 +332,8 @@ export default function QRBadges() {
             detailValue2: s.qualification || '',
           },
         }))
-      : volunteers.map((v: any) => ({
+      : tab === 'volunteers'
+      ? volunteers.map((v: any) => ({
           role: 'VOLUNTEER' as BadgeRole,
           person: {
             id: v.id,
@@ -335,6 +345,20 @@ export default function QRBadges() {
             detailValue: v.organization || '',
             detailLabel2: 'Mobile No',
             detailValue2: v.mobile || '',
+          },
+        }))
+      : directors.map((d: any) => ({
+          role: (d.staff_category === 'Adviser' ? 'ADVISER' : 'DIRECTOR') as BadgeRole,
+          person: {
+            id: d.id,
+            code: d.staff_code,
+            full_name: d.full_name,
+            photo_url: d.photo_url,
+            line1: d.designation ? `Designation: ${d.designation}` : '',
+            detailLabel: 'Mobile No',
+            detailValue: d.mobile || '',
+            detailLabel2: 'Qualification',
+            detailValue2: d.qualification || '',
           },
         }));
 
@@ -352,7 +376,7 @@ export default function QRBadges() {
       </div>
 
       <div className="flex gap-2 no-print border-b border-border">
-        {(['students', 'staff', 'volunteers'] as Tab[]).map((t) => (
+        {(['students', 'staff', 'volunteers', 'directors'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
