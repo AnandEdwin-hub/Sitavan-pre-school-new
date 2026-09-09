@@ -383,6 +383,11 @@ export default function QRBadges() {
 
       <style>{`
         @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           body * { visibility: hidden; }
           .print\\:grid-cols-2, .print\\:grid-cols-2 * { visibility: visible; }
           .print\\:grid-cols-2 {
@@ -390,6 +395,10 @@ export default function QRBadges() {
             left: 0;
             top: 0;
             width: 100%;
+          }
+          .break-inside-avoid {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
           @page { margin: 1cm; size: A4 portrait; }
         }
