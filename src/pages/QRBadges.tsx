@@ -102,9 +102,9 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-[#FBF3E3] border-[3px] border-[#C99A3A] shadow-sm" />
+      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 w-12 h-5 rounded-full bg-[#FBF3E3] border-[3px] border-[#C99A3A] shadow-sm" />
 
-      <div className="relative bg-[#FBF3E3] rounded-[22px] border-[3px] border-[#C99A3A] shadow-md overflow-hidden pt-4">
+      <div className="relative bg-[#FBF3E3] rounded-[22px] border-[3px] border-[#C99A3A] shadow-md overflow-hidden pt-3 aspect-[2.125/3.375] flex flex-col">
         <div className="flex justify-center gap-[3px] px-3 pb-2">
           {['#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A'].map((c, i) => (
             <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
@@ -148,32 +148,32 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
           </span>
         </div>
 
-        <div className="relative mx-4 mt-3 bg-white rounded-xl border border-[#E4D3A8] grid grid-cols-2 divide-x divide-[#E4D3A8]">
-          <div className="p-2.5 border-b border-[#E4D3A8]">
+        <div className="relative mx-4 mt-2 bg-white rounded-xl border border-[#E4D3A8] grid grid-cols-2 divide-x divide-[#E4D3A8]">
+          <div className="p-2 border-b border-[#E4D3A8]">
             <p className="text-[9px] font-semibold text-[#7A6A45]">Roll No</p>
             <p className="text-[13px] font-bold text-[#2E4A28]">{person.code}</p>
           </div>
-          <div className="p-2.5 border-b border-[#E4D3A8]">
+          <div className="p-2 border-b border-[#E4D3A8]">
             <p className="text-[9px] font-semibold text-[#7A6A45]">Class</p>
             <p className="text-[13px] font-bold text-[#2E4A28]">{person.line1.replace('Class: ', '') || '—'}</p>
           </div>
-          <div className="p-2.5">
+          <div className="p-2">
             <p className="text-[9px] font-semibold text-[#7A6A45]">Mother's Name</p>
             <p className="text-[13px] font-bold text-[#2E4A28] truncate">{person.detailValue || '—'}</p>
           </div>
-          <div className="p-2.5">
+          <div className="p-2">
             <p className="text-[9px] font-semibold text-[#7A6A45]">Mobile No</p>
             <p className="text-[13px] font-bold text-[#2E4A28]">{person.detailValue2 || '—'}</p>
           </div>
         </div>
 
-        <div className="relative flex justify-center py-3">
-          <div className="bg-white p-1.5 rounded-lg border border-[#E4D3A8] shadow-sm">
-            <QRCodeSVG value={person.code} size={72} level="H" />
+        <div className="relative flex justify-center py-2 mt-auto">
+          <div className="bg-white p-1 rounded-lg border border-[#E4D3A8] shadow-sm">
+            <QRCodeSVG value={person.code} size={60} level="H" />
           </div>
         </div>
 
-        <div className="flex justify-center gap-[3px] px-3 pb-3">
+        <div className="flex justify-center gap-[3px] px-3 pb-2">
           {['#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A', '#B0532C', '#3E6B35', '#C99A3A'].map((c, i) => (
             <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
           ))}
