@@ -154,12 +154,14 @@ export default function ScanAttendance() {
   const volunteersRef = React.useRef(volunteers);
   const todayAttendanceRef = React.useRef(todayAttendance);
   const todayStaffAttendanceRef = React.useRef(todayStaffAttendance);
+  const isAdminRef = React.useRef(isAdmin);
 
   useEffect(() => { studentsRef.current = students; }, [students]);
   useEffect(() => { staffRef.current = staff; }, [staff]);
   useEffect(() => { volunteersRef.current = volunteers; }, [volunteers]);
   useEffect(() => { todayAttendanceRef.current = todayAttendance; }, [todayAttendance]);
   useEffect(() => { todayStaffAttendanceRef.current = todayStaffAttendance; }, [todayStaffAttendance]);
+  useEffect(() => { isAdminRef.current = isAdmin; }, [isAdmin]);
 
   useEffect(() => {
     if (closureReason) return;
@@ -264,7 +266,7 @@ export default function ScanAttendance() {
         return;
       }
 
-      if (person.role === 'staff' && !isAdmin) {
+      if (person.role === 'staff' && !isAdminRef.current) {
         toast({ variant: 'destructive', title: 'Not Allowed', description: 'Only an admin can take staff attendance.' });
         return;
       }
