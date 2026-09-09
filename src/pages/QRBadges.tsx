@@ -41,28 +41,7 @@ const ROLE_STYLES: Record<string, {
     border: '#C3C6F2', bg: '#F5F5FE', barColors: ['#4338CA', '#C99A3A', '#3E6B35'],
     pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
   },
-}; 12h18" />
-  </svg>
-);
-
-const RainbowCorner = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 120 70" className={className}>
-    <path d="M5 65 A55 55 0 0 1 115 65" fill="none" stroke="#EF4444" strokeWidth="7" strokeLinecap="round" />
-    <path d="M14 65 A46 46 0 0 1 106 65" fill="none" stroke="#F59E0B" strokeWidth="7" strokeLinecap="round" />
-    <path d="M23 65 A37 37 0 0 1 97 65" fill="none" stroke="#FACC15" strokeWidth="7" strokeLinecap="round" />
-    <path d="M32 65 A28 28 0 0 1 88 65" fill="none" stroke="#22C55E" strokeWidth="7" strokeLinecap="round" />
-    <path d="M41 65 A19 19 0 0 1 79 65" fill="none" stroke="#3B82F6" strokeWidth="7" strokeLinecap="round" />
-  </svg>
-);
-
-const DOODLE_COLORS = ['text-blue-200', 'text-emerald-200', 'text-amber-200', 'text-pink-200'];
-
-const AVATAR_COLORS = [
-  'bg-rose-400', 'bg-blue-400', 'bg-emerald-400', 'bg-amber-400',
-  'bg-violet-400', 'bg-cyan-400', 'bg-orange-400', 'bg-pink-400',
-];
-
-type BadgeRole = 'STUDENT' | 'STAFF' | 'VOLUNTEER';
+};
 
 interface BadgePerson {
   id: string;
