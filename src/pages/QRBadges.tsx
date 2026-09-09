@@ -22,12 +22,12 @@ const ROLE_STYLES: Record<string, {
   pillBg: string; pillText: string; nameColor: string; labelColor: string;
 }> = {
   STAFF: {
-    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
-    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
+    border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
+    pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
   },
   HELPER: {
-    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
-    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
+    border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
+    pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
   },
   VOLUNTEER: {
     border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
@@ -223,6 +223,66 @@ function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role:
   );
 }
 
+function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number }) {
+  const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+  return (
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
+      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 w-12 h-5 rounded-full bg-white border-[3px] border-[#134E4A] shadow-sm" />
+
+      <div className="relative bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
+
+        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '52%' }}>
+          {person.photo_url ? (
+            <img
+              src={person.photo_url}
+              alt={person.full_name}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          ) : (
+            <div className={`absolute inset-0 w-full h-full ${avatarColor} flex items-center justify-center text-white text-4xl font-bold`}>
+              {initials}
+            </div>
+          )}
+          <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-[#F4B400]" />
+          <div className="absolute top-3 right-3 flex gap-[3px]">
+            {[0, 1, 2].map(i => <div key={i} className="w-[2px] h-8 bg-white/70" />)}
+          </div>
+        </div>
+
+        <div className="relative h-2.5 bg-[#134E4A] shrink-0">
+          <div className="absolute inset-x-0 top-0 h-[3px] bg-[#C0392B]" />
+        </div>
+
+        <div className="relative flex-1 flex flex-col items-center justify-center px-4">
+          <div className="absolute left-3 top-2 flex flex-col gap-1">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="w-[3px] h-[3px] rounded-full bg-[#C0392B]" />
+            ))}
+          </div>
+          <div
+            className="absolute right-2 top-0 w-8 h-8 rounded-full bg-[#F4B400] overflow-hidden"
+            style={{ clipPath: 'inset(0 0 50% 0)' }}
+          />
+
+          <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
+            <QRCodeSVG value={person.code} size={72} level="H" fgColor="#134E4A" />
+          </div>
+
+          <h3 className="mt-2 font-bold text-[16px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
+          <p className="text-[11px] font-semibold text-[#C0392B] tracking-wide">{person.line1 || 'VOLUNTEER'}</p>
+
+          <div className="absolute right-3 bottom-2 flex gap-[3px]">
+            {[0, 1, 2].map(i => <div key={i} className="w-[2px] h-6 bg-[#C0392B]/60" />)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type Tab = 'students' | 'staff' | 'volunteers' | 'directors';
 
 export default function QRBadges() {
@@ -365,6 +425,8 @@ export default function QRBadges() {
           {badgeData.map(({ person, role }, index) => (
             role === 'STUDENT'
               ? <StudentBadge key={person.id} person={person} index={index} />
+              : role === 'VOLUNTEER'
+              ? <VolunteerCardV2 key={person.id} person={person} index={index} />
               : <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
           ))}
         </div>
