@@ -10,58 +10,38 @@ const LOGO_URL = 'https://thsvlzxckrvpxduhbykk.supabase.co/storage/v1/object/pub
 
 // ---- Original decorative artwork (hand-built SVG, not copied from any existing brand) ----
 
-const SunMascot = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" className={className}>
-    {Array.from({ length: 8 }).map((_, i) => {
-      const angle = (i * 360) / 8;
-      return (
-        <rect key={i} x="47" y="2" width="6" height="16" rx="3" fill="#FDB813" transform={`rotate(${angle} 50 50)`} />
-      );
-    })}
-    <circle cx="50" cy="50" r="26" fill="#FFC93C" stroke="#F5A623" strokeWidth="2" />
-    <circle cx="41" cy="46" r="3.2" fill="#5B4636" />
-    <circle cx="59" cy="46" r="3.2" fill="#5B4636" />
-    <circle cx="36" cy="54" r="3.5" fill="#FF9E9E" opacity="0.7" />
-    <circle cx="64" cy="54" r="3.5" fill="#FF9E9E" opacity="0.7" />
-    <path d="M40 58 Q50 66 60 58" stroke="#5B4636" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-  </svg>
-);
+const AVATAR_COLORS = [
+  'bg-rose-400', 'bg-blue-400', 'bg-emerald-400', 'bg-amber-400',
+  'bg-violet-400', 'bg-cyan-400', 'bg-orange-400', 'bg-pink-400',
+];
 
-const StarDoodle = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-    <path d="M12 1l2.9 6.9L22 9l-5.5 4.8L18 22l-6-3.9L6 22l1.5-8.2L2 9l7.1-1.1L12 1z" />
-  </svg>
-);
+type BadgeRole = 'STUDENT' | 'STAFF' | 'HELPER' | 'VOLUNTEER' | 'DIRECTOR' | 'ADVISER';
 
-const FlowerDoodle = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-    <circle cx="12" cy="12" r="3" />
-    <circle cx="12" cy="5" r="3.2" opacity="0.85" />
-    <circle cx="12" cy="19" r="3.2" opacity="0.85" />
-    <circle cx="5" cy="12" r="3.2" opacity="0.85" />
-    <circle cx="19" cy="12" r="3.2" opacity="0.85" />
-  </svg>
-);
-
-const TreeDoodle = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className}>
-    <rect x="10.5" y="14" width="3" height="8" rx="1" fill="#B08968" />
-    <circle cx="12" cy="9" r="7" fill="currentColor" />
-  </svg>
-);
-
-const PencilDoodle = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className}>
-    <rect x="3" y="16" width="16" height="4" rx="1" transform="rotate(-45 3 16)" fill="currentColor" />
-    <path d="M16.5 2.5l5 5-2.5 2.5-5-5 2.5-2.5z" fill="#F5A623" />
-  </svg>
-);
-
-const GlobeDoodle = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="12" cy="12" r="9" />
-    <ellipse cx="12" cy="12" rx="4" ry="9" />
-    <path d="M3 12h18" />
+const ROLE_STYLES: Record<string, {
+  border: string; bg: string; barColors: string[];
+  pillBg: string; pillText: string; nameColor: string; labelColor: string;
+}> = {
+  STAFF: {
+    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
+    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
+  },
+  HELPER: {
+    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
+    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
+  },
+  VOLUNTEER: {
+    border: '#E8CE85', bg: '#FEFAEE', barColors: ['#C99A3A', '#B0532C', '#3E6B35'],
+    pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
+  },
+  DIRECTOR: {
+    border: '#C3C6F2', bg: '#F5F5FE', barColors: ['#4338CA', '#C99A3A', '#3E6B35'],
+    pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
+  },
+  ADVISER: {
+    border: '#C3C6F2', bg: '#F5F5FE', barColors: ['#4338CA', '#C99A3A', '#3E6B35'],
+    pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
+  },
+}; 12h18" />
   </svg>
 );
 
@@ -115,7 +95,7 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
           <img src={LOGO_URL} alt="Sitavan Pre-School" className="w-10 h-10 rounded-full object-cover shrink-0" />
           <div>
             <p className="text-[15px] leading-tight font-bold text-[#2E4A28]">Sitavan Pre-School</p>
-            <p className="text-[9px] font-semibold text-[#7A6A45] tracking-wide">NURTURING DREAMS, ENRICHING LIVES</p>
+            <p className="text-[9px] font-semibold text-[#7A6A45] tracking-wide">MOUNT ABU</p>
           </div>
           <img src={`${ASSETS}/bee.png`} alt="" className="absolute top-1 right-3 w-7 h-7 rotate-6" />
         </div>
@@ -183,73 +163,92 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
   );
 }
 
-function Badge({ person, role, index }: { person: BadgePerson; role: BadgeRole; index: number }) {
+function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role: BadgeRole; index: number }) {
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const s = ROLE_STYLES[role] || ROLE_STYLES.STAFF;
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 w-7 h-7 rounded-full bg-white border-[3px] border-gray-300 shadow-sm" />
+      <div
+        className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-30 w-12 h-5 rounded-full border-[3px] shadow-sm"
+        style={{ backgroundColor: s.bg, borderColor: s.border }}
+      />
 
-      <div className="relative bg-white rounded-[22px] border-[3px] border-sky-200 shadow-md overflow-hidden pt-4">
-        <StarDoodle className={`absolute top-3 right-8 w-4 h-4 ${DOODLE_COLORS[0]} opacity-70`} />
-        <StarDoodle className={`absolute top-20 right-4 w-3 h-3 ${DOODLE_COLORS[1]} opacity-70`} />
-        <FlowerDoodle className={`absolute top-9 right-16 w-4 h-4 ${DOODLE_COLORS[2]} opacity-70`} />
-        <PencilDoodle className={`absolute top-24 right-10 w-5 h-5 ${DOODLE_COLORS[0]} opacity-70`} />
-        <TreeDoodle className={`absolute bottom-24 right-3 w-6 h-6 ${DOODLE_COLORS[1]} opacity-60`} />
-        <GlobeDoodle className={`absolute bottom-16 right-9 w-5 h-5 ${DOODLE_COLORS[3]} opacity-60`} />
-        <StarDoodle className={`absolute top-4 left-24 w-3 h-3 ${DOODLE_COLORS[2]} opacity-60`} />
+      <div
+        className="relative rounded-[22px] border-[3px] shadow-md overflow-hidden pt-3 aspect-[2.125/3.375] flex flex-col"
+        style={{ backgroundColor: s.bg, borderColor: s.border }}
+      >
+        <div className="flex justify-center gap-[3px] px-3 pb-2">
+          {s.barColors.concat(s.barColors).slice(0, 8).map((c, i) => (
+            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
+          ))}
+        </div>
 
-        <div className="relative px-4 pt-1 pb-3 flex items-start gap-2">
-          <SunMascot className="w-14 h-14 shrink-0 drop-shadow-sm" />
-          <div className="pt-1">
-            <p className="text-[22px] leading-none font-extrabold text-sky-500 tracking-tight">Sitavan</p>
-            <p className="text-[22px] leading-tight font-extrabold text-emerald-500 tracking-tight -mt-0.5">Pre-School</p>
-            <p className="text-[10px] font-bold text-gray-400 tracking-[0.2em] mt-1">MOUNT ABU</p>
+        <div className="px-4 pb-2 flex items-center gap-2">
+          <img src={LOGO_URL} alt="Sitavan Pre-School" className="w-9 h-9 rounded-full object-cover shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[13px] leading-tight font-bold" style={{ color: s.nameColor }}>Sitavan Pre-School</p>
+            <p className="text-[8px] font-semibold tracking-wide" style={{ color: s.labelColor }}>MOUNT ABU, RAJASTHAN</p>
           </div>
         </div>
 
-        <div className="h-1 bg-gradient-to-r from-sky-300 via-emerald-300 to-amber-300" />
-
-        <div className="relative px-4 py-3 space-y-2.5">
-          <div className="flex gap-3 items-start">
-            {person.photo_url ? (
-              <img
-                src={person.photo_url}
-                alt={person.full_name}
-                className="w-16 h-16 rounded-xl object-cover border-2 border-sky-300 shadow-sm shrink-0"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-            ) : (
-              <div className={`w-16 h-16 rounded-xl ${avatarColor} border-2 border-sky-300 shadow-sm flex items-center justify-center text-white text-xl font-bold shrink-0`}>
-                {initials}
-              </div>
-            )}
-            <div className="min-w-0 pt-0.5">
-              <h3 className="font-extrabold text-gray-900 text-base leading-tight truncate">{person.full_name}</h3>
-              <p className="text-[11px] font-semibold text-gray-400 tracking-wide">{role}</p>
-              <p className="text-[13px] font-bold text-gray-700 mt-0.5">Code: <span className="font-mono">{person.code}</span></p>
-              {person.line1 && (
-                <span className="inline-block mt-1 text-[10px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 px-1.5 py-0.5 rounded">
-                  {person.line1}
-                </span>
-              )}
+        <div className="px-4 pb-2 flex items-start gap-3">
+          {person.photo_url ? (
+            <img
+              src={person.photo_url}
+              alt={person.full_name}
+              className="w-[72px] h-[72px] rounded-xl object-cover shrink-0 border-2 shadow-sm bg-white"
+              style={{ borderColor: s.border }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          ) : (
+            <div
+              className={`w-[72px] h-[72px] rounded-xl ${avatarColor} border-2 shadow-sm flex items-center justify-center text-white text-xl font-bold shrink-0`}
+              style={{ borderColor: s.border }}
+            >
+              {initials}
             </div>
-          </div>
-
-          <div className="text-[12px] text-gray-700 space-y-0.5 pt-1 border-t border-dashed border-gray-200">
-            <p className="pt-1.5"><span className="font-semibold text-gray-500">{person.detailLabel}:</span> {person.detailValue || '—'}</p>
-            {person.detailLabel2 && (
-              <p><span className="font-semibold text-gray-500">{person.detailLabel2}:</span> {person.detailValue2 || '—'}</p>
+          )}
+          <div className="min-w-0 pt-1">
+            <h3 className="font-bold text-[15px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
+            <span
+              className="inline-block mt-1 text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide"
+              style={{ backgroundColor: s.pillBg, color: s.pillText }}
+            >
+              {role}
+            </span>
+            {person.line1 && (
+              <p className="text-[10px] font-semibold mt-1 truncate" style={{ color: s.labelColor }}>{person.line1}</p>
             )}
           </div>
+        </div>
 
-          <div className="flex items-end justify-between pt-1">
-            <div className="bg-white p-1 rounded-md border border-gray-100 shadow-sm">
-              <QRCodeSVG value={person.code} size={62} level="H" />
-            </div>
-            <RainbowCorner className="w-20 h-12 -mb-1 -mr-1" />
+        <div className="relative mx-4 mt-1 bg-white rounded-xl border grid grid-cols-2 divide-x" style={{ borderColor: s.border }}>
+          <div className="p-2 border-b" style={{ borderColor: s.border }}>
+            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>ID No</p>
+            <p className="text-[13px] font-bold" style={{ color: s.nameColor }}>{person.code}</p>
           </div>
+          <div className="p-2 border-b" style={{ borderColor: s.border }}>
+            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>{person.detailLabel}</p>
+            <p className="text-[13px] font-bold truncate" style={{ color: s.nameColor }}>{person.detailValue || '—'}</p>
+          </div>
+          <div className="p-2 col-span-2">
+            <p className="text-[9px] font-semibold" style={{ color: s.labelColor }}>{person.detailLabel2 || 'Contact'}</p>
+            <p className="text-[13px] font-bold" style={{ color: s.nameColor }}>{person.detailValue2 || '—'}</p>
+          </div>
+        </div>
+
+        <div className="relative flex justify-center py-2 mt-auto">
+          <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
+            <QRCodeSVG value={person.code} size={60} level="H" />
+          </div>
+        </div>
+
+        <div className="flex justify-center gap-[3px] px-3 pb-2">
+          {s.barColors.concat(s.barColors).slice(0, 8).map((c, i) => (
+            <div key={i} className="w-4 h-2.5 rounded-[1px]" style={{ backgroundColor: c }} />
+          ))}
         </div>
       </div>
     </div>
@@ -398,7 +397,7 @@ export default function QRBadges() {
           {badgeData.map(({ person, role }, index) => (
             role === 'STUDENT'
               ? <StudentBadge key={person.id} person={person} index={index} />
-              : <Badge key={person.id} person={person} role={role} index={index} />
+              : <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
           ))}
         </div>
       )}
