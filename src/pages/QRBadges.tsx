@@ -242,15 +242,7 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
 
         <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-30 w-10 h-4 rounded-full bg-white border-2 border-[#134E4A]" />
 
-        <div className="relative flex flex-col items-center gap-0.5 px-3 pt-4 pb-1 bg-[#134E4A] shrink-0">
-          <img src={LOGO_URL} alt="" className="w-6 h-6 rounded-full bg-white p-0.5 shadow shrink-0" />
-          <div className="text-center">
-            <p className="text-[9px] font-bold text-white leading-tight">Sitavan Pre-School</p>
-            <p className="text-[6px] font-semibold text-white/80 tracking-wide">MOUNT ABU</p>
-          </div>
-        </div>
-
-        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '38%' }}>
+        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '46%' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
@@ -275,14 +267,19 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
         </div>
 
         <div className="relative flex-1 flex flex-col items-center justify-center px-3 py-1 min-h-0">
-          <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm shrink-0">
-            <QRCodeSVG value={person.code} size={56} level="H" fgColor="#134E4A" />
-          </div>
-
-          <h3 className="mt-1.5 font-bold text-[14px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
+          <h3 className="font-bold text-[14px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
           <span className="inline-block mt-0.5 text-[8px] font-bold text-[#134E4A] bg-[#F4B400]/25 px-2 py-0.5 rounded-full tracking-wide">VOLUNTEER</span>
           {person.line1 && <p className="text-[9.5px] font-semibold text-[#C0392B] tracking-wide mt-1">{person.line1}</p>}
           <p className="text-[9px] font-semibold text-[#134E4A]/70 mt-0.5">ID No: <span className="font-bold text-[#134E4A]">{person.code}</span></p>
+
+          <div className="flex items-center gap-1 mt-1.5">
+            <img src={LOGO_URL} alt="" className="w-4 h-4 rounded-full bg-white shadow-sm shrink-0" />
+            <p className="text-[7px] font-semibold text-[#134E4A]/70 leading-tight">Sitavan Pre-School, MOUNT ABU</p>
+          </div>
+
+          <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm shrink-0 mt-1.5">
+            <QRCodeSVG value={person.code} size={52} level="H" fgColor="#134E4A" />
+          </div>
         </div>
       </div>
     </div>
