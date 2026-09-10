@@ -300,7 +300,7 @@ export default function QRBadges() {
     queryKey: ['students-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile, father_mobile, photo_url, photo_position').eq('status', 'Active').order('class').order('roll_no');
+      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile, father_mobile, photo_url, photo_position').eq('status', 'Active').order('roll_no');
       return data || [];
     }
   });
