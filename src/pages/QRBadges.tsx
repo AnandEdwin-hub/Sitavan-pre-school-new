@@ -54,6 +54,7 @@ interface BadgePerson {
   code: string; // QR value: roll_no / staff_code / volunteer_code
   full_name: string;
   photo_url?: string | null;
+  photoPosition?: number; // 0 (top) to 100 (bottom), default 50
   line1: string; // e.g. "Class: LKG (BEG)" or "Designation: Teacher" or "School: Kendriya Vidyalaya"
   detailLabel: string; // e.g. "Mother's Name" or "Mobile No" or "Contact"
   detailValue: string;
@@ -93,7 +94,8 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="relative w-24 h-24 rounded-full object-cover object-top border-[3px] border-[#C99A3A] shadow-sm bg-white"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectPosition: `center ${person.photoPosition ?? 25}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
@@ -307,7 +309,7 @@ export default function QRBadges() {
     queryKey: ['students-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile, father_mobile, photo_url').eq('status', 'Active').order('class').order('roll_no');
+      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, mother_name, mother_mobile, father_mobile, photo_url, photo_position').eq('status', 'Active').order('class').order('roll_no');
       return data || [];
     }
   });
@@ -316,7 +318,7 @@ export default function QRBadges() {
     queryKey: ['staff-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category').eq('status', 'Active').in('staff_category', ['Staff', 'Helper']).order('staff_code');
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category, photo_position').eq('status', 'Active').in('staff_category', ['Staff', 'Helper']).order('staff_code');
       return data || [];
     }
   });
@@ -325,7 +327,7 @@ export default function QRBadges() {
     queryKey: ['directors-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category').eq('status', 'Active').in('staff_category', ['Director', 'Adviser']).order('staff_code');
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category, photo_position').eq('status', 'Active').in('staff_category', ['Director', 'Adviser']).order('staff_code');
       return data || [];
     }
   });
@@ -334,7 +336,7 @@ export default function QRBadges() {
     queryKey: ['volunteers-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile, photo_url').eq('status', 'Active').order('volunteer_code');
+      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile, photo_url, photo_position').eq('status', 'Active').order('volunteer_code');
       return data || [];
     }
   });
@@ -352,6 +354,7 @@ export default function QRBadges() {
             code: s.roll_no,
             full_name: s.full_name,
             photo_url: s.photo_url,
+            photoPosition: s.photo_position,
             line1: s.class ? `Class: ${s.class}${s.group ? ` (${s.group})` : ''}` : '',
             detailLabel: "Mother's Name",
             detailValue: s.mother_name || '',
@@ -367,6 +370,7 @@ export default function QRBadges() {
             code: s.staff_code,
             full_name: s.full_name,
             photo_url: s.photo_url,
+            photoPosition: s.photo_position,
             line1: s.designation ? `Designation: ${s.designation}` : '',
             detailLabel: 'Mobile No',
             detailValue: s.mobile || '',
@@ -382,6 +386,7 @@ export default function QRBadges() {
             code: v.volunteer_code,
             full_name: v.full_name,
             photo_url: v.photo_url,
+            photoPosition: v.photo_position,
             line1: v.school_class ? `Class: ${v.school_class}` : '',
             detailLabel: 'School',
             detailValue: v.organization || '',
@@ -396,6 +401,7 @@ export default function QRBadges() {
             code: d.staff_code,
             full_name: d.full_name,
             photo_url: d.photo_url,
+            photoPosition: d.photo_position,
             line1: d.designation ? `Designation: ${d.designation}` : '',
             detailLabel: 'Mobile No',
             detailValue: d.mobile || '',
