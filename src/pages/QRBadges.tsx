@@ -290,6 +290,7 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
 
           <h3 className="mt-2 font-bold text-[16px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
           <p className="text-[11px] font-semibold text-[#C0392B] tracking-wide">{person.line1 || 'VOLUNTEER'}</p>
+          <p className="text-[10px] font-semibold text-[#134E4A]/70 mt-0.5">ID No: <span className="font-bold text-[#134E4A]">{person.code}</span></p>
 
           <div className="absolute right-3 bottom-2 flex gap-[3px]">
             {[0, 1, 2].map(i => <div key={i} className="w-[2px] h-6 bg-[#C0392B]/60" />)}
