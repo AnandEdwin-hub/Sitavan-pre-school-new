@@ -247,12 +247,12 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: `center ${person.photoPosition ?? 25}%` }}
+              className="absolute inset-x-0 bottom-0 w-full object-cover"
+              style={{ top: '16%', objectPosition: `center ${person.photoPosition ?? 25}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className={`absolute inset-0 w-full h-full ${avatarColor} flex items-center justify-center text-white text-3xl font-bold`}>
+            <div className={`absolute inset-x-0 bottom-0 w-full ${avatarColor} flex items-center justify-center text-white text-3xl font-bold`} style={{ top: '16%' }}>
               {initials}
             </div>
           )}
@@ -266,7 +266,7 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
           <div className="absolute inset-x-0 top-0 h-[2px] bg-[#C0392B]" />
         </div>
 
-        <div className="relative flex-1 flex flex-col items-center justify-center px-3 py-1 min-h-0">
+        <div className="relative flex-1 flex flex-col items-center justify-center px-3 pt-3 pb-1 min-h-0">
           <h3 className="font-bold text-[14px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
           <span className="inline-block mt-0.5 text-[8px] font-bold text-[#134E4A] bg-[#F4B400]/25 px-2 py-0.5 rounded-full tracking-wide">VOLUNTEER</span>
           {person.line1 && <p className="text-[9.5px] font-semibold text-[#C0392B] tracking-wide mt-1">{person.line1}</p>}
@@ -276,9 +276,9 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
             <QRCodeSVG value={person.code} size={52} level="H" fgColor="#134E4A" />
           </div>
 
-          <div className="flex flex-col items-center gap-1 mt-2">
-            <img src={LOGO_URL} alt="" className="w-12 h-12 rounded-full bg-white shadow-sm shrink-0" />
-            <div className="text-center leading-tight">
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <img src={LOGO_URL} alt="" className="w-10 h-10 rounded-full bg-white shadow-sm shrink-0" />
+            <div className="leading-tight">
               <p className="text-[11px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
               <p className="text-[9px] font-semibold text-[#134E4A]/70 text-center">MOUNT ABU</p>
             </div>
