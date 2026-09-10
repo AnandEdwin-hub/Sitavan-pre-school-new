@@ -289,7 +289,8 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
           </div>
 
           <h3 className="mt-2 font-bold text-[16px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
-          <p className="text-[11px] font-semibold text-[#C0392B] tracking-wide">{person.line1 || 'VOLUNTEER'}</p>
+          <span className="inline-block mt-1 text-[9px] font-bold text-[#134E4A] bg-[#F4B400]/25 px-2.5 py-0.5 rounded-full tracking-wide">VOLUNTEER</span>
+          {person.line1 && <p className="text-[11px] font-semibold text-[#C0392B] tracking-wide mt-1">{person.line1}</p>}
           <p className="text-[10px] font-semibold text-[#134E4A]/70 mt-0.5">ID No: <span className="font-bold text-[#134E4A]">{person.code}</span></p>
 
           <div className="absolute right-3 bottom-2 flex gap-[3px]">
@@ -443,7 +444,7 @@ export default function QRBadges() {
       ) : badgeData.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">No {tab} found to generate badges for.</div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 print:grid-cols-2 print:gap-6 print:p-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 pt-3 print:grid-cols-2 print:gap-6 print:pt-6 print:p-4">
           {badgeData.map(({ person, role }, index) => (
             role === 'STUDENT'
               ? <StudentBadge key={person.id} person={person} index={index} />
