@@ -162,17 +162,18 @@ function ProfessionalBadge({ person, role, index }: { person: BadgePerson; role:
 
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
-        <div className="relative w-full shrink-0" style={{ height: '32%', backgroundColor: s.pillBg }}>
+        <div className="relative w-full shrink-0" style={{ height: '34%', backgroundColor: s.pillBg }}>
           <svg viewBox="0 0 300 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
             <path d="M0,70 C60,100 120,45 180,68 C240,90 270,55 300,62 L300,100 L0,100 Z" fill="rgba(255,255,255,0.14)" />
             <path d="M0,85 C80,55 160,100 300,75 L300,100 L0,100 Z" fill="rgba(255,255,255,0.09)" />
           </svg>
-          <div className="absolute top-2.5 left-3 grid grid-cols-4 gap-[3px] opacity-40">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="w-[3px] h-[3px] rounded-full bg-white" />
-            ))}
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center gap-1.5">
+            <img src={LOGO_URL} alt="" className="w-9 h-9 rounded-full bg-white p-0.5 shadow shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold text-white leading-tight truncate">Sitavan Pre-School</p>
+              <p className="text-[7px] font-semibold text-white/80 tracking-wide">MOUNT ABU, RAJASTHAN</p>
+            </div>
           </div>
-          <img src={LOGO_URL} alt="" className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white p-0.5 shadow" />
         </div>
 
         <div className="relative flex justify-center" style={{ marginTop: '-68px' }}>
@@ -239,12 +240,20 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
 
       <div className="relative bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
 
-        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '52%' }}>
+        <div className="relative flex items-center gap-1.5 px-3 py-1.5 bg-[#134E4A] shrink-0">
+          <img src={LOGO_URL} alt="" className="w-7 h-7 rounded-full bg-white p-0.5 shadow shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white leading-tight truncate">Sitavan Pre-School</p>
+            <p className="text-[6.5px] font-semibold text-white/80 tracking-wide">MOUNT ABU, RAJASTHAN</p>
+          </div>
+        </div>
+
+        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '46%' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-top"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
@@ -252,7 +261,7 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
               {initials}
             </div>
           )}
-          <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-[#F4B400]" />
+          <div className="absolute -top-2 -left-2 w-16 h-16 rounded-full bg-[#F4B400]" />
           <div className="absolute top-3 right-3 flex gap-[3px]">
             {[0, 1, 2].map(i => <div key={i} className="w-[2px] h-8 bg-white/70" />)}
           </div>
