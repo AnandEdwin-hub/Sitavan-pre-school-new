@@ -276,11 +276,11 @@ function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number
             <QRCodeSVG value={person.code} size={52} level="H" fgColor="#134E4A" />
           </div>
 
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <img src={LOGO_URL} alt="" className="w-8 h-8 rounded-full bg-white shadow-sm shrink-0" />
-            <div className="leading-tight">
-              <p className="text-[9px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
-              <p className="text-[8px] font-semibold text-[#134E4A]/70">MOUNT ABU</p>
+          <div className="flex flex-col items-center gap-1 mt-2">
+            <img src={LOGO_URL} alt="" className="w-12 h-12 rounded-full bg-white shadow-sm shrink-0" />
+            <div className="text-center leading-tight">
+              <p className="text-[11px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
+              <p className="text-[9px] font-semibold text-[#134E4A]/70 text-center">MOUNT ABU</p>
             </div>
           </div>
         </div>
