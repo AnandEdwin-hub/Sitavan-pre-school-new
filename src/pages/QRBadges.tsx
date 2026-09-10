@@ -94,8 +94,8 @@ function StudentBadge({ person, index }: { person: BadgePerson; index: number })
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: `center ${person.photoPosition ?? 25}%` }}
+              className="relative w-24 h-24 rounded-full object-cover border-[3px] border-[#C99A3A] shadow-sm bg-white"
+              style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
