@@ -3,24 +3,26 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Student } from '@/types/database';
-import { QRCodeSVG } from 'qrcode.react';
 import { ArrowLeft, Printer, Phone, Edit, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, parseISO } from 'date-fns';
+import { StudentBadge, BadgePerson } from '@/components/badges/PersonBadge';
 
 export default function StudentProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  type StudentWithBadgeFields = Student & { photo_position?: number | null };
+
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
     queryFn: async () => {
-      if (!isSupabaseConfigured) return MOCK_STUDENT as Student;
+      if (!isSupabaseConfigured) return MOCK_STUDENT as StudentWithBadgeFields;
       const { data, error } = await supabase.from('students').select('*').eq('id', id as string).single();
       if (error) throw error;
-      return data as Student;
+      return data as StudentWithBadgeFields;
     },
     enabled: !!id,
   });
@@ -33,12 +35,18 @@ export default function StudentProfile() {
     return <div className="p-8 text-center text-red-500">Student not found</div>;
   }
 
-  const initials = student.full_name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase();
+  const badgePerson: BadgePerson = {
+    id: student.id,
+    code: student.roll_no,
+    full_name: student.full_name,
+    photo_url: student.photo_url,
+    photoPosition: student.photo_position ?? undefined,
+    line1: student.class ? `Class: ${student.class}${student.group ? ` (${student.group})` : ''}` : '',
+    detailLabel: "Mother's Name",
+    detailValue: student.mother_name || '',
+    detailLabel2: 'Mobile No',
+    detailValue2: student.mother_mobile || student.father_mobile || '',
+  };
 
   const handlePrintQR = () => {
     window.print();
@@ -59,45 +67,26 @@ export default function StudentProfile() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column: ID Card */}
-        <Card className="md:col-span-1 overflow-hidden relative">
-          <div className="h-24 bg-gradient-to-r from-primary/80 to-primary"></div>
-          <CardContent className="pt-0 relative px-6 pb-6 text-center">
-            <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-sm mx-auto -mt-12 flex items-center justify-center text-3xl font-bold text-primary mb-4 z-10 relative">
-              {initials}
-            </div>
-            
-            <h3 className="text-xl font-bold text-foreground">{student.full_name}</h3>
-            <p className="text-muted-foreground font-mono mt-1">{student.roll_no}</p>
-            
-            <div className="flex justify-center gap-2 mt-4">
-              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold uppercase tracking-wider">
-                CLASS {student.class}
-              </span>
-              <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold uppercase tracking-wider">
-                {student.group} GROUP
-              </span>
-            </div>
-            
-            <div className="mt-4 inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+        <div className="md:col-span-1 space-y-4">
+          <StudentBadge person={badgePerson} index={0} />
+
+          <Card className="no-print">
+            <CardContent className="p-4">
+              <Button variant="outline" size="sm" className="w-full bg-white" onClick={handlePrintQR}>
+                <Printer className="w-4 h-4 mr-2" /> Print ID Card
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="no-print text-center">
+            <div className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
               {student.status}
             </div>
-
-            <div className="mt-8 bg-gray-50 rounded-xl p-4 flex flex-col items-center">
-              <div className="bg-white p-3 rounded-lg shadow-sm print-only-qr">
-                <QRCodeSVG value={student.roll_no} size={140} level="H" />
-              </div>
-              <p className="text-xs text-muted-foreground mt-3">Scan to mark attendance</p>
-              <div className="flex gap-2 mt-4 w-full">
-                <Button variant="outline" size="sm" className="w-full bg-white" onClick={handlePrintQR}>
-                  <Printer className="w-4 h-4 mr-2" /> Print
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Right Column: Details Tabs */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-6 no-print">
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="w-full justify-start bg-white border border-border h-12 p-1">
               <TabsTrigger value="profile" className="px-6">Profile</TabsTrigger>
