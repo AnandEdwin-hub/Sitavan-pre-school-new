@@ -51,6 +51,7 @@ export interface BadgePerson {
   full_name: string;
   photo_url?: string | null;
   photoPosition?: number; // 0 (top) to 100 (bottom), default 50
+  photoZoom?: number; // scale factor, e.g. 0.85 = zoomed out 15%, default 0.85
   line1: string; // e.g. "Class: LKG (BEG)" or "Designation: Teacher" or "School: Kendriya Vidyalaya"
   detailLabel: string; // e.g. "Mother's Name" or "Mobile No" or "Contact"
   detailValue: string;
@@ -246,7 +247,7 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
               src={person.photo_url}
               alt={person.full_name}
               className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${person.photoPosition ?? 25}%` }}
+              style={{ objectPosition: `center ${person.photoPosition ?? 25}%`, transform: `scale(${person.photoZoom ?? 0.85})` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (

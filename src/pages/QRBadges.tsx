@@ -47,7 +47,7 @@ export default function QRBadges() {
     queryKey: ['volunteers-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile, photo_url, photo_position').eq('status', 'Active').order('volunteer_code');
+      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization, school_class, mobile, photo_url, photo_position, photo_zoom').eq('status', 'Active').order('volunteer_code');
       return data || [];
     }
   });
@@ -98,6 +98,7 @@ export default function QRBadges() {
             full_name: v.full_name,
             photo_url: v.photo_url,
             photoPosition: v.photo_position,
+            photoZoom: v.photo_zoom,
             line1: v.school_class ? `Class: ${v.school_class}` : '',
             detailLabel: 'School',
             detailValue: v.organization || '',
