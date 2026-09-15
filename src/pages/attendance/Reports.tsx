@@ -358,7 +358,7 @@ export default function ReportsAttendance() {
       </div>
 
       <Card className="overflow-hidden border-border shadow-sm">
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-[70vh]">
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground animate-pulse">Loading report...</div>
           ) : (
@@ -366,15 +366,15 @@ export default function ReportsAttendance() {
               <table className="w-full text-xs text-left border-collapse">
                 <thead>
                   <tr>
-                    <th className="sticky left-0 z-10 bg-gray-100 text-gray-600 font-semibold px-4 py-3 border-b border-r border-border min-w-[200px] shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
+                    <th className="sticky top-0 left-0 z-30 bg-gray-100 text-gray-600 font-semibold px-4 py-3 border-b border-r border-border min-w-[200px] shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
                       {view === 'students' ? 'Student Details' : view === 'staff' ? 'Staff Details' : 'Volunteer Details'}
                     </th>
                     {daysInMonth.map(day => (
-                      <th key={day.toISOString()} className={`text-gray-500 font-medium px-1 py-3 text-center border-b border-r border-border min-w-[36px] ${day.getDay() === 0 ? 'bg-gray-200' : 'bg-gray-50'}`}>
+                      <th key={day.toISOString()} className={`sticky top-0 z-20 text-gray-500 font-medium px-1 py-3 text-center border-b border-r border-border min-w-[36px] ${day.getDay() === 0 ? 'bg-gray-200' : 'bg-gray-50'}`}>
                         {format(day, 'd')}
                       </th>
                     ))}
-                    <th className="sticky right-0 z-10 bg-gray-100 text-gray-600 font-semibold px-3 py-3 text-center border-b border-border min-w-[64px] shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">
+                    <th className="sticky top-0 right-0 z-30 bg-gray-100 text-gray-600 font-semibold px-3 py-3 text-center border-b border-border min-w-[64px] shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">
                       %
                     </th>
                   </tr>
