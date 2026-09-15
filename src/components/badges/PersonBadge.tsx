@@ -236,14 +236,11 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
       <div className="relative bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
 
-        <div className="relative w-full shrink-0 bg-[#0F172A] flex items-center justify-center" style={{ height: '10%' }}>
-          <div className="absolute -top-2 -left-2 w-10 h-10 rounded-full bg-[#F4B400]" />
-          <div className="absolute top-1.5 right-2 flex gap-[3px]">
+        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '46%' }}>
+          <div className="absolute -top-2 -left-2 w-10 h-10 rounded-full bg-[#F4B400] z-10" />
+          <div className="absolute top-1.5 right-2 flex gap-[3px] z-10">
             {[0, 1, 2].map(i => <div key={i} className="w-[2px] h-4 bg-white/70" />)}
           </div>
-        </div>
-
-        <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '38%' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
