@@ -264,7 +264,6 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
         <div className="flex-1 flex flex-col items-center justify-center gap-1 px-3 py-2 min-h-0">
           <h3 className="font-bold text-[14px] text-[#134E4A] leading-tight text-center truncate max-w-full">{person.full_name}</h3>
           <span className="inline-block text-[8px] font-bold text-[#134E4A] bg-[#F4B400]/25 px-2 py-0.5 rounded-full tracking-wide">VOLUNTEER</span>
-          {person.line1 && <p className="text-[9.5px] font-semibold text-[#C0392B] tracking-wide">{person.line1}</p>}
           <p className="text-[9px] font-semibold text-[#134E4A]/70">ID No: <span className="font-bold text-[#134E4A]">{person.code}</span></p>
 
           <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
