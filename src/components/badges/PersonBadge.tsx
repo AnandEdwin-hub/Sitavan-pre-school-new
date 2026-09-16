@@ -247,7 +247,7 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
               src={person.photo_url}
               alt={person.full_name}
               className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${person.photoPosition ?? 25}%`, transform: `scale(${person.photoZoom ?? 0.85})` }}
+              style={{ objectPosition: `center ${person.photoPosition ?? 25}%`, transform: `scale(${person.photoZoom ?? 1})` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
@@ -271,7 +271,7 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
             <QRCodeSVG value={person.code} size={48} level="H" fgColor="#134E4A" />
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 -mt-0.5">
             <img src={LOGO_URL} alt="" className="w-8 h-8 rounded-full bg-white shadow-sm shrink-0" />
             <div className="leading-tight">
               <p className="text-[9.5px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
