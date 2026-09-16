@@ -185,10 +185,10 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="text-center px-3 pt-1.5">
-          <h3 className="font-bold text-[15px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
+        <div className="text-center px-3 pt-1">
+          <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
           <span
-            className="inline-block mt-1 text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide"
+            className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
             style={{ backgroundColor: `${s.pillBg}1A`, color: s.pillBg }}
           >
             {role}
@@ -212,9 +212,9 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="relative flex justify-center py-1.5 mt-auto">
+        <div className="relative flex justify-center pb-2 mt-auto">
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
-            <QRCodeSVG value={person.code} size={64} level="H" />
+            <QRCodeSVG value={person.code} size={58} level="H" />
           </div>
         </div>
 
