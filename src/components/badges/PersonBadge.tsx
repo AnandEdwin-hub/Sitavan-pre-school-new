@@ -266,15 +266,15 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
           <span className="inline-block text-[8px] font-bold text-[#134E4A] bg-[#F4B400]/25 px-2 py-0.5 rounded-full tracking-wide">VOLUNTEER</span>
           <p className="text-[9px] font-semibold text-[#134E4A]/70">ID No: <span className="font-bold text-[#134E4A]">{person.code}</span></p>
 
-          <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
-            <QRCodeSVG value={person.code} size={48} level="H" fgColor="#134E4A" />
+          <div className="bg-white p-1.5 rounded-lg border border-gray-200 shadow-sm">
+            <QRCodeSVG value={person.code} size={58} level="H" fgColor="#134E4A" />
           </div>
 
-          <div className="flex items-center gap-1.5 -mt-0.5">
-            <img src={LOGO_URL} alt="" className="w-8 h-8 rounded-full bg-white shadow-sm shrink-0" />
+          <div className="flex items-center gap-2 mt-0.5">
+            <img src={LOGO_URL} alt="" className="w-10 h-10 rounded-full bg-white shadow-sm shrink-0" />
             <div className="leading-tight">
-              <p className="text-[9.5px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
-              <p className="text-[8px] font-semibold text-[#134E4A]/70">MOUNT ABU</p>
+              <p className="text-[11px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
+              <p className="text-[9px] font-semibold text-[#134E4A]/70">MOUNT ABU</p>
             </div>
           </div>
         </div>
