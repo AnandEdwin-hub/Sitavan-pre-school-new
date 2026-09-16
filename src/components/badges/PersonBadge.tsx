@@ -176,6 +176,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
               src={person.photo_url}
               alt={person.full_name}
               className="w-[136px] h-[136px] rounded-full object-cover border-4 border-white shadow-md bg-white"
+              style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
