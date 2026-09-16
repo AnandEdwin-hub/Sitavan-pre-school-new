@@ -156,12 +156,12 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
-        <div className="relative w-full shrink-0" style={{ height: '34%', backgroundColor: s.pillBg }}>
+        <div className="relative w-full shrink-0" style={{ height: '38%', backgroundColor: s.pillBg }}>
           <svg viewBox="0 0 300 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
             <path d="M0,70 C60,100 120,45 180,68 C240,90 270,55 300,62 L300,100 L0,100 Z" fill="rgba(255,255,255,0.14)" />
             <path d="M0,85 C80,55 160,100 300,75 L300,100 L0,100 Z" fill="rgba(255,255,255,0.09)" />
           </svg>
-          <div className="absolute top-2.5 left-2.5 right-2.5 flex flex-col items-center gap-0.5">
+          <div className="absolute top-3 left-2.5 right-2.5 flex flex-col items-center gap-1">
             <img src={LOGO_URL} alt="" className="w-11 h-11 rounded-full bg-white p-0.5 shadow shrink-0" />
             <div className="text-center">
               <p className="text-[11px] font-bold text-white leading-tight">Sitavan Pre-School</p>
@@ -170,7 +170,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </div>
         </div>
 
-        <div className="relative flex justify-center" style={{ marginTop: '-68px' }}>
+        <div className="relative flex justify-center" style={{ marginTop: '-58px' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
@@ -195,26 +195,26 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </span>
         </div>
 
-        <div className="px-4 pt-2 text-center space-y-1">
-          <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+        <div className="px-4 pt-1.5 text-center space-y-0.5">
+          <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
             ID No: <span className="font-bold" style={{ color: s.nameColor }}>{person.code}</span>
           </p>
           {person.line1 && (
-            <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>{person.line1}</p>
+            <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>{person.line1}</p>
           )}
-          <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+          <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
             {person.detailLabel}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue || '—'}</span>
           </p>
           {person.detailLabel2 && (
-            <p className="text-[10px] font-semibold" style={{ color: s.labelColor }}>
+            <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
               {person.detailLabel2}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue2 || '—'}</span>
             </p>
           )}
         </div>
 
-        <div className="relative flex justify-center py-2 mt-auto">
+        <div className="relative flex justify-center py-1.5 mt-auto">
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
-            <QRCodeSVG value={person.code} size={56} level="H" />
+            <QRCodeSVG value={person.code} size={64} level="H" />
           </div>
         </div>
 
