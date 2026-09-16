@@ -170,7 +170,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </div>
         </div>
 
-        <div className="relative flex justify-center" style={{ marginTop: '-66px' }}>
+        <div className="relative flex justify-center" style={{ marginTop: '-72px' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
