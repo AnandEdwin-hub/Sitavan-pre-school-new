@@ -161,7 +161,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
             <path d="M0,70 C60,100 120,45 180,68 C240,90 270,55 300,62 L300,100 L0,100 Z" fill="rgba(255,255,255,0.14)" />
             <path d="M0,85 C80,55 160,100 300,75 L300,100 L0,100 Z" fill="rgba(255,255,255,0.09)" />
           </svg>
-          <div className="absolute top-1.5 left-2.5 right-2.5 flex flex-col items-center gap-1">
+          <div className="absolute top-1/2 left-2.5 right-2.5 flex flex-col items-center gap-1" style={{ transform: 'translateY(calc(-50% + 10px))' }}>
             <img src={LOGO_URL} alt="" className="w-11 h-11 rounded-full bg-white p-0.5 shadow shrink-0" />
             <div className="text-center">
               <p className="text-[11px] font-bold text-white leading-tight">Sitavan Pre-School</p>
