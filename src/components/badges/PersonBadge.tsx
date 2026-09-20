@@ -157,7 +157,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
   const s = LEGACY_STAFF_CODES.includes(person.code) ? ROLE_STYLES.STAFF_LEGACY : (ROLE_STYLES[role] || ROLE_STYLES.STAFF);
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none">
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none print:w-[48%]">
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
         <div className="relative w-full shrink-0" style={{ height: '38%', backgroundColor: s.pillBg }}>

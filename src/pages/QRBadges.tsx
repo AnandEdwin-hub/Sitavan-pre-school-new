@@ -165,7 +165,7 @@ export default function QRBadges() {
       ) : badgeData.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">No {tab} found to generate badges for.</div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8 pt-3 print:grid-cols-2 print:gap-6 print:mt-0 print:p-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8 pt-3 print:flex print:flex-wrap print:gap-6 print:p-2">
           {badgeData.map(({ person, role }, index) => (
             role === 'STUDENT'
               ? <StudentBadge key={person.id} person={person} index={index} decorations={studentDecorations} />
