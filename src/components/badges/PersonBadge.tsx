@@ -130,17 +130,17 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
         <div className="relative w-full mt-3 bg-[#FBF3E3] rounded-t-[24px] flex-1 flex flex-col items-center gap-3 pt-3 pb-2">
           <div className="w-[88%] pb-2 border-b-[1.5px] border-dashed border-[#E3D6B6]">
             <div className="grid grid-cols-3 gap-x-1 text-center">
-              <p className="text-[7px] font-extrabold text-[#93690D]">CLASS</p>
-              <p className="text-[7px] font-extrabold text-[#93690D]">MOTHER'S NAME</p>
-              <p className="text-[7px] font-extrabold text-[#93690D]">MOBILE NO</p>
-              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5">{person.line1.replace('Class: ', '') || '—'}</p>
-              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5 truncate">{person.detailValue || '—'}</p>
-              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5">{person.detailValue2 || '—'}</p>
+              <p className="text-[8px] font-extrabold text-[#93690D]">CLASS</p>
+              <p className="text-[8px] font-extrabold text-[#93690D]">MOTHER'S NAME</p>
+              <p className="text-[8px] font-extrabold text-[#93690D]">MOBILE NO</p>
+              <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5">{person.line1.replace('Class: ', '') || '—'}</p>
+              <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5 truncate">{person.detailValue || '—'}</p>
+              <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5">{person.detailValue2 || '—'}</p>
             </div>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <p className="text-[9px] font-extrabold text-[#93690D]">ROLL NO <span className="text-[#2E4A28]">{person.code}</span></p>
+            <p className="text-[10px] font-extrabold text-[#93690D]">ROLL NO <span className="text-[#2E4A28]">{person.code}</span></p>
             <div className="bg-white p-1 rounded-lg border-[2px] border-[#3E6B35]">
               <QRCodeSVG value={person.code} size={56} level="H" fgColor="#3E6B35" />
             </div>
