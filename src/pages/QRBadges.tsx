@@ -52,6 +52,17 @@ export default function QRBadges() {
     }
   });
 
+  const { data: decorations = [] } = useQuery({
+    queryKey: ['card-decorations'],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return [];
+      const { data } = await supabase.from('card_decorations').select('*').eq('active', true);
+      return data || [];
+    }
+  });
+
+  const studentDecorations = decorations.filter((d: any) => d.card_type === 'student');
+
   const handlePrintAll = () => window.print();
 
   const isLoading = tab === 'students' ? studentsLoading : tab === 'staff' ? staffLoading : tab === 'volunteers' ? volunteersLoading : directorsLoading;
@@ -157,7 +168,7 @@ export default function QRBadges() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8 pt-3 print:grid-cols-2 print:gap-6 print:pt-6 print:p-4">
           {badgeData.map(({ person, role }, index) => (
             role === 'STUDENT'
-              ? <StudentBadge key={person.id} person={person} index={index} />
+              ? <StudentBadge key={person.id} person={person} index={index} decorations={studentDecorations} />
               : role === 'VOLUNTEER'
               ? <VolunteerCardV2 key={person.id} person={person} index={index} />
               : <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
