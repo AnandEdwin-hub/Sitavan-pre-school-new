@@ -77,34 +77,34 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
       <div className="relative bg-[#3E6B35] rounded-[26px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col items-center">
 
         <svg className="absolute" style={{ top: -14, left: -16 }} width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="45" fill="#4A7A40" /></svg>
-        <svg className="absolute" style={{ top: 20, right: -24 }} width="70" height="70" viewBox="0 0 70 70"><circle cx="35" cy="35" r="35" fill="#B0532C" /></svg>
-        <svg className="absolute" style={{ top: 54, left: 14 }} width="30" height="30" viewBox="0 0 30 30">
+        <svg className="absolute" style={{ top: 16, right: -22 }} width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#B0532C" /></svg>
+        <svg className="absolute" style={{ top: 44, left: 12 }} width="26" height="26" viewBox="0 0 30 30">
           <circle cx="4" cy="4" r="2" fill="#FBF3E3" /><circle cx="12" cy="4" r="2" fill="#FBF3E3" />
           <circle cx="4" cy="12" r="2" fill="#FBF3E3" /><circle cx="12" cy="12" r="2" fill="#FBF3E3" />
         </svg>
-        <svg className="absolute" style={{ top: 150, right: 6 }} width="26" height="26" viewBox="0 0 26 26"><path d="M13 2 L15.5 10 L24 13 L15.5 16 L13 24 L10.5 16 L2 13 L10.5 10 Z" fill="#B0532C" /></svg>
+        <svg className="absolute" style={{ top: 128, right: 6 }} width="22" height="22" viewBox="0 0 26 26"><path d="M13 2 L15.5 10 L24 13 L15.5 16 L13 24 L10.5 16 L2 13 L10.5 10 Z" fill="#B0532C" /></svg>
 
-        <div className="relative w-full pt-4 px-4 flex flex-col items-center gap-1">
-          <img src={LOGO_URL} alt="" className="w-[38px] h-[38px] rounded-full bg-white" />
+        <div className="relative w-full pt-3 px-4 flex flex-col items-center gap-0.5">
+          <img src={LOGO_URL} alt="" className="w-8 h-8 rounded-full bg-white" />
           <div className="text-center">
-            <p className="text-[13px] font-bold text-[#FFFDF6] leading-tight">Sitavan Pre-School</p>
-            <p className="text-[8px] font-extrabold text-[#C9E0BE] tracking-wide">MOUNT ABU</p>
+            <p className="text-[12px] font-bold text-[#FFFDF6] leading-tight">Sitavan Pre-School</p>
+            <p className="text-[7px] font-extrabold text-[#C9E0BE] tracking-wide">MOUNT ABU</p>
           </div>
         </div>
 
-        <div className="relative w-full flex justify-center" style={{ margin: '12px 0 10px' }}>
-          <div className="absolute rounded-full" style={{ width: 134, height: 134, top: -8, background: '#C99A3A' }} />
+        <div className="relative w-full flex justify-center" style={{ margin: '10px 0 8px' }}>
+          <div className="absolute rounded-full" style={{ width: 118, height: 118, top: -7, background: '#C99A3A' }} />
 
           {person.photo_url ? (
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="relative w-[118px] h-[118px] rounded-full object-cover border-[5px] border-[#FDF9EF] bg-[#B0532C]"
+              className="relative w-[104px] h-[104px] rounded-full object-cover border-[4px] border-[#FDF9EF] bg-[#B0532C]"
               style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className={`relative w-[118px] h-[118px] rounded-full ${avatarColor} border-[5px] border-[#FDF9EF] flex items-center justify-center text-white text-3xl font-bold`}>
+            <div className={`relative w-[104px] h-[104px] rounded-full ${avatarColor} border-[4px] border-[#FDF9EF] flex items-center justify-center text-white text-2xl font-bold`}>
               {initials}
             </div>
           )}
@@ -121,28 +121,28 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
         </div>
 
         <div className="relative text-center">
-          <p className="font-bold text-[24px] uppercase text-[#FFFDF6] leading-none">{person.full_name}</p>
-          <span className="inline-block mt-1.5 text-[10px] font-extrabold tracking-wide bg-[#FBF3E3] text-[#6B4E00] px-4 py-1 rounded-full">
+          <p className="font-bold text-[19px] uppercase text-[#FFFDF6] leading-none">{person.full_name}</p>
+          <span className="inline-block mt-1 text-[9px] font-extrabold tracking-wide bg-[#FBF3E3] text-[#6B4E00] px-3 py-0.5 rounded-full">
             STUDENT
           </span>
         </div>
 
-        <div className="relative w-full mt-4 bg-[#FBF3E3] rounded-t-[24px] flex-1 flex flex-col items-center justify-between py-4">
-          <div className="w-[88%] pb-3 border-b-[1.5px] border-dashed border-[#E3D6B6]">
+        <div className="relative w-full mt-3 bg-[#FBF3E3] rounded-t-[24px] flex-1 flex flex-col items-center justify-between py-3">
+          <div className="w-[88%] pb-2 border-b-[1.5px] border-dashed border-[#E3D6B6]">
             <div className="grid grid-cols-3 gap-x-1 text-center">
-              <p className="text-[7.5px] font-extrabold text-[#93690D]">CLASS</p>
-              <p className="text-[7.5px] font-extrabold text-[#93690D]">MOTHER'S NAME</p>
-              <p className="text-[7.5px] font-extrabold text-[#93690D]">MOBILE NO</p>
-              <p className="text-[10.5px] font-extrabold text-[#2E4A28] mt-1">{person.line1.replace('Class: ', '') || '—'}</p>
-              <p className="text-[10.5px] font-extrabold text-[#2E4A28] mt-1 truncate">{person.detailValue || '—'}</p>
-              <p className="text-[10.5px] font-extrabold text-[#2E4A28] mt-1">{person.detailValue2 || '—'}</p>
+              <p className="text-[7px] font-extrabold text-[#93690D]">CLASS</p>
+              <p className="text-[7px] font-extrabold text-[#93690D]">MOTHER'S NAME</p>
+              <p className="text-[7px] font-extrabold text-[#93690D]">MOBILE NO</p>
+              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5">{person.line1.replace('Class: ', '') || '—'}</p>
+              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5 truncate">{person.detailValue || '—'}</p>
+              <p className="text-[10px] font-extrabold text-[#2E4A28] mt-0.5">{person.detailValue2 || '—'}</p>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-[10px] font-extrabold text-[#93690D]">ROLL NO <span className="text-[#2E4A28]">{person.code}</span></p>
-            <div className="bg-white p-1.5 rounded-lg border-[2.5px] border-[#3E6B35]">
-              <QRCodeSVG value={person.code} size={64} level="H" fgColor="#3E6B35" />
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-[9px] font-extrabold text-[#93690D]">ROLL NO <span className="text-[#2E4A28]">{person.code}</span></p>
+            <div className="bg-white p-1 rounded-lg border-[2px] border-[#3E6B35]">
+              <QRCodeSVG value={person.code} size={56} level="H" fgColor="#3E6B35" />
             </div>
           </div>
         </div>
