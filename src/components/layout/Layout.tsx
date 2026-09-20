@@ -40,7 +40,7 @@ export function Layout() {
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <div className="md:pl-64 flex flex-col min-h-screen">
         <Header setMobileOpen={setMobileOpen} />
-        <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8">
+        <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 print:p-0">
           <Outlet />
         </main>
       </div>
