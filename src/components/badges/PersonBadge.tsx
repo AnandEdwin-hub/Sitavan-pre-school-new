@@ -73,7 +73,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[46%] print:max-w-none">
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
       <div className="relative bg-[#3E6B35] rounded-[26px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col items-center">
 
         <svg className="absolute" style={{ top: -14, left: -16 }} width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="45" fill="#4A7A40" /></svg>
@@ -157,7 +157,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
   const s = LEGACY_STAFF_CODES.includes(person.code) ? ROLE_STYLES.STAFF_LEGACY : (ROLE_STYLES[role] || ROLE_STYLES.STAFF);
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:max-w-none print:w-[48%]">
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
         <div className="relative w-full shrink-0" style={{ height: '38%', backgroundColor: s.pillBg }}>
@@ -234,7 +234,7 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
-    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[46%] print:max-w-none">
+    <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
       <div className="relative bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
 
         <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '46%' }}>
