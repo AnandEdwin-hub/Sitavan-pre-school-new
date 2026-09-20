@@ -85,7 +85,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
         <svg className="absolute" style={{ top: 128, right: 6 }} width="22" height="22" viewBox="0 0 26 26"><path d="M13 2 L15.5 10 L24 13 L15.5 16 L13 24 L10.5 16 L2 13 L10.5 10 Z" fill="#B0532C" /></svg>
 
         <div className="relative w-full pt-3 px-4 flex flex-col items-center gap-0.5">
-          <img src={LOGO_URL} alt="" className="w-8 h-8 rounded-full bg-white" />
+          <img src={LOGO_URL} alt="" className="w-11 h-11 rounded-full bg-white" />
           <div className="text-center">
             <p className="text-[12px] font-bold text-[#FFFDF6] leading-tight">Sitavan Pre-School</p>
             <p className="text-[7px] font-extrabold text-[#C9E0BE] tracking-wide">MOUNT ABU</p>
@@ -127,7 +127,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
           </span>
         </div>
 
-        <div className="relative w-full mt-3 bg-[#FBF3E3] rounded-t-[24px] flex-1 flex flex-col items-center justify-between py-3">
+        <div className="relative w-full mt-3 bg-[#FBF3E3] rounded-t-[24px] flex-1 flex flex-col items-center gap-3 pt-3 pb-2">
           <div className="w-[88%] pb-2 border-b-[1.5px] border-dashed border-[#E3D6B6]">
             <div className="grid grid-cols-3 gap-x-1 text-center">
               <p className="text-[7px] font-extrabold text-[#93690D]">CLASS</p>
