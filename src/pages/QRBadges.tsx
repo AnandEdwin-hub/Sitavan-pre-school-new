@@ -183,14 +183,7 @@ export default function QRBadges() {
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
-          body * { visibility: hidden; }
-          .print\\:grid-cols-2, .print\\:grid-cols-2 * { visibility: visible; }
-          .print\\:grid-cols-2 {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
+          .no-print { display: none !important; }
           .break-inside-avoid {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
