@@ -115,7 +115,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
 
         </div>
 
-        <div className="relative text-center">
+        <div className="relative z-10 text-center">
           <p className="font-bold text-[19px] uppercase text-[#FFFDF6] leading-none">{person.full_name}</p>
           <span className="inline-block mt-1 text-[9px] font-extrabold tracking-wide bg-[#FBF3E3] text-[#6B4E00] px-3 py-0.5 rounded-full">
             STUDENT
