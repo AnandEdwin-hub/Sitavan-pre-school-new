@@ -38,7 +38,7 @@ export default function ScanAttendance() {
     queryKey: ['app-settings'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return null;
-      const { data, error } = await supabase.from('settings').select('*').limit(1).maybeSingle();
+      const { data, error } = await supabase.from('settings').select('*').order('id').limit(1).maybeSingle();
       if (error) throw error;
       return data;
     }
