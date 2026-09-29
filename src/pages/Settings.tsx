@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import TimeInput from '@/components/TimeInput';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -192,7 +193,7 @@ export default function Settings() {
                 <>
                   <div className="space-y-2">
                     <Label>School Start Time</Label>
-                    <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} disabled={isLoading} />
+                    <TimeInput value={startTime} onChange={setStartTime} disabled={isLoading} />
                     <p className="text-xs text-muted-foreground">Scans within the "Present" window below count as on time.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -218,12 +219,7 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
-                      <Input
-                        type="time"
-                        value={closeTime}
-                        onChange={(e) => setCloseTime(e.target.value)}
-                        disabled={isLoading}
-                      />
+                      <TimeInput value={closeTime} onChange={setCloseTime} disabled={isLoading} />
                       <p className="text-xs text-muted-foreground">
                         Students not scanned by this time will be automatically marked Absent.
                       </p>
@@ -239,7 +235,7 @@ export default function Settings() {
                 <>
                   <div className="space-y-2">
                     <Label>Staff Start Time</Label>
-                    <Input type="time" value={staffStartTime} onChange={(e) => setStaffStartTime(e.target.value)} disabled={isLoading} />
+                    <TimeInput value={staffStartTime} onChange={setStaffStartTime} disabled={isLoading} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
@@ -252,7 +248,7 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
-                      <Input type="time" value={staffCloseTime} onChange={(e) => setStaffCloseTime(e.target.value)} disabled={isLoading} />
+                      <TimeInput value={staffCloseTime} onChange={setStaffCloseTime} disabled={isLoading} />
                     </div>
                   </div>
                 </>
@@ -262,7 +258,7 @@ export default function Settings() {
                 <>
                   <div className="space-y-2">
                     <Label>Volunteer Start Time</Label>
-                    <Input type="time" value={volunteerStartTime} onChange={(e) => setVolunteerStartTime(e.target.value)} disabled={isLoading} />
+                    <TimeInput value={volunteerStartTime} onChange={setVolunteerStartTime} disabled={isLoading} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
@@ -275,7 +271,7 @@ export default function Settings() {
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
-                      <Input type="time" value={volunteerCloseTime} onChange={(e) => setVolunteerCloseTime(e.target.value)} disabled={isLoading} />
+                      <TimeInput value={volunteerCloseTime} onChange={setVolunteerCloseTime} disabled={isLoading} />
                     </div>
                   </div>
                 </>
