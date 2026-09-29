@@ -63,9 +63,12 @@ export interface CardDecoration {
   id?: string | number;
   image_url: string;
   width_px?: number;
-  bottom_px?: number;
-  left_px?: number;
-  right_px?: number;
+  bottom_px?: number | null;
+  left_px?: number | null;
+  right_px?: number | null;
+  top_px?: number | null;
+  height_px?: number | null;
+  z_index?: number | null;
 }
 
 export function StudentBadge({ person, index, decorations = [] }: { person: BadgePerson; index: number; decorations?: CardDecoration[] }) {
@@ -109,15 +112,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
             </div>
           )}
 
-          {decorations.map((d, i) => (
-            <img
-              key={d.id ?? i}
-              src={d.image_url}
-              alt=""
-              className="absolute pointer-events-none"
-              style={{ width: d.width_px ?? 70, bottom: d.bottom_px ?? 0, left: d.left_px, right: d.right_px }}
-            />
-          ))}
+
         </div>
 
         <div className="relative text-center">
@@ -146,6 +141,26 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
             </div>
           </div>
         </div>
+
+        {decorations.map((d, i) => (
+          <img
+            key={d.id ?? i}
+            src={d.image_url}
+            alt=""
+            className="absolute pointer-events-none"
+            style={{
+              width: d.width_px ?? 70,
+              height: d.height_px ?? undefined,
+              objectFit: d.height_px ? 'cover' : undefined,
+              objectPosition: 'left top',
+              top: d.top_px ?? undefined,
+              bottom: d.bottom_px ?? undefined,
+              left: d.left_px ?? undefined,
+              right: d.right_px ?? undefined,
+              zIndex: d.z_index ?? 1,
+            }}
+          />
+        ))}
       </div>
     </div>
   );
