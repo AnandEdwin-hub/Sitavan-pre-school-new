@@ -77,7 +77,7 @@ export function StudentBadge({ person, index, decorations = [] }: { person: Badg
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
-      <div className="relative bg-[#3E6B35] rounded-[26px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col items-center">
+      <div className="relative isolate bg-[#3E6B35] rounded-[26px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col items-center">
 
         <svg className="absolute" style={{ top: -14, left: -16 }} width="90" height="90" viewBox="0 0 90 90"><circle cx="45" cy="45" r="45" fill="#4A7A40" /></svg>
         <svg className="absolute" style={{ top: 16, right: -22 }} width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#B0532C" /></svg>
