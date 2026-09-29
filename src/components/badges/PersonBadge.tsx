@@ -1,5 +1,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export const ASSETS = 'https://thsvlzxckrvpxduhbykk.supabase.co/storage/v1/object/public/card-assets';
 export const LOGO_URL = 'https://thsvlzxckrvpxduhbykk.supabase.co/storage/v1/object/public/card-assets/logo.png';
@@ -71,7 +73,17 @@ export interface CardDecoration {
   z_index?: number | null;
 }
 
-export function StudentBadge({ person, index, decorations = [] }: { person: BadgePerson; index: number; decorations?: CardDecoration[] }) {
+export function StudentBadge({ person, index, decorations: decorationsProp }: { person: BadgePerson; index: number; decorations?: CardDecoration[] }) {
+  const { data: fetchedDecorations = [] } = useQuery({
+    queryKey: ['card-decorations'],
+    enabled: !decorationsProp,
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return [];
+      const { data } = await supabase.from('card_decorations').select('*').eq('active', true);
+      return data || [];
+    },
+  });
+  const decorations: CardDecoration[] = decorationsProp ?? fetchedDecorations.filter((d: any) => d.card_type === 'student');
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
 
