@@ -147,6 +147,13 @@ export default function ScanAttendance() {
     }
   });
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (format(new Date(), 'yyyy-MM-dd') !== todayDateStr) window.location.reload();
+    }, 60000);
+    return () => clearInterval(id);
+  }, [todayDateStr]);
+
   const directoryFullyLoaded = studentsLoaded && staffLoaded && volunteersLoaded;
   const directoryReadyRef = React.useRef(false);
   useEffect(() => {
