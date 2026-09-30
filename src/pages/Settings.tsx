@@ -27,6 +27,17 @@ const DEFAULT_SETTINGS = {
   volunteer_attendance_close_time: '11:00',
 };
 
+const toMins = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const addMins = (t: string, mins: number) => {
+  const total = (((toMins(t) + mins) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+};
+const diffMins = (from: string, to: string) => toMins(to) - toMins(from);
+const fmt12 = (t: string) => {
+  const [h, m] = t.split(':');
+  return `${Number(h) % 12 || 12}:${m} ${Number(h) >= 12 ? 'PM' : 'AM'}`;
+};
+
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -89,6 +100,16 @@ export default function Settings() {
   }, [settingsRow]);
 
   const saveSettings = async () => {
+    const checks: [string, number, number][] = [
+      ['Students', lateMins, veryLateMins],
+      ['Staff', staffLateMins, staffVeryLateMins],
+      ['Volunteers', volunteerLateMins, volunteerVeryLateMins],
+    ];
+    const bad = checks.find(([, l, v]) => l < 0 || v <= l);
+    if (bad) {
+      toast({ variant: 'destructive', title: `Check ${bad[0]} times`, description: '"Present until" cannot be before the start time, and "Late until" must be after "Present until".' });
+      return;
+    }
     setIsSaving(true);
     try {
       if (!isSupabaseConfigured) {
@@ -198,24 +219,12 @@ export default function Settings() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Late (L) after (mins)</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={lateMins}
-                        onChange={(e) => setLateMins(Number(e.target.value))}
-                        disabled={isLoading}
-                      />
+                      <Label>Present (P) until</Label>
+                      <TimeInput value={addMins(startTime, lateMins)} onChange={(t) => setLateMins(diffMins(startTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Very Late (LL) after (mins)</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={veryLateMins}
-                        onChange={(e) => setVeryLateMins(Number(e.target.value))}
-                        disabled={isLoading}
-                      />
+                      <Label>Late (L) until</Label>
+                      <TimeInput value={addMins(startTime, veryLateMins)} onChange={(t) => setVeryLateMins(diffMins(startTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
@@ -226,7 +235,7 @@ export default function Settings() {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    e.g. start {startTime}, Late {lateMins} min → P until {lateMins} min past start, L until {veryLateMins} min past start, LL after that.
+                    e.g. start {fmt12(startTime)} → Present until {fmt12(addMins(startTime, lateMins))}, Late until {fmt12(addMins(startTime, veryLateMins))}, Very Late (LL) after that.
                   </p>
                 </>
               )}
@@ -239,12 +248,12 @@ export default function Settings() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Late (L) after (mins)</Label>
-                      <Input type="number" min={1} value={staffLateMins} onChange={(e) => setStaffLateMins(Number(e.target.value))} disabled={isLoading} />
+                      <Label>Present (P) until</Label>
+                      <TimeInput value={addMins(staffStartTime, staffLateMins)} onChange={(t) => setStaffLateMins(diffMins(staffStartTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Very Late (LL) after (mins)</Label>
-                      <Input type="number" min={1} value={staffVeryLateMins} onChange={(e) => setStaffVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                      <Label>Late (L) until</Label>
+                      <TimeInput value={addMins(staffStartTime, staffVeryLateMins)} onChange={(t) => setStaffVeryLateMins(diffMins(staffStartTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
@@ -262,12 +271,12 @@ export default function Settings() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label>Late (L) after (mins)</Label>
-                      <Input type="number" min={1} value={volunteerLateMins} onChange={(e) => setVolunteerLateMins(Number(e.target.value))} disabled={isLoading} />
+                      <Label>Present (P) until</Label>
+                      <TimeInput value={addMins(volunteerStartTime, volunteerLateMins)} onChange={(t) => setVolunteerLateMins(diffMins(volunteerStartTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Very Late (LL) after (mins)</Label>
-                      <Input type="number" min={1} value={volunteerVeryLateMins} onChange={(e) => setVolunteerVeryLateMins(Number(e.target.value))} disabled={isLoading} />
+                      <Label>Late (L) until</Label>
+                      <TimeInput value={addMins(volunteerStartTime, volunteerVeryLateMins)} onChange={(t) => setVolunteerVeryLateMins(diffMins(volunteerStartTime, t))} disabled={isLoading} />
                     </div>
                     <div className="space-y-2">
                       <Label>Attendance Window Closes</Label>
