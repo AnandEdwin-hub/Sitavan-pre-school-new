@@ -44,6 +44,9 @@ export default function ScanAttendance() {
     }
   });
 
+  const settingsRef = React.useRef(settings);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
+
   const { data: todayHoliday } = useQuery({
     queryKey: ['holiday-today', todayDateStr],
     queryFn: async () => {
@@ -64,6 +67,7 @@ export default function ScanAttendance() {
     : null;
 
   const getTimingForRole = (role: PersonRole) => {
+    const settings = settingsRef.current;
     if (role === 'staff') {
       return {
         startTime: settings?.staff_start_time?.slice(0, 5) || DEFAULT_START_TIME,
@@ -254,6 +258,10 @@ export default function ScanAttendance() {
     if (isProcessing || closureReason) return;
     if (!directoryReadyRef.current) {
       toast({ variant: 'destructive', title: 'Still loading', description: 'The directory is still loading — wait a second and try again.' });
+      return;
+    }
+    if (isSupabaseConfigured && !settingsRef.current) {
+      toast({ variant: 'destructive', title: 'Still loading', description: 'Attendance rules are still loading — wait a second and try again.' });
       return;
     }
     setIsProcessing(true);
