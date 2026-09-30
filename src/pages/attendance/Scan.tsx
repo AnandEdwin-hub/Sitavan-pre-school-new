@@ -148,10 +148,17 @@ export default function ScanAttendance() {
   });
 
   useEffect(() => {
-    const id = setInterval(() => {
+    const reloadIfNewDay = () => {
       if (format(new Date(), 'yyyy-MM-dd') !== todayDateStr) window.location.reload();
-    }, 60000);
-    return () => clearInterval(id);
+    };
+    const nextMidnight = new Date();
+    nextMidnight.setHours(24, 0, 5, 0);
+    const timer = setTimeout(reloadIfNewDay, nextMidnight.getTime() - Date.now());
+    document.addEventListener('visibilitychange', reloadIfNewDay);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', reloadIfNewDay);
+    };
   }, [todayDateStr]);
 
   const directoryFullyLoaded = studentsLoaded && staffLoaded && volunteersLoaded;
