@@ -9,8 +9,10 @@ import { ChevronLeft, ChevronRight, Download, AlertCircle } from 'lucide-react';
 import { AttendanceStatus, STATUS_CODE, STATUS_COLOR } from '@/types/database';
 import * as XLSX from 'xlsx';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
+  Cell,
+  LabelList,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -228,9 +230,27 @@ export default function ReportsAttendance() {
     .filter(r => r.pct !== null && r.pct < 75)
     .sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0));
 
-  const trendData = columnStats
-    .filter(c => c.pct !== null)
-    .map(c => ({ date: format(new Date(c.date), 'dd MMM'), percentage: c.pct as number }));
+  // One entry per working day (Mon–Sat, minus holidays/closures); pct is null if not marked yet
+  const dailyData = useMemo(() => {
+    return columnStats
+      .map((c, i) => ({ c, day: daysInMonth[i] }))
+      .filter(({ c, day }) => {
+        if (c.pct !== null) return true;
+        if (day.getDay() === 0 || holidayMap[c.date]) return false;
+        const markedOff = people.some(p => {
+          const s = attendanceMap[`${p.id}_${c.date}`];
+          return s === 'Holiday' || s === 'Weekly Holiday' || s === 'Forced Closure';
+        });
+        return !markedOff;
+      })
+      .map(({ c, day }) => ({ label: format(day, 'd'), full: format(day, 'EEE, d MMM'), pct: c.pct }));
+  }, [columnStats, daysInMonth, holidayMap, people, attendanceMap]);
+
+  const monthAvg = useMemo(() => {
+    const present = rowStats.reduce((s, r) => s + r.present, 0);
+    const counted = rowStats.reduce((s, r) => s + r.counted, 0);
+    return counted > 0 ? Math.round((present / counted) * 100) : null;
+  }, [rowStats]);
 
   const handleExport = () => {
     const header = ['Code', 'Name', 'Detail', ...daysInMonth.map(d => format(d, 'd')), '%'];
@@ -293,7 +313,7 @@ export default function ReportsAttendance() {
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm font-semibold w-28 text-center">{format(currentMonth, 'MMMM yyyy')}</span>
+            <span className="text-sm font-bold w-36 text-center rounded-md bg-primary text-primary-foreground py-1">{format(currentMonth, 'MMMM yyyy')}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -305,59 +325,72 @@ export default function ReportsAttendance() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Attendance Trend (%)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
-                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Line type="monotone" dataKey="percentage" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4, fill: '#4F46E5', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader className="pb-2 flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+          <div className="flex items-center gap-3">
+            <span className="rounded-md bg-primary text-primary-foreground px-3 py-1 text-sm font-bold">
+              {format(currentMonth, 'MMMM yyyy')}
+            </span>
+            <CardTitle className="text-base font-semibold">Daily Attendance Rate</CardTitle>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <span className="text-2xl font-bold text-foreground mr-1">{monthAvg === null ? '—' : `${monthAvg}%`}</span>
+            month avg · {dailyData.length} working days
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[280px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="label" fontSize={12} tickLine={false} axisLine={false} interval={0} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v: any) => `${v}%`} />
+                <Tooltip
+                  cursor={{ fill: '#f5f5f5' }}
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  labelFormatter={(_: any, payload: any) => payload?.[0]?.payload?.full ?? ''}
+                  formatter={(v: any) => [`${v}%`, 'Attendance']}
+                />
+                <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={28}>
+                  {dailyData.map((d, i) => (
+                    <Cell key={i} fill={(d.pct ?? 0) < 75 ? '#dc2626' : '#16a34a'} />
+                  ))}
+                  <LabelList dataKey="pct" position="top" fontSize={10} formatter={(v: any) => (v == null ? '' : v)} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card className="col-span-1 flex flex-col">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-500" />
-              Below 75% Alert ({flagged.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-auto max-h-[250px] p-0">
-            {flagged.length > 0 ? (
-              <div className="divide-y divide-border">
-                {flagged.map(r => (
-                  <div key={r.id} className="p-4 flex justify-between items-center bg-red-50/30">
-                    <div>
-                      <p className="font-medium text-sm">{r.person.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{r.person.subtitle}</p>
-                    </div>
-                    <div className="text-xl font-bold text-red-600">{r.pct}%</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground text-sm flex flex-col items-center justify-center h-full">
-                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center mb-2">
-                  <span className="text-green-500 text-xl">✓</span>
-                </div>
-                Everyone above 75%
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="p-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <AlertCircle className={`w-4 h-4 ${flagged.length > 0 ? 'text-red-500' : 'text-green-600'}`} />
+            Below 75% · {format(currentMonth, 'MMM yyyy')} ({flagged.length})
+          </div>
+          {flagged.length === 0 ? (
+            <span className="text-sm text-muted-foreground">Everyone above 75% ✓</span>
+          ) : (
+            <div className="flex flex-wrap gap-2 max-h-24 overflow-auto">
+              {flagged.map(r => (
+                <span key={r.id} title={r.person.subtitle} className="inline-flex items-center gap-1.5 rounded-full bg-red-50 border border-red-200 px-2.5 py-1 text-xs">
+                  <span className="font-medium">{r.person.full_name}</span>
+                  <span className="font-bold text-red-600">{r.pct}%</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="overflow-hidden border-border shadow-sm">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-white">
+          <span className="rounded-md bg-primary text-primary-foreground px-3 py-1 text-sm font-bold">{format(currentMonth, 'MMMM yyyy')}</span>
+          <span className="text-sm font-semibold text-gray-700">
+            {view === 'students' ? 'Student' : view === 'staff' ? 'Staff' : 'Volunteer'} Attendance Register
+          </span>
+        </div>
         <div className="overflow-auto max-h-[70vh]">
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground animate-pulse">Loading report...</div>
