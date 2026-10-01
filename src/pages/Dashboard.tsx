@@ -3,19 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval, } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
+
+const PRESENT_STATUSES = ['Present', 'Late', 'Very Late', 'Half Day'];
+const NON_WORKING = ['Holiday', 'Weekly Holiday'];
 
 export default function Dashboard() {
   const today = new Date();
@@ -60,37 +53,58 @@ export default function Dashboard() {
     },
   });
 
+  const year = today.getFullYear();
+  const { data: yearAttendance = [] } = useQuery({
+    queryKey: ['attendance-year', year],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return MOCK_ATTENDANCE_MONTH;
+      // Supabase caps at 1000 rows per request, so page through
+      const pageSize = 1000;
+      let from = 0;
+      let all: any[] = [];
+      while (true) {
+        const { data, error } = await supabase
+          .from('attendance')
+          .select('date,status')
+          .gte('date', `${year}-01-01`)
+          .lte('date', `${year}-12-31`)
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        all = all.concat(data || []);
+        if (!data || data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
+    },
+  });
+
   // Derived stats
   const activeStudents = students.filter(s => s.status === 'Active');
   const totalStudentsCount = activeStudents.length;
   
-  const presentTodayCount = todayAttendance.filter(a => ['Present', 'Late', 'Half Day'].includes(a.status)).length;
+  const presentTodayCount = todayAttendance.filter(a => PRESENT_STATUSES.includes(a.status)).length;
   const absentTodayCount = todayAttendance.filter(a => a.status === 'Absent').length;
 
   const monthAvg = useMemo(() => {
-    if (monthAttendance.length === 0 || totalStudentsCount === 0) return 0;
-    const workDays = new Set(monthAttendance.map(a => a.date)).size;
-    if (workDays === 0) return 0;
-    const presentTotal = monthAttendance.filter(a => ['Present', 'Late', 'Half Day'].includes(a.status)).length;
-    return Math.round((presentTotal / (workDays * totalStudentsCount)) * 100);
-  }, [monthAttendance, totalStudentsCount]);
+    const recs = monthAttendance.filter(a => !NON_WORKING.includes(a.status));
+    if (recs.length === 0) return 0;
+    const presentTotal = recs.filter(a => PRESENT_STATUSES.includes(a.status)).length;
+    return Math.round((presentTotal / recs.length) * 100);
+  }, [monthAttendance]);
 
-  // Chart data
-  const chartData = useMemo(() => {
-    const days = eachDayOfInterval({ start: subDays(today, 14), end: today });
-    return days.map(day => {
-      const dateStr = format(day, 'yyyy-MM-dd');
-      const dayRecords = monthAttendance.filter(a => a.date === dateStr);
-      if (dayRecords.length === 0) return { name: format(day, 'd MMM'), pct: 0, date: dateStr };
-      
-      const present = dayRecords.filter(a => ['Present', 'Late', 'Half Day'].includes(a.status)).length;
-      return {
-        name: format(day, 'd MMM'),
-        pct: Math.round((present / totalStudentsCount) * 100),
-        date: dateStr,
-      };
-    }).filter(d => d.pct > 0); // exclude non-working days in rough mock
-  }, [monthAttendance, totalStudentsCount, today]);
+  // Monthly attendance % for Jan–Dec of the current year
+  const monthlyStats = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => {
+      const monthDate = new Date(year, i, 1);
+      const key = format(monthDate, 'yyyy-MM');
+      const recs = yearAttendance.filter(
+        a => String(a.date).startsWith(key) && !NON_WORKING.includes(a.status)
+      );
+      const present = recs.filter(a => PRESENT_STATUSES.includes(a.status)).length;
+      const pct = recs.length > 0 ? Math.round((present / recs.length) * 100) : null;
+      return { name: format(monthDate, 'MMM'), pct };
+    });
+  }, [yearAttendance, totalStudentsCount, year]);
 
   return (
     <div className="space-y-6">
@@ -160,27 +174,20 @@ export default function Dashboard() {
       <div className="grid gap-6 md:grid-cols-7">
         <Card className="md:col-span-4 lg:col-span-5">
           <CardHeader>
-            <CardTitle>Attendance Trend (Last 14 Days)</CardTitle>
+            <CardTitle>Monthly Attendance Rate · {year}</CardTitle>
           </CardHeader>
-          <CardContent className="px-2">
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip 
-                    cursor={{fill: 'hsl(var(--muted))'}} 
-                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                    formatter={(value: number) => [`${value}%`, 'Attendance']}
-                  />
-                  <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.pct < 75 ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          <CardContent>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              {monthlyStats.map((m) => (
+                <div key={m.name} className="rounded-lg border border-border/50 p-4 text-center">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{m.name}</p>
+                  <p className={`text-2xl font-bold mt-1 ${
+                    m.pct === null ? 'text-muted-foreground' : m.pct < 75 ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {m.pct === null ? '—' : `${m.pct}%`}
+                  </p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
