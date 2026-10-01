@@ -9,9 +9,8 @@ import { ChevronLeft, ChevronRight, Download, AlertCircle } from 'lucide-react';
 import { AttendanceStatus, STATUS_CODE, STATUS_COLOR } from '@/types/database';
 import * as XLSX from 'xlsx';
 import {
-  BarChart,
-  Bar,
-  Cell,
+  LineChart,
+  Line,
   LabelList,
   XAxis,
   YAxis,
@@ -341,23 +340,34 @@ export default function ReportsAttendance() {
         <CardContent>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailyData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={dailyData} margin={{ top: 20, right: 16, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <XAxis dataKey="label" fontSize={12} tickLine={false} axisLine={false} interval={0} />
                 <YAxis fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} tickFormatter={(v: any) => `${v}%`} />
                 <Tooltip
-                  cursor={{ fill: '#f5f5f5' }}
+                  cursor={{ stroke: '#d4d4d4' }}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   labelFormatter={(_: any, payload: any) => payload?.[0]?.payload?.full ?? ''}
                   formatter={(v: any) => [`${v}%`, 'Attendance']}
                 />
-                <Bar dataKey="pct" radius={[4, 4, 0, 0]} maxBarSize={28}>
-                  {dailyData.map((d, i) => (
-                    <Cell key={i} fill={(d.pct ?? 0) < 75 ? '#dc2626' : '#16a34a'} />
-                  ))}
+                <Line
+                  type="monotone"
+                  dataKey="pct"
+                  stroke="#15803d"
+                  strokeWidth={2.5}
+                  connectNulls={false}
+                  dot={(p: any) =>
+                    p.payload.pct == null ? (
+                      <g key={p.index} />
+                    ) : (
+                      <circle key={p.index} cx={p.cx} cy={p.cy} r={4} fill={p.payload.pct < 75 ? '#dc2626' : '#16a34a'} />
+                    )
+                  }
+                  activeDot={{ r: 6 }}
+                >
                   <LabelList dataKey="pct" position="top" fontSize={10} formatter={(v: any) => (v == null ? '' : v)} />
-                </Bar>
-              </BarChart>
+                </Line>
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
