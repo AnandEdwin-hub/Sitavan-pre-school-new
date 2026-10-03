@@ -59,7 +59,7 @@ export default function ReportsAttendance() {
     queryKey: ['students-reports'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group').order('roll_no');
+      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, age').order('roll_no');
       return data || [];
     },
     enabled: view === 'students',
@@ -158,7 +158,7 @@ export default function ReportsAttendance() {
     if (view === 'students') {
       return students
         .filter((s: any) => classFilter === 'all' || s.class === classFilter)
-        .map((s: any) => ({ id: s.id, code: s.roll_no, full_name: s.full_name, subtitle: `${s.roll_no} • ${s.class || ''}` }));
+        .map((s: any) => ({ id: s.id, code: s.roll_no, full_name: s.full_name, subtitle: `${s.roll_no} • ${s.class || ''}${s.age != null ? ` • ${s.age} yrs` : ''}` }));
     }
     if (view === 'staff') {
       return staff.map((s: any) => ({ id: s.id, code: s.staff_code, full_name: s.full_name, subtitle: `${s.staff_code} • ${s.designation || ''}` }));
