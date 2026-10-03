@@ -182,7 +182,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const s = LEGACY_STAFF_CODES.includes(person.code) ? ROLE_STYLES.STAFF_LEGACY : (ROLE_STYLES[role] || ROLE_STYLES.STAFF);
-  const HALO = { textShadow: '0 0 3px #fff, 0 0 6px #fff, 0 0 10px #fff' };
+
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
@@ -224,8 +224,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="relative mx-4 mt-1 rounded-xl bg-white/90 shadow-sm pb-1">
-        <div className="relative text-center px-3 pt-1" style={HALO}>
+                <div className="relative text-center px-3 pt-1">
           <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
           <span
             className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
@@ -235,14 +234,13 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </span>
         </div>
 
-        <div className="relative px-4 pt-1.5 text-center space-y-0.5" style={HALO}>
-          <p className="text-[10px] font-bold" style={{ color: s.nameColor }}>
+        <div className="relative px-4 pt-1 flex flex-col items-center gap-1">
+          <p className="inline-block rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-bold" style={{ color: s.nameColor }}>
             ID No: <span className="font-extrabold">{person.code}</span>
           </p>
           {person.line1 && (
-            <p className="text-[10px] font-bold" style={{ color: s.nameColor }}>{person.line1}</p>
+            <p className="inline-block rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-bold" style={{ color: s.nameColor }}>{person.line1}</p>
           )}
-        </div>
         </div>
 
         <div className="relative flex justify-center pb-3 mt-1.5">
