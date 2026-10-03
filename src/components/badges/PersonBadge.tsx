@@ -224,6 +224,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
+        <div className="relative mx-4 mt-1 rounded-xl bg-white/90 shadow-sm pb-1">
         <div className="relative text-center px-3 pt-1" style={HALO}>
           <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
           <span
@@ -242,8 +243,9 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
             <p className="text-[10px] font-bold" style={{ color: s.nameColor }}>{person.line1}</p>
           )}
         </div>
+        </div>
 
-        <div className="relative flex justify-center pb-3 mt-3">
+        <div className="relative flex justify-center pb-3 mt-1.5">
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
             <QRCodeSVG value={person.code} size={76} level="H" />
           </div>
