@@ -201,7 +201,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </div>
         </div>
 
-        <div className="relative flex justify-center" style={{ marginTop: '-72px' }}>
+        <div className="relative flex justify-center" style={{ marginTop: '-60px' }}>
           {person.photo_url ? (
             <img
               src={person.photo_url}
@@ -236,9 +236,9 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="relative flex justify-center pb-2 mt-auto">
+        <div className="relative flex justify-center pb-3 mt-3">
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
-            <QRCodeSVG value={person.code} size={58} level="H" />
+            <QRCodeSVG value={person.code} size={76} level="H" />
           </div>
         </div>
 
