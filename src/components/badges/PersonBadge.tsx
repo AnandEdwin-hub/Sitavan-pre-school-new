@@ -187,6 +187,12 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
+        <img
+          src={`${ASSETS}/staff-mowgli-wolf.png`}
+          alt=""
+          className="absolute left-0 right-0 bottom-2 w-full h-auto pointer-events-none"
+        />
+
         <div className="relative w-full shrink-0" style={{ height: '38%', backgroundColor: s.pillBg }}>
           <svg viewBox="0 0 300 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
             <path d="M0,70 C60,100 120,45 180,68 C240,90 270,55 300,62 L300,100 L0,100 Z" fill="rgba(255,255,255,0.14)" />
@@ -217,7 +223,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="text-center px-3 pt-1">
+        <div className="relative text-center px-3 pt-1">
           <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
           <span
             className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
@@ -227,7 +233,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </span>
         </div>
 
-        <div className="px-4 pt-1.5 text-center space-y-0.5">
+        <div className="relative px-4 pt-1.5 text-center space-y-0.5">
           <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
             ID No: <span className="font-bold" style={{ color: s.nameColor }}>{person.code}</span>
           </p>
