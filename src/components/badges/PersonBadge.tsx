@@ -228,7 +228,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
           <span
             className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
-            style={{ backgroundColor: `${s.pillBg}1A`, color: s.pillBg }}
+            style={{ backgroundColor: '#fff', backgroundImage: `linear-gradient(${s.pillBg}1A, ${s.pillBg}1A)`, color: s.pillBg }}
           >
             {role}
           </span>
