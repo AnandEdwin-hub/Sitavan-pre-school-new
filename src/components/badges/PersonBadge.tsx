@@ -193,7 +193,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
             <path d="M0,85 C80,55 160,100 300,75 L300,100 L0,100 Z" fill="rgba(255,255,255,0.09)" />
           </svg>
           <div className="absolute top-1.5 left-2.5 right-2.5 flex flex-col items-center gap-1">
-            <img src={LOGO_URL} alt="" className="w-11 h-11 rounded-full bg-white p-0.5 shadow shrink-0" />
+            <img src={LOGO_URL} alt="" className="w-[60px] h-[60px] rounded-full bg-white p-0.5 shadow shrink-0" />
             <div className="text-center">
               <p className="text-[11px] font-bold text-white leading-tight">Sitavan Pre-School</p>
               <p className="text-[7px] font-semibold text-white/80 tracking-wide">MOUNT ABU</p>
@@ -233,14 +233,6 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </p>
           {person.line1 && (
             <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>{person.line1}</p>
-          )}
-          <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
-            {person.detailLabel}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue || '—'}</span>
-          </p>
-          {person.detailLabel2 && (
-            <p className="text-[9.5px] font-semibold" style={{ color: s.labelColor }}>
-              {person.detailLabel2}: <span className="font-bold" style={{ color: s.nameColor }}>{person.detailValue2 || '—'}</span>
-            </p>
           )}
         </div>
 
@@ -298,7 +290,7 @@ export function VolunteerCardV2({ person, index }: { person: BadgePerson; index:
           </div>
 
           <div className="flex items-center gap-2 mt-0.5">
-            <img src={LOGO_URL} alt="" className="w-10 h-10 rounded-full bg-white shadow-sm shrink-0" />
+            <img src={LOGO_URL} alt="" className="w-14 h-14 rounded-full bg-white shadow-sm shrink-0" />
             <div className="leading-tight">
               <p className="text-[11px] font-bold text-[#134E4A]">Sitavan Pre-School</p>
               <p className="text-[9px] font-semibold text-[#134E4A]/70">MOUNT ABU</p>
