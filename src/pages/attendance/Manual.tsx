@@ -27,12 +27,16 @@ interface LocalEntry {
 
 const ALL_STATUSES = ['Present', 'Late', 'Very Late', 'Absent', 'Sick', 'Half Day', 'Holiday', 'Weekly Holiday', 'Forced Closure'];
 
+const ABSENCE_REASONS = ['Illness / Fever', 'Family function', 'Out of station', 'Festival / Religious', 'Household work', 'Not informed'];
+const REASON_OTHER = 'Other';
+
 export default function ManualAttendance() {
   const { isAdmin } = useAuth();
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [view, setView] = useState<ViewType>('students');
   const [localAttendance, setLocalAttendance] = useState<Record<string, LocalEntry>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [otherMode, setOtherMode] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   const handleViewChange = (v: ViewType) => {
@@ -103,6 +107,7 @@ export default function ManualAttendance() {
       }
 
       setLocalAttendance(map);
+      setOtherMode({});
       return map;
     }
   });
@@ -126,6 +131,16 @@ export default function ManualAttendance() {
   const handleSave = async () => {
     if (view === 'staff' && !isAdmin) {
       toast({ variant: 'destructive', title: 'Not Allowed', description: 'Only an admin can save staff attendance.' });
+      return;
+    }
+    const missingReason = people.filter(p => {
+      const e = localAttendance[p.id];
+      return e?.status === 'Absent' && !(e.notes || '').trim();
+    });
+    if (missingReason.length > 0) {
+      const names = missingReason.slice(0, 5).map(p => p.full_name).join(', ');
+      const extra = missingReason.length > 5 ? ` +${missingReason.length - 5} more` : '';
+      toast({ variant: 'destructive', title: 'Absence reason required', description: `Please add a reason for: ${names}${extra}` });
       return;
     }
     setIsSaving(true);
@@ -246,12 +261,14 @@ export default function ManualAttendance() {
                 <th className="px-6 py-3 font-medium w-32">{view === 'students' ? 'Class' : view === 'staff' ? 'Designation' : 'School'}</th>
                 <th className="px-6 py-3 font-medium">Current Status</th>
                 <th className="px-6 py-3 font-medium w-48">Update To</th>
-                <th className="px-6 py-3 font-medium w-56">Reason (if Absent)</th>
+                <th className="px-6 py-3 font-medium w-56">Reason (required if Absent)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {people.map((person) => {
                 const entry = localAttendance[person.id];
+                const reasonText = entry?.notes || '';
+                const isOther = !!otherMode[person.id] || (reasonText !== '' && !ABSENCE_REASONS.includes(reasonText));
                 return (
                   <tr key={person.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-3 font-mono text-xs">{person.code}</td>
@@ -276,12 +293,47 @@ export default function ManualAttendance() {
                       </Select>
                     </td>
                     <td className="px-6 py-3">
-                      <Input
-                        placeholder={entry?.status === 'Absent' ? 'e.g. Fever, family event...' : 'Optional note'}
-                        value={entry?.notes || ''}
-                        onChange={(e) => handleNotesChange(person.id, e.target.value)}
-                        className="h-8 text-xs bg-white"
-                      />
+                      {entry?.status === 'Absent' ? (
+                        <div className="space-y-1">
+                          <Select
+                            value={isOther ? REASON_OTHER : (ABSENCE_REASONS.includes(reasonText) ? reasonText : '')}
+                            onValueChange={(val) => {
+                              if (val === REASON_OTHER) {
+                                setOtherMode(prev => ({ ...prev, [person.id]: true }));
+                                handleNotesChange(person.id, '');
+                              } else {
+                                setOtherMode(prev => ({ ...prev, [person.id]: false }));
+                                handleNotesChange(person.id, val);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className={`w-full bg-white h-8 text-xs ${!reasonText.trim() ? 'border-red-400' : ''}`}>
+                              <SelectValue placeholder="Select reason *" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ABSENCE_REASONS.map((r) => (
+                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                              ))}
+                              <SelectItem value={REASON_OTHER}>Other…</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {isOther && (
+                            <Input
+                              placeholder="Type the reason..."
+                              value={reasonText}
+                              onChange={(e) => handleNotesChange(person.id, e.target.value)}
+                              className={`h-8 text-xs bg-white ${!reasonText.trim() ? 'border-red-400' : ''}`}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <Input
+                          placeholder="Optional note"
+                          value={reasonText}
+                          onChange={(e) => handleNotesChange(person.id, e.target.value)}
+                          className="h-8 text-xs bg-white"
+                        />
+                      )}
                     </td>
                   </tr>
                 );
