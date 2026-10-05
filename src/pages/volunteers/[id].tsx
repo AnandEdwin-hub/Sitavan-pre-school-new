@@ -60,10 +60,12 @@ export default function VolunteerProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Volunteer Profile</h2>
-        <Button variant="outline" className="bg-white">
-          <Edit className="w-4 h-4 mr-2" />
-          Edit Profile
-        </Button>
+        {!isViewer && (
+          <Button variant="outline" className="bg-white">
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
