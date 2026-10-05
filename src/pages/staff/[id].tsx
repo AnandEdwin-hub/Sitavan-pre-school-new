@@ -1,7 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Staff } from '@/types/database';
 import { ArrowLeft, Printer, Phone, Mail, Edit, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { ProfessionalBadge, BadgePerson, BadgeRole } from '@/components/badges/P
 export default function StaffProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
 
   type StaffWithBadgeFields = Staff & { staff_category?: string | null; photo_position?: number | null };
 
@@ -20,7 +23,7 @@ export default function StaffProfile() {
     queryKey: ['staff-member', id],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STAFF as StaffWithBadgeFields;
-      const { data, error } = await supabase.from('staff').select('*').eq('id', id as string).single();
+      const { data, error } = await supabase.from(peopleTable('staff')).select('*').eq('id', id as string).single();
       if (error) throw error;
       return data as StaffWithBadgeFields;
     },
@@ -50,7 +53,7 @@ export default function StaffProfile() {
     photo_url: staff.photo_url,
     photoPosition: staff.photo_position ?? undefined,
     line1: staff.designation ? `Designation: ${staff.designation}` : '',
-    detailLabel: 'Mobile No',
+    detailLabel: isViewer ? '' : 'Mobile No',
     detailValue: staff.mobile || '',
     detailLabel2: 'Qualification',
     detailValue2: staff.qualification || '',
@@ -65,10 +68,10 @@ export default function StaffProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Staff Profile</h2>
-        <Button variant="outline" className="bg-white">
+        {!isViewer && (<Button variant="outline" className="bg-white">
           <Edit className="w-4 h-4 mr-2" />
           Edit Profile
-        </Button>
+        </Button>)}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -76,13 +79,13 @@ export default function StaffProfile() {
         <div className="md:col-span-1 space-y-4">
           <ProfessionalBadge person={badgePerson} role={role} index={0} />
 
-          <Card className="no-print">
+          {!isViewer && (<Card className="no-print">
             <CardContent className="p-4">
               <Button variant="outline" size="sm" className="w-full bg-white" onClick={handlePrint}>
                 <Printer className="w-4 h-4 mr-2" /> Print ID Card
               </Button>
             </CardContent>
-          </Card>
+          </Card>)}
 
           <div className="no-print text-center">
             <div className="mt-2 inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
@@ -122,7 +125,7 @@ export default function StaffProfile() {
                     </div>
                   </div>
 
-                  <h4 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 mt-8 border-b pb-2">Contact</h4>
+                  {!isViewer && (<><h4 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 mt-8 border-b pb-2">Contact</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="bg-gray-50 p-4 rounded-lg border border-border/50">
                       <p className="text-xs text-muted-foreground mb-1">Mobile</p>
@@ -146,7 +149,7 @@ export default function StaffProfile() {
                         <p className="text-sm font-medium">-</p>
                       )}
                     </div>
-                  </div>
+                  </div></>)}
                 </CardContent>
               </Card>
             </TabsContent>

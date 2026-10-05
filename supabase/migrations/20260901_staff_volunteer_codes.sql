@@ -1,3 +1,4 @@
+
 -- Rename teachers -> staff (covers Teacher/Helper/Director/Adviser roles, not just teachers)
 ALTER TABLE teachers RENAME TO staff;
 

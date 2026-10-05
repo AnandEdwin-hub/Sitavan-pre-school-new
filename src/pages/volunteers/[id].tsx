@@ -2,6 +2,8 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Volunteer } from '@/types/database';
 import { ArrowLeft, Printer, Phone, Mail, Edit, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { VolunteerCardV2, BadgePerson } from '@/components/badges/PersonBadge';
 export default function VolunteerProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
 
   type VolunteerWithBadgeFields = Volunteer & { photo_position?: number | null };
 
@@ -20,7 +23,7 @@ export default function VolunteerProfile() {
     queryKey: ['volunteer', id],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_VOLUNTEER as VolunteerWithBadgeFields;
-      const { data, error } = await supabase.from('volunteers').select('*').eq('id', id as string).single();
+      const { data, error } = await supabase.from(peopleTable('volunteers')).select('*').eq('id', id as string).single();
       if (error) throw error;
       return data as VolunteerWithBadgeFields;
     },

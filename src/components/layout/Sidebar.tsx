@@ -13,6 +13,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -22,6 +24,8 @@ interface SidebarProps {
 export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAdmin, isStaff, isViewer } = useAuth();
+  const queryClient = useQueryClient();
   const [studentsOpen, setStudentsOpen] = React.useState(true);
   const [staffOpen, setStaffOpen] = React.useState(false);
   const [volunteersOpen, setVolunteersOpen] = React.useState(false);
@@ -38,6 +42,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    queryClient.clear();
     navigate('/login');
   };
 
@@ -73,14 +78,17 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
               <Link to="/students" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/students'))}>
                 Overview
               </Link>
-              <Link to="/students/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/students/new'))}>
-                Add New
-              </Link>
+              {(isAdmin || isStaff) && (
+                <Link to="/students/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/students/new'))}>
+                  Add New
+                </Link>
+              )}
             </div>
           )}
         </div>
 
         {/* Staff Group */}
+        {(isAdmin || isViewer) && (
         <div className="pt-2">
           <button
             onClick={() => setStaffOpen(!staffOpen)}
@@ -97,12 +105,15 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
               <Link to="/staff" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/staff'))}>
                 Overview
               </Link>
-              <Link to="/staff/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/staff/new'))}>
-                Add New
-              </Link>
+              {isAdmin && (
+                <Link to="/staff/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/staff/new'))}>
+                  Add New
+                </Link>
+              )}
             </div>
           )}
         </div>
+        )}
 
         {/* Volunteers Group */}
         <div className="pt-2">
@@ -121,9 +132,11 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
               <Link to="/volunteers" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/volunteers'))}>
                 Overview
               </Link>
-              <Link to="/volunteers/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/volunteers/new'))}>
-                Add New
-              </Link>
+              {(isAdmin || isStaff) && (
+                <Link to="/volunteers/new" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/volunteers/new'))}>
+                  Add New
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -142,38 +155,52 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
           </button>
           {attendanceOpen && (
             <div className="mt-1 space-y-1 pl-10">
-              <Link to="/attendance/scan" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/scan'))}>
-                Scan In
-              </Link>
-              <Link to="/attendance/manual" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/manual'))}>
-                Manual Override
-              </Link>
-              <Link to="/attendance/calendar" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/calendar'))}>
-                Calendar View
-              </Link>
-              <Link to="/attendance/reports" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/reports'))}>
-                Reports
-              </Link>
-              <Link to="/attendance/holidays" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/holidays'))}>
-                Holiday Manager
-              </Link>
+              {(isAdmin || isStaff) && (
+                <Link to="/attendance/scan" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/scan'))}>
+                  Scan In
+                </Link>
+              )}
+              {isAdmin && (
+                <Link to="/attendance/manual" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/manual'))}>
+                  Manual Override
+                </Link>
+              )}
+              {(isAdmin || isViewer) && (
+                <Link to="/attendance/calendar" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/calendar'))}>
+                  Calendar View
+                </Link>
+              )}
+              {(isAdmin || isViewer) && (
+                <Link to="/attendance/reports" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/reports'))}>
+                  Reports
+                </Link>
+              )}
+              {isAdmin && (
+                <Link to="/attendance/holidays" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/holidays'))}>
+                  Holiday Manager
+                </Link>
+              )}
             </div>
           )}
         </div>
 
-        <div className="pt-2">
-          <Link to="/qr-badges" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/qr-badges'))}>
-            <QrCode className="w-5 h-5" />
-            QR Badges
-          </Link>
-        </div>
+        {isAdmin && (
+          <>
+            <div className="pt-2">
+              <Link to="/qr-badges" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/qr-badges'))}>
+                <QrCode className="w-5 h-5" />
+                QR Badges
+              </Link>
+            </div>
 
-        <div className="pt-2">
-          <Link to="/settings" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/settings'))}>
-            <Settings className="w-5 h-5" />
-            Settings
-          </Link>
-        </div>
+            <div className="pt-2">
+              <Link to="/settings" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/settings'))}>
+                <Settings className="w-5 h-5" />
+                Settings
+              </Link>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="p-4 border-t border-sidebar-border">

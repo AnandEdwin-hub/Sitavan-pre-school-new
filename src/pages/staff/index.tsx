@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Staff } from '@/types/database';
 import { Search, Plus, Eye, Edit } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -11,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function StaffOverview() {
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -18,7 +21,7 @@ export default function StaffOverview() {
     queryKey: ['staff'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STAFF as Staff[];
-      const { data, error } = await supabase.from('staff').select('*').order('staff_code');
+       const { data, error } = await supabase.from(peopleTable('staff')).select('*').order('staff_code');
       if (error) throw error;
       return data as Staff[];
     },
@@ -52,12 +55,14 @@ export default function StaffOverview() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Staff</h2>
-        <Button asChild>
-          <Link to="/staff/new">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Staff
-          </Link>
-        </Button>
+        {!isViewer && (
+          <Button asChild>
+            <Link to="/staff/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Staff
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
@@ -107,7 +112,7 @@ export default function StaffOverview() {
                 <th className="px-6 py-3 font-medium">Staff Code</th>
                 <th className="px-6 py-3 font-medium">Name</th>
                 <th className="px-6 py-3 font-medium">Designation</th>
-                <th className="px-6 py-3 font-medium">Mobile</th>
+                {!isViewer && <th className="px-6 py-3 font-medium">Mobile</th>}
                 <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
@@ -131,7 +136,7 @@ export default function StaffOverview() {
                         {person.designation || '-'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{person.mobile || '-'}</td>
+                    {!isViewer && <td className="px-6 py-4">{person.mobile || '-'}</td>}
                     <td className="px-6 py-4">
                       <StatusBadge status={person.status} />
                     </td>
@@ -140,9 +145,11 @@ export default function StaffOverview() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/staff/${person.id}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {!isViewer && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +13,7 @@ const PRESENT_STATUSES = ['Present', 'Late', 'Very Late', 'Half Day'];
 const NON_WORKING = ['Holiday', 'Weekly Holiday'];
 
 export default function Dashboard() {
+  const { isViewer } = useAuth();
   const today = new Date();
   
   // Queries
@@ -18,7 +21,7 @@ export default function Dashboard() {
     queryKey: ['students'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data, error } = await supabase.from('students').select('*');
+      const { data, error } = await supabase.from(peopleTable('students')).select('*');
       if (error) throw error;
       return data;
     },
@@ -114,12 +117,12 @@ export default function Dashboard() {
           <p className="text-muted-foreground">{format(today, 'EEEE, d MMMM yyyy')}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button asChild variant="outline">
+          {!isViewer && (<><Button asChild variant="outline">
             <Link to="/students/new">Add Student</Link>
           </Button>
           <Button asChild>
             <Link to="/attendance/scan">Take Attendance</Link>
-          </Button>
+          </Button></>)}
         </div>
       </div>
 

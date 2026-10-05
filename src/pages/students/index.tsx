@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Student } from '@/types/database';
 import { 
   Search, Plus, Download, Eye, Edit
@@ -13,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function StudentsOverview() {
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -21,7 +24,7 @@ export default function StudentsOverview() {
     queryKey: ['students'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS as Student[];
-      const { data, error } = await supabase.from('students').select('*').order('roll_no');
+      const { data, error } = await supabase.from(peopleTable('students')).select('*').order('roll_no');
       if (error) throw error;
       return data as Student[];
     },
@@ -64,12 +67,12 @@ export default function StudentsOverview() {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button asChild>
+          {!isViewer && (<Button asChild>
             <Link to="/students/new">
               <Plus className="w-4 h-4 mr-2" />
               Add Student
             </Link>
-          </Button>
+          </Button>)}
         </div>
       </div>
 
@@ -175,9 +178,9 @@ export default function StudentsOverview() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/students/${student.id}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                        {!isViewer && (<Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
                           <Edit className="w-4 h-4" />
-                        </Button>
+                        </Button>)}
                       </div>
                     </td>
                   </tr>

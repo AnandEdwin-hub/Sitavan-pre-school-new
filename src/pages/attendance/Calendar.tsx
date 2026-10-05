@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ export default function CalendarAttendance() {
     queryKey: ['students-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group').order('roll_no');
+      const { data } = await supabase.from(peopleTable('students')).select('id, roll_no, full_name, class, group').order('roll_no');
       return data || [];
     },
     enabled: view === 'students',
@@ -68,7 +69,7 @@ export default function CalendarAttendance() {
     queryKey: ['staff-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation').order('staff_code');
+      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').order('staff_code');
       return data || [];
     },
     enabled: view === 'staff',
@@ -94,7 +95,7 @@ export default function CalendarAttendance() {
     queryKey: ['volunteers-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization').order('volunteer_code');
+      const { data } = await supabase.from(peopleTable('volunteers')).select('id, volunteer_code, full_name, organization').order('volunteer_code');
       return data || [];
     },
     enabled: view === 'volunteers',
@@ -301,17 +302,17 @@ export default function CalendarAttendance() {
         </div>
       </Card>
 
-      <div className="flex flex-wrap gap-4 items-center text-sm bg-white p-4 rounded-lg border border-border">
-        <span className="font-semibold text-gray-700 mr-2">Legend:</span>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-green-500"></div> P - Present</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-amber-500"></div> L - Late</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-orange-500"></div> LL - Very Late</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-red-500"></div> A - Absent</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-purple-500"></div> S - Sick</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-indigo-400"></div> HD - Half Day</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-400"></div> H - Holiday</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-300"></div> SUN - Sunday</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-800"></div> FC - Forced Closure</div>
+      <div className="flex flex-wrap gap-x-3 gap-y-2 items-center text-xs bg-white px-4 py-3 rounded-lg border border-border whitespace-nowrap">
+        <span className="font-semibold text-gray-700 mr-1">Legend:</span>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-green-500"></div> P - Present</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-amber-500"></div> L - Late (upto 5m)</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-orange-500"></div> LL - V Late (&gt;5m)</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-red-500"></div> A - Absent</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-purple-500"></div> S - Sick</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-indigo-400"></div> HD - Half Day</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-gray-400"></div> H - Holiday</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-gray-300"></div> SUN - Sunday</div>
+        <div className="flex items-center gap-1"><div className="w-3.5 h-3.5 rounded-sm bg-gray-800"></div> FC - Forced Closure</div>
       </div>
     </div>
   );

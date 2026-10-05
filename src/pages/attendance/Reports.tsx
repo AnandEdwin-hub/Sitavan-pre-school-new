@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, subMonths, addMonths } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -59,7 +60,7 @@ export default function ReportsAttendance() {
     queryKey: ['students-reports'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from('students').select('id, roll_no, full_name, class, group, age').order('roll_no');
+      const { data } = await supabase.from(peopleTable('students')).select('id, roll_no, full_name, class, group, age').order('roll_no');
       return data || [];
     },
     enabled: view === 'students',
@@ -84,7 +85,7 @@ export default function ReportsAttendance() {
     queryKey: ['staff-reports'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation').order('staff_code');
+      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').order('staff_code');
       return data || [];
     },
     enabled: view === 'staff',
@@ -110,7 +111,7 @@ export default function ReportsAttendance() {
     queryKey: ['volunteers-reports'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('volunteers').select('id, volunteer_code, full_name, organization').order('volunteer_code');
+      const { data } = await supabase.from(peopleTable('volunteers')).select('id, volunteer_code, full_name, organization').order('volunteer_code');
       return data || [];
     },
     enabled: view === 'volunteers',

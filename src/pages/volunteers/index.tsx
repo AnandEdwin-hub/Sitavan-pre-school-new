@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Volunteer } from '@/types/database';
 import { Search, Plus, Eye, Edit } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -11,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function VolunteersOverview() {
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -18,7 +21,7 @@ export default function VolunteersOverview() {
     queryKey: ['volunteers'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_VOLUNTEERS as Volunteer[];
-      const { data, error } = await supabase.from('volunteers').select('*').order('volunteer_code');
+      const { data, error } = await supabase.from(peopleTable('volunteers')).select('*').order('volunteer_code');
       if (error) throw error;
       return data as Volunteer[];
     },
@@ -52,12 +55,12 @@ export default function VolunteersOverview() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Volunteers</h2>
-        <Button asChild>
+        {!isViewer && (<Button asChild>
           <Link to="/volunteers/new">
             <Plus className="w-4 h-4 mr-2" />
             Add Volunteer
           </Link>
-        </Button>
+        </Button>)}
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
@@ -107,7 +110,7 @@ export default function VolunteersOverview() {
                 <th className="px-6 py-3 font-medium">Volunteer Code</th>
                 <th className="px-6 py-3 font-medium">Name</th>
                 <th className="px-6 py-3 font-medium">School / Class</th>
-                <th className="px-6 py-3 font-medium">Mobile</th>
+                {!isViewer && <th className="px-6 py-3 font-medium">Mobile</th>}
                 <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
@@ -129,7 +132,7 @@ export default function VolunteersOverview() {
                     <td className="px-6 py-4 text-xs text-muted-foreground">
                       {person.organization || '-'}{person.school_class ? ` • ${person.school_class}` : ''}
                     </td>
-                    <td className="px-6 py-4">{person.mobile || '-'}</td>
+                    {!isViewer && <td className="px-6 py-4">{person.mobile || '-'}</td>}
                     <td className="px-6 py-4">
                       <StatusBadge status={person.status} />
                     </td>
@@ -138,9 +141,9 @@ export default function VolunteersOverview() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/volunteers/${person.id}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                        {!isViewer && (<Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
                           <Edit className="w-4 h-4" />
-                        </Button>
+                        </Button>)}
                       </div>
                     </td>
                   </tr>

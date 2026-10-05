@@ -1,7 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { peopleTable } from '@/lib/people';
+import { useAuth } from '@/hooks/useAuth';
 import { Student } from '@/types/database';
 import { ArrowLeft, Printer, Phone, Edit, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { StudentBadge, BadgePerson } from '@/components/badges/PersonBadge';
 export default function StudentProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isViewer } = useAuth();
 
   type StudentWithBadgeFields = Student & { photo_position?: number | null };
 
@@ -20,7 +23,7 @@ export default function StudentProfile() {
     queryKey: ['student', id],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENT as StudentWithBadgeFields;
-      const { data, error } = await supabase.from('students').select('*').eq('id', id as string).single();
+      const { data, error } = await supabase.from(peopleTable('students')).select('*').eq('id', id as string).single();
       if (error) throw error;
       return data as StudentWithBadgeFields;
     },
@@ -59,10 +62,10 @@ export default function StudentProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Student Profile</h2>
-        <Button variant="outline" className="bg-white">
+        {!isViewer && (<Button variant="outline" className="bg-white">
           <Edit className="w-4 h-4 mr-2" />
           Edit Profile
-        </Button>
+        </Button>)}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

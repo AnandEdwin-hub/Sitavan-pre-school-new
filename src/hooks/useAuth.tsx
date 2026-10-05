@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { setCurrentRole } from '@/lib/people';
 import { Session, User } from '@supabase/supabase-js';
+
+export type AppRole = 'admin' | 'staff' | 'viewer';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<AppRole | null>(null);
+  const [roleUserId, setRoleUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -43,8 +48,46 @@ export function useAuth() {
     };
   }, []);
 
-  const ADMIN_EMAILS = ['admin@sitavan.edu'];
-  const isAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email);
+  useEffect(() => {
+    let cancelled = false;
 
-  return { session, user, loading, isAdmin };
+    if (!user) {
+      setRole(null);
+      setRoleUserId(null);
+      return;
+    }
+
+    supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) console.error('Error fetching role:', error);
+        const r = ((data as { role?: string } | null)?.role as AppRole) ?? null;
+        setCurrentRole(r);
+        setRole(r);
+        setRoleUserId(user.id);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const roleLoading = !!user && roleUserId !== user.id;
+  const isAdmin = role === 'admin';
+  const isStaff = role === 'staff';
+  const isViewer = role === 'viewer';
+
+  return {
+    session,
+    user,
+    loading: loading || roleLoading,
+    role,
+    isAdmin,
+    isStaff,
+    isViewer,
+  };
 }
