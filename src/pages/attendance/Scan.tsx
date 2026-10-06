@@ -104,7 +104,7 @@ export default function ScanAttendance() {
     queryKey: ['staff-scan'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data, error } = await supabase.from('staff').select('id, staff_code, full_name, designation');
+      const { data, error } = await supabase.from('staff').select('id, staff_code, full_name, designation').eq('status', 'Active');
       if (error) throw error;
       return data || [];
     }
