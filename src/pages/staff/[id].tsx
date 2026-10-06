@@ -46,7 +46,9 @@ export default function StaffProfile() {
     return <div className="p-8 text-center text-red-500">Staff member not found</div>;
   }
 
-  const role: BadgeRole = staff.staff_category === 'Helper' || staff.designation === 'Helper'
+  const role: BadgeRole = staff.staff_category === 'Volunteer Teacher'
+    ? 'VOLUNTEER'
+    : staff.staff_category === 'Helper' || staff.designation === 'Helper'
     ? 'HELPER'
     : staff.staff_category === 'Director' || staff.designation === 'Director'
     ? 'DIRECTOR'

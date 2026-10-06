@@ -52,6 +52,15 @@ export default function QRBadges() {
     }
   });
 
+  const { data: volunteerTeachers = [], isLoading: volTeachersLoading } = useQuery({
+    queryKey: ['volunteer-teachers-badges'],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return [];
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category, photo_position').eq('status', 'Active').eq('staff_category', 'Volunteer Teacher').order('staff_code');
+      return data || [];
+    }
+  });
+
   const { data: decorations = [] } = useQuery({
     queryKey: ['card-decorations'],
     queryFn: async () => {
@@ -66,7 +75,7 @@ export default function QRBadges() {
 
   const handlePrintAll = () => window.print();
 
-  const isLoading = tab === 'students' ? studentsLoading : tab === 'staff' ? staffLoading : tab === 'volunteers' ? volunteersLoading : directorsLoading;
+  const isLoading = tab === 'students' ? studentsLoading : tab === 'staff' ? staffLoading : tab === 'volunteers' ? (volunteersLoading || volTeachersLoading) : directorsLoading;
 
   const badgeData: { person: BadgePerson; role: BadgeRole }[] =
     tab === 'students'
@@ -134,6 +143,22 @@ export default function QRBadges() {
           },
         }));
 
+  const volTeacherBadges: { person: BadgePerson; role: BadgeRole }[] = volunteerTeachers.map((s: any) => ({
+    role: 'VOLUNTEER' as BadgeRole,
+    person: {
+      id: s.id,
+      code: s.staff_code,
+      full_name: s.full_name,
+      photo_url: s.photo_url,
+      photoPosition: s.photo_position,
+      line1: s.designation ? `Designation: ${s.designation}` : '',
+      detailLabel: 'Mobile No',
+      detailValue: s.mobile || '',
+      detailLabel2: 'Qualification',
+      detailValue2: s.qualification || '',
+    },
+  }));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
@@ -163,7 +188,7 @@ export default function QRBadges() {
 
       {isLoading ? (
         <div className="p-8 text-center text-muted-foreground animate-pulse">Generating badges...</div>
-      ) : badgeData.length === 0 ? (
+      ) : badgeData.length === 0 && !(tab === 'volunteers' && volTeacherBadges.length > 0) ? (
         <div className="p-8 text-center text-muted-foreground">No {tab} found to generate badges for.</div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8 pt-3 print:flex print:flex-wrap print:justify-center print:gap-4 print:p-2">
@@ -175,6 +200,21 @@ export default function QRBadges() {
               : <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
           ))}
         </div>
+      )}
+
+      {tab === 'volunteers' && volTeacherBadges.length > 0 && (
+        <>
+          <div className="flex items-center gap-3 pt-4 no-print">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Volunteer Teachers</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8 pt-3 print:flex print:flex-wrap print:justify-center print:gap-4 print:p-2">
+            {volTeacherBadges.map(({ person, role }, index) => (
+              <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
+            ))}
+          </div>
+        </>
       )}
 
       <style>{`
