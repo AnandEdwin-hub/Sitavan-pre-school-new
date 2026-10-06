@@ -75,7 +75,7 @@ export default function StaffOverview() {
           <p className="text-2xl font-bold mt-1 text-green-600">{active}</p>
         </Card>
         <Card className="p-4 flex flex-col justify-center">
-          <p className="text-sm font-medium text-muted-foreground">Inactive</p>
+          <p className="text-sm font-medium text-muted-foreground">Resigned / Inactive</p>
           <p className="text-2xl font-bold mt-1 text-red-600">{total - active}</p>
         </Card>
       </div>
