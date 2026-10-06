@@ -191,7 +191,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         <img
           src={`${ASSETS}/Sps-%20Panther%20for%20staff.png`}
           alt=""
-          className="absolute left-1/2 -translate-x-1/2 bottom-[90px] w-[140%] max-w-none h-auto pointer-events-none"
+          className="absolute left-1/2 -translate-x-1/2 bottom-[55px] w-[140%] max-w-none h-auto pointer-events-none"
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
@@ -229,7 +229,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         </div>
 
                 <div className="relative text-center px-3 pt-1">
-          <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: s.nameColor }}>{person.full_name}</h3>
+          <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.65)' }}>{person.full_name}</h3>
           <span
             className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
             style={{ backgroundColor: '#fff', backgroundImage: `linear-gradient(${s.pillBg}1A, ${s.pillBg}1A)`, color: s.pillBg }}
