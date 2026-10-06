@@ -189,7 +189,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
       <div className="relative bg-white rounded-[22px] border-[3px] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col" style={{ borderColor: s.border }}>
 
         <img
-          src={`${ASSETS}/staff-mowgli-wolf.png`}
+          src={`${ASSETS}/Sps-%20Panther%20for%20staff.png`}
           alt=""
           className="absolute left-0 right-0 bottom-2 w-full h-auto pointer-events-none"
         />
