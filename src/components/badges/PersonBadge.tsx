@@ -247,7 +247,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           )}
         </div>
 
-        <div className="relative flex justify-center pb-3 mt-1.5">
+        <div className={`relative flex justify-center pb-3 mt-1.5 ${role === 'DIRECTOR' || role === 'ADVISER' ? 'hidden' : ''}`}>
           <div className="bg-white p-1 rounded-lg border shadow-sm" style={{ borderColor: s.border }}>
             <QRCodeSVG value={person.code} size={76} level="H" />
           </div>
