@@ -85,7 +85,7 @@ export default function ReportsAttendance() {
     queryKey: ['staff-reports'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').order('staff_code');
+      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').eq('attendance_required', true).order('staff_code');
       return data || [];
     },
     enabled: view === 'staff',
