@@ -15,7 +15,7 @@ export default function StaffOverview() {
   const navigate = useNavigate();
   const { isViewer } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('Active');
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['staff'],
