@@ -64,7 +64,7 @@ export default function ManualAttendance() {
     queryKey: ['staff-active-manual'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('*').eq('status', 'Active').order('staff_code');
+      const { data } = await supabase.from('staff').select('*').eq('status', 'Active').eq('attendance_required', true).order('staff_code');
       return data || [];
     },
     enabled: view === 'staff',
