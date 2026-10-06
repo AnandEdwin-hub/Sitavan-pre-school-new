@@ -88,7 +88,7 @@ export default function StaffProfile() {
           </Card>)}
 
           <div className="no-print text-center">
-            <div className="mt-2 inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+            <div className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-medium ${staff.status === 'Resigned' ? 'bg-amber-100 text-amber-800' : staff.status === 'Inactive' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
               {staff.status}
             </div>
           </div>
