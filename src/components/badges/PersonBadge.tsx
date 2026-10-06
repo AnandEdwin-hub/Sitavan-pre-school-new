@@ -191,7 +191,11 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         <img
           src={`${ASSETS}/Sps-%20Panther%20for%20staff.png`}
           alt=""
-          className="absolute left-0 right-0 bottom-2 w-full h-auto pointer-events-none"
+          className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[125%] max-w-none h-auto pointer-events-none"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
+          }}
         />
 
         <div className="relative w-full shrink-0" style={{ height: '38%', backgroundColor: s.pillBg }}>
