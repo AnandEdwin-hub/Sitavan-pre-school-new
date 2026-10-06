@@ -42,6 +42,7 @@ export default function StaffOverview() {
     const colors: Record<string, string> = {
       Active: 'bg-green-100 text-green-700',
       Inactive: 'bg-red-100 text-red-700',
+      Resigned: 'bg-amber-100 text-amber-800',
     };
     const colorClass = status && colors[status] ? colors[status] : 'bg-gray-100 text-gray-700';
     return (
