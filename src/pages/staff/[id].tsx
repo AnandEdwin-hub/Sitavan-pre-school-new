@@ -21,6 +21,9 @@ export default function StaffProfile() {
   const [leaveForm, setLeaveForm] = useState({ status: 'Active', resigned_on: '', leaving_reason: '', archive_notes: '' });
   const [leaveMsg, setLeaveMsg] = useState('');
   const [photoMsg, setPhotoMsg] = useState('');
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [detailsForm, setDetailsForm] = useState({ full_name: '', mobile: '', email: '', qualification: '', doj: '' });
+  const [detailsMsg, setDetailsMsg] = useState('');
 
   type StaffWithBadgeFields = Staff & { staff_category?: string | null; photo_position?: number | null; resigned_on?: string | null; leaving_reason?: string | null; archive_notes?: string | null };
 
@@ -65,6 +68,40 @@ export default function StaffProfile() {
   };
 
   const handlePrint = () => window.print();
+
+  const startDetailsEdit = () => {
+    setDetailsForm({
+      full_name: staff.full_name || '',
+      mobile: staff.mobile || '',
+      email: staff.email || '',
+      qualification: staff.qualification || '',
+      doj: staff.doj || '',
+    });
+    setDetailsMsg('');
+    setEditingDetails(true);
+  };
+
+  const saveDetails = async () => {
+    if (!detailsForm.full_name.trim()) {
+      setDetailsMsg('Name cannot be empty');
+      return;
+    }
+    const { error } = await supabase.from('staff').update({
+      full_name: detailsForm.full_name.trim(),
+      mobile: detailsForm.mobile.trim() || null,
+      email: detailsForm.email.trim() || null,
+      qualification: detailsForm.qualification.trim() || null,
+      doj: detailsForm.doj || null,
+    }).eq('id', staff.id);
+    if (error) {
+      setDetailsMsg('Could not save: ' + error.message);
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ['staff-member', id] });
+    await queryClient.invalidateQueries({ queryKey: ['staff'] });
+    setEditingDetails(false);
+    setDetailsMsg('');
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -123,7 +160,7 @@ export default function StaffProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Staff Profile</h2>
-        {!isViewer && (<Button variant="outline" className="bg-white">
+        {!isViewer && (<Button variant="outline" className="bg-white" onClick={startDetailsEdit}>
           <Edit className="w-4 h-4 mr-2" />
           Edit Profile
         </Button>)}
@@ -158,6 +195,40 @@ export default function StaffProfile() {
 
         {/* Right Column: Details Tabs */}
         <div className="md:col-span-2 space-y-6 no-print">
+          {editingDetails && (
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <h4 className="text-sm font-semibold text-primary uppercase tracking-wider border-b pb-2">Edit Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Full name</p>
+                    <input className="w-full border rounded-md h-9 px-2 text-sm bg-white" value={detailsForm.full_name} onChange={(e) => setDetailsForm({ ...detailsForm, full_name: e.target.value })} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Mobile</p>
+                    <input className="w-full border rounded-md h-9 px-2 text-sm bg-white" value={detailsForm.mobile} onChange={(e) => setDetailsForm({ ...detailsForm, mobile: e.target.value })} placeholder="e.g. 98765 43210" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Email</p>
+                    <input type="email" className="w-full border rounded-md h-9 px-2 text-sm bg-white" value={detailsForm.email} onChange={(e) => setDetailsForm({ ...detailsForm, email: e.target.value })} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Qualification</p>
+                    <input className="w-full border rounded-md h-9 px-2 text-sm bg-white" value={detailsForm.qualification} onChange={(e) => setDetailsForm({ ...detailsForm, qualification: e.target.value })} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Date of joining</p>
+                    <input type="date" className="w-full border rounded-md h-9 px-2 text-sm bg-white" value={detailsForm.doj} onChange={(e) => setDetailsForm({ ...detailsForm, doj: e.target.value })} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" onClick={saveDetails}>Save</Button>
+                  <Button size="sm" variant="outline" className="bg-white" onClick={() => setEditingDetails(false)}>Cancel</Button>
+                  {detailsMsg && <span className="text-xs text-destructive">{detailsMsg}</span>}
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="w-full justify-start bg-white border border-border h-12 p-1">
               <TabsTrigger value="profile" className="px-6">Profile</TabsTrigger>
