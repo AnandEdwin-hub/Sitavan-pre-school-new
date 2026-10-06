@@ -62,6 +62,7 @@ export default function QRBadges() {
   });
 
   const studentDecorations = decorations.filter((d: any) => d.card_type === 'student');
+  const volunteerDecorations = decorations.filter((d: any) => d.card_type === 'volunteer');
 
   const handlePrintAll = () => window.print();
 
@@ -170,7 +171,7 @@ export default function QRBadges() {
             role === 'STUDENT'
               ? <StudentBadge key={person.id} person={person} index={index} decorations={studentDecorations} />
               : role === 'VOLUNTEER'
-              ? <VolunteerCardV2 key={person.id} person={person} index={index} />
+              ? <VolunteerCardV2 key={person.id} person={person} index={index} decorations={volunteerDecorations} />
               : <ProfessionalBadge key={person.id} person={person} role={role} index={index} />
           ))}
         </div>

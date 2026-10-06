@@ -259,13 +259,34 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
   );
 }
 
-export function VolunteerCardV2({ person, index }: { person: BadgePerson; index: number }) {
+export function VolunteerCardV2({ person, index, decorations = [] }: { person: BadgePerson; index: number; decorations?: CardDecoration[] }) {
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <div className="relative w-full max-w-[280px] mx-auto break-inside-avoid print:w-[280px]">
-      <div className="relative bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
+      <div className="relative isolate bg-white rounded-[22px] border-[3px] border-[#134E4A] shadow-md overflow-hidden aspect-[2.125/3.375] flex flex-col">
+
+        {decorations.map((d, i) => (
+          <img
+            key={d.id ?? i}
+            src={d.image_url}
+            alt=""
+            className="absolute pointer-events-none"
+            style={{
+              width: d.width_px ?? 70,
+              height: d.height_px ?? undefined,
+              objectFit: d.height_px ? 'cover' : undefined,
+              objectPosition: 'left top',
+              top: d.top_px ?? undefined,
+              bottom: d.bottom_px ?? undefined,
+              left: d.left_px ?? undefined,
+              right: d.right_px ?? undefined,
+              zIndex: d.z_index ?? 1,
+              transform: (d as any).flip_x ? 'scaleX(-1)' : undefined,
+            }}
+          />
+        ))}
 
         <div className="relative w-full shrink-0 bg-[#0F172A]" style={{ height: '46%' }}>
           <div className="absolute -top-2 -left-2 w-10 h-10 rounded-full bg-[#F4B400] z-10" />
