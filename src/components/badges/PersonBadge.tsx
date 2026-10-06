@@ -191,7 +191,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         <img
           src={`${ASSETS}/Sps-%20Panther%20for%20staff.png`}
           alt=""
-          className="absolute left-1/2 -translate-x-1/2 bottom-[55px] w-[140%] max-w-none h-auto pointer-events-none"
+          className="absolute left-1/2 -translate-x-1/2 bottom-[72px] w-[140%] max-w-none h-auto pointer-events-none"
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
