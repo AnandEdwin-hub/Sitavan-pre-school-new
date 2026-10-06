@@ -20,6 +20,7 @@ export default function StaffProfile() {
   const [editingLeave, setEditingLeave] = useState(false);
   const [leaveForm, setLeaveForm] = useState({ status: 'Active', resigned_on: '', leaving_reason: '', archive_notes: '' });
   const [leaveMsg, setLeaveMsg] = useState('');
+  const [photoMsg, setPhotoMsg] = useState('');
 
   type StaffWithBadgeFields = Staff & { staff_category?: string | null; photo_position?: number | null; resigned_on?: string | null; leaving_reason?: string | null; archive_notes?: string | null };
 
@@ -64,6 +65,28 @@ export default function StaffProfile() {
   };
 
   const handlePrint = () => window.print();
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoMsg('Uploading...');
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${staff.staff_code || staff.id} - ${staff.full_name.split(' ')[0]}.${ext}`;
+    const { error: upError } = await supabase.storage.from('photos').upload(path, file, { upsert: true, contentType: file.type });
+    if (upError) {
+      setPhotoMsg('Upload failed: ' + upError.message);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+    const { error: dbError } = await supabase.from('staff').update({ photo_url: `${urlData.publicUrl}?v=${Date.now()}` }).eq('id', staff.id);
+    if (dbError) {
+      setPhotoMsg('Could not save photo: ' + dbError.message);
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ['staff-member', id] });
+    await queryClient.invalidateQueries({ queryKey: ['staff'] });
+    setPhotoMsg('Photo saved');
+  };
 
   const startLeaveEdit = () => {
     setLeaveForm({
@@ -119,6 +142,13 @@ export default function StaffProfile() {
             </CardContent>
           </Card>)}
 
+          {!isViewer && (<div className="no-print">
+            <label className="block w-full cursor-pointer text-center text-sm border rounded-md py-2 bg-white hover:bg-gray-50">
+              Upload / change photo
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+            </label>
+            {photoMsg && <p className="text-xs text-muted-foreground text-center mt-1">{photoMsg}</p>}
+          </div>)}
           <div className="no-print text-center">
             <div className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-medium ${staff.status === 'Resigned' ? 'bg-amber-100 text-amber-800' : staff.status === 'Inactive' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
               {staff.status}
