@@ -100,6 +100,7 @@ export default function StaffOverview() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="Active">Active</SelectItem>
                 <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="Resigned">Resigned</SelectItem>
               </SelectContent>
             </Select>
           </div>
