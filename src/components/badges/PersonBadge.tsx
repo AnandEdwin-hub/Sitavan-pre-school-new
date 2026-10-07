@@ -36,16 +36,16 @@ const ROLE_STYLES: Record<string, {
     pillBg: '#A6790C', pillText: '#FFFBEA', nameColor: '#6B4E00', labelColor: '#93690D',
   },
   DIRECTOR: {
-    border: '#C3C6F2', bg: '#F5F5FE', barColors: ['#4338CA', '#C99A3A', '#3E6B35'],
-    pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
+    border: '#B7D0AE', bg: '#F3F8F1', barColors: ['#3E6B35', '#C99A3A', '#B0532C'],
+    pillBg: '#3E6B35', pillText: '#F1F8EE', nameColor: '#274A21', labelColor: '#3E6B35',
   },
   ADVISER: {
-    border: '#C3C6F2', bg: '#F5F5FE', barColors: ['#4338CA', '#C99A3A', '#3E6B35'],
-    pillBg: '#4338CA', pillText: '#EEF0FF', nameColor: '#312E81', labelColor: '#4642A6',
+    border: '#DDB89C', bg: '#FDF6F1', barColors: ['#B0532C', '#C99A3A', '#3E6B35'],
+    pillBg: '#B0532C', pillText: '#FFF7F0', nameColor: '#7A3418', labelColor: '#A15A36',
   },
 };
 
-const LEGACY_STAFF_CODES = ['SITST2604', 'SITST2605'];
+const LEGACY_STAFF_CODES = ['SITST2605'];
 
 export interface BadgePerson {
   id: string;
@@ -191,7 +191,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         <img
           src={`${ASSETS}/Sps-%20Panther%20for%20staff.png`}
           alt=""
-          className="absolute left-1/2 -translate-x-1/2 bottom-[72px] w-[140%] max-w-none h-auto pointer-events-none"
+          className={`absolute left-1/2 -translate-x-1/2 ${role === 'DIRECTOR' || role === 'ADVISER' ? 'bottom-2' : 'bottom-[72px]'} w-[140%] max-w-none h-auto pointer-events-none`}
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, transparent 0%, black 22%, black 55%, transparent 100%)',
@@ -217,12 +217,12 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="w-[136px] h-[136px] rounded-full object-cover border-4 border-white shadow-md bg-white"
+              className="w-[168px] h-[168px] rounded-full object-cover border-4 border-white shadow-md bg-white"
               style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className={`w-[136px] h-[136px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
+            <div className={`w-[168px] h-[168px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
               {initials}
             </div>
           )}
@@ -253,7 +253,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </div>
         </div>
 
-        <div className="h-2 w-full shrink-0" style={{ backgroundColor: s.pillBg }} />
+        <div className="h-2 w-full shrink-0 mt-auto" style={{ backgroundColor: s.pillBg }} />
       </div>
     </div>
   );
