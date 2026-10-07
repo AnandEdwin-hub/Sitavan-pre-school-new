@@ -220,7 +220,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
                 src={person.photo_url}
                 alt={person.full_name}
                 className="w-full h-full object-cover"
-                style={{ objectPosition: `center ${person.photoPosition ?? 50}%`, transform: person.code === 'SITST2604' ? 'scale(0.88)' : undefined }}
+                style={{ objectPosition: `center ${person.photoPosition ?? 50}%`, transform: `scale(${person.photoZoom ?? 1})` }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             </div>

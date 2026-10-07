@@ -38,7 +38,7 @@ export default function QRBadges() {
     queryKey: ['directors-badges'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category, photo_position').eq('status', 'Active').in('staff_category', ['Director', 'Adviser']).order('staff_code');
+      const { data } = await supabase.from('staff').select('id, staff_code, full_name, designation, mobile, qualification, photo_url, staff_category, photo_position, photo_zoom').eq('status', 'Active').in('staff_category', ['Director', 'Adviser']).order('staff_code');
       return data || [];
     }
   });
@@ -135,6 +135,7 @@ export default function QRBadges() {
             full_name: d.full_name,
             photo_url: d.photo_url,
             photoPosition: d.photo_position,
+            photoZoom: d.photo_zoom,
             line1: d.designation ? `Designation: ${d.designation}` : '',
             detailLabel: 'Mobile No',
             detailValue: d.mobile || '',
