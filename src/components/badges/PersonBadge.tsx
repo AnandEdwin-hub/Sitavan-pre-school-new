@@ -115,7 +115,7 @@ export function StudentBadge({ person, index, decorations: decorationsProp }: { 
               src={person.photo_url}
               alt={person.full_name}
               className="relative w-[104px] h-[104px] rounded-full object-cover border-[4px] border-[#FDF9EF] bg-[#B0532C]"
-              style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
+              style={{ objectPosition: `center ${person.photoPosition ?? 50}%`, padding: person.code === 'SITST2604' ? 12 : 0 }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
