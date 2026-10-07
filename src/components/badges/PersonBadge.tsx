@@ -182,6 +182,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
   const initials = person.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const s = LEGACY_STAFF_CODES.includes(person.code) ? ROLE_STYLES.STAFF_LEGACY : (ROLE_STYLES[role] || ROLE_STYLES.STAFF);
+  const isLeader = role === 'DIRECTOR' || role === 'ADVISER';
 
 
   return (
@@ -217,12 +218,12 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
             <img
               src={person.photo_url}
               alt={person.full_name}
-              className="w-[168px] h-[168px] rounded-full object-cover border-4 border-white shadow-md bg-white"
+              className={`${isLeader ? 'w-[168px] h-[168px]' : 'w-[136px] h-[136px]'} rounded-full object-cover border-4 border-white shadow-md bg-white`}
               style={{ objectPosition: `center ${person.photoPosition ?? 50}%` }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className={`w-[168px] h-[168px] rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
+            <div className={`${isLeader ? 'w-[168px] h-[168px]' : 'w-[136px] h-[136px]'} rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
               {initials}
             </div>
           )}
@@ -253,7 +254,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
           </div>
         </div>
 
-        <div className="h-2 w-full shrink-0 mt-auto" style={{ backgroundColor: s.pillBg }} />
+        <div className={`h-2 w-full shrink-0 ${isLeader ? 'mt-auto' : ''}`} style={{ backgroundColor: s.pillBg }} />
       </div>
     </div>
   );
