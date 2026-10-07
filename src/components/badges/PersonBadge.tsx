@@ -230,7 +230,7 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
         </div>
 
                 <div className="relative text-center px-3 pt-1">
-          <h3 className="font-bold text-[14px] leading-tight truncate" style={{ color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.65)' }}>{person.full_name}</h3>
+          <h3 className="font-bold text-[14px] leading-tight truncate" style={isLeader ? { color: s.nameColor, textShadow: '0 0 4px rgba(255,255,255,0.95), 0 0 8px rgba(255,255,255,0.85)' } : { color: '#FFFFFF', textShadow: '0 1px 3px rgba(0,0,0,0.65)' }}>{person.full_name}</h3>
           <span
             className="inline-block mt-0.5 text-[8.5px] font-bold px-2 py-0.5 rounded-full tracking-wide"
             style={{ backgroundColor: '#fff', backgroundImage: `linear-gradient(${s.pillBg}1A, ${s.pillBg}1A)`, color: s.pillBg }}
