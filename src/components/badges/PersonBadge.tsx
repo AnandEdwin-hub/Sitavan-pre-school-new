@@ -215,13 +215,15 @@ export function ProfessionalBadge({ person, role, index }: { person: BadgePerson
 
         <div className="relative flex justify-center" style={{ marginTop: '-60px' }}>
           {person.photo_url ? (
-            <img
-              src={person.photo_url}
-              alt={person.full_name}
-              className={`${isLeader ? 'w-[168px] h-[168px]' : 'w-[136px] h-[136px]'} rounded-full object-cover border-4 border-white shadow-md bg-white`}
-              style={{ objectPosition: `center ${person.photoPosition ?? 50}%`, padding: person.code === 'SITST2604' ? 12 : 0 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+            <div className={`${isLeader ? 'w-[168px] h-[168px]' : 'w-[136px] h-[136px]'} rounded-full overflow-hidden border-4 border-white shadow-md bg-[#DCE8D8]`}>
+              <img
+                src={person.photo_url}
+                alt={person.full_name}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: `center ${person.photoPosition ?? 50}%`, transform: person.code === 'SITST2604' ? 'scale(0.88)' : undefined }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
           ) : (
             <div className={`${isLeader ? 'w-[168px] h-[168px]' : 'w-[136px] h-[136px]'} rounded-full ${avatarColor} border-4 border-white shadow-md flex items-center justify-center text-white text-3xl font-bold`}>
               {initials}
