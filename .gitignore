@@ -5,3 +5,4 @@ pnpm-lock.yaml
 tsconfig.tsbuildinfo
 .replit-artifact
 supabase/.temp
+src_backup_today/
