@@ -301,7 +301,8 @@ export function VolunteerCardV2({ person, index, decorations = [] }: { person: B
               src={person.photo_url}
               alt={person.full_name}
               className="w-full h-full object-cover"
-              style={{ objectPosition: `center ${person.photoPosition ?? 25}%`, transform: `scale(${person.photoZoom ?? 1})` }}
+                          photoPosition: d.photo_position,
+            style={{ objectPosition: `center ${person.photoPosition ?? 25}%`, transform: person.code === 'SITST2606' ? 'translateX(-8px) scale(1.1)' : `scale(${person.photoZoom ?? 1})` }}photoZoom: d.photo_zoom,
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
