@@ -141,7 +141,7 @@ export function StudentBadge({ person, index, decorations: decorationsProp }: { 
               <p className="text-[8px] font-extrabold text-[#93690D]">MOTHER'S NAME</p>
               <p className="text-[8px] font-extrabold text-[#93690D]">MOBILE NO</p>
               <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5">{person.line1.replace('Class: ', '') || '—'}</p>
-              <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5 truncate">{person.detailValue || '—'}</p>
+              <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5 leading-tight break-words">{person.detailValue || '—'}</p>
               <p className="text-[11px] font-extrabold text-[#2E4A28] mt-0.5">{person.detailValue2 || '—'}</p>
             </div>
           </div>
