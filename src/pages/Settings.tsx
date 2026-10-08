@@ -270,14 +270,6 @@ export default function Settings() {
             }}
           />
 
-          <IndividualTimings
-            defaults={{
-              student: { start: startTime, lateMins: lateMins, veryLateMins: veryLateMins, close: closeTime },
-              staff: { start: staffStartTime, lateMins: staffLateMins, veryLateMins: staffVeryLateMins, close: staffCloseTime },
-              volunteer: { start: volunteerStartTime, lateMins: volunteerLateMins, veryLateMins: volunteerVeryLateMins, close: volunteerCloseTime },
-            }}
-          />
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><UserPlus className="w-5 h-5 text-primary" /> Staff Management</CardTitle>
