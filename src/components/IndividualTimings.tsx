@@ -198,19 +198,14 @@ export default function IndividualTimings({ defaults }: Props) {
               <TimeInput value={start} onChange={setStart} />
             </div>
 
-            <div className="rounded-lg border border-l-4 border-l-green-500 bg-green-50/60 p-3 space-y-2">
-              <Label className="font-semibold text-green-800">{`P ${DASH} Present (${LE} ${lateMins} min)`}</Label>
+            <div className="rounded-lg border border-l-4 border-l-amber-500 bg-amber-50/60 p-3 space-y-2">
+              <Label className="font-semibold text-amber-800">{`L ${DASH} Late (${LE} ${lateMins} min)`}</Label>
               <TimeInput value={addMins(start, lateMins)} onChange={(t) => setLateMins(diffMins(start, t))} />
             </div>
 
-            <div className="rounded-lg border border-l-4 border-l-amber-500 bg-amber-50/60 p-3 space-y-2">
-              <Label className="font-semibold text-amber-800">{`L ${DASH} Late (${LE} ${veryLateMins} min)`}</Label>
+            <div className="rounded-lg border border-l-4 border-l-red-500 bg-red-50/60 p-3 space-y-2">
+              <Label className="font-semibold text-red-800">{`LL ${DASH} Very Late (more than ${lateMins} min)`}</Label>
               <TimeInput value={addMins(start, veryLateMins)} onChange={(t) => setVeryLateMins(diffMins(start, t))} />
-            </div>
-
-            <div className="rounded-lg border border-l-4 border-l-red-500 bg-red-50/60 p-3 space-y-1">
-              <Label className="font-semibold text-red-800">{`LL ${DASH} Very Late (more than ${veryLateMins} min)`}</Label>
-              <p className="text-xs text-muted-foreground">{`Any scan after ${fmt12(addMins(start, veryLateMins))} until the window closes.`}</p>
             </div>
 
             <div className="rounded-lg border bg-muted/30 p-3 space-y-2">

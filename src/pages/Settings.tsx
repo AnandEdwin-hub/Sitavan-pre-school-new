@@ -226,25 +226,14 @@ export default function Settings() {
                       <TimeInput value={cfg.start} onChange={cfg.setStart} disabled={isLoading} />
                     </div>
 
-                    <div className="rounded-lg border border-l-4 border-l-green-500 bg-green-50/60 p-3 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <Label className="font-semibold text-green-800">{`P ${DASH} Present (${LE} ${cfg.late} min)`}</Label>
-                        <span className="text-xs text-muted-foreground">Present until</span>
-                      </div>
+                    <div className="rounded-lg border border-l-4 border-l-amber-500 bg-amber-50/60 p-3 space-y-2">
+                      <Label className="font-semibold text-amber-800">{`L ${DASH} Late (${LE} ${cfg.late} min)`}</Label>
                       <TimeInput value={addMins(cfg.start, cfg.late)} onChange={(t) => cfg.setLate(diffMins(cfg.start, t))} disabled={isLoading} />
                     </div>
 
-                    <div className="rounded-lg border border-l-4 border-l-amber-500 bg-amber-50/60 p-3 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <Label className="font-semibold text-amber-800">{`L ${DASH} Late (${LE} ${cfg.veryLate} min)`}</Label>
-                        <span className="text-xs text-muted-foreground">Late until</span>
-                      </div>
+                    <div className="rounded-lg border border-l-4 border-l-red-500 bg-red-50/60 p-3 space-y-2">
+                      <Label className="font-semibold text-red-800">{`LL ${DASH} Very Late (more than ${cfg.late} min)`}</Label>
                       <TimeInput value={addMins(cfg.start, cfg.veryLate)} onChange={(t) => cfg.setVeryLate(diffMins(cfg.start, t))} disabled={isLoading} />
-                    </div>
-
-                    <div className="rounded-lg border border-l-4 border-l-red-500 bg-red-50/60 p-3 space-y-1">
-                      <Label className="font-semibold text-red-800">{`LL ${DASH} Very Late (more than ${cfg.veryLate} min)`}</Label>
-                      <p className="text-xs text-muted-foreground">{`Any scan after ${fmt12(addMins(cfg.start, cfg.veryLate))} until the window closes.`}</p>
                     </div>
 
                     <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
