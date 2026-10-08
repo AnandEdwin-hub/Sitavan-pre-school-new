@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Save, UserPlus, School } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import IndividualTimings from '@/components/IndividualTimings';
 
 const DEFAULT_SETTINGS = {
   id: '',
@@ -260,6 +261,22 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          <IndividualTimings
+            defaults={{
+              student: { start: startTime, lateMins: lateMins, veryLateMins: veryLateMins, close: closeTime },
+              staff: { start: staffStartTime, lateMins: staffLateMins, veryLateMins: staffVeryLateMins, close: staffCloseTime },
+              volunteer: { start: volunteerStartTime, lateMins: volunteerLateMins, veryLateMins: volunteerVeryLateMins, close: volunteerCloseTime },
+            }}
+          />
+
+          <IndividualTimings
+            defaults={{
+              student: { start: startTime, lateMins: lateMins, veryLateMins: veryLateMins, close: closeTime },
+              staff: { start: staffStartTime, lateMins: staffLateMins, veryLateMins: staffVeryLateMins, close: staffCloseTime },
+              volunteer: { start: volunteerStartTime, lateMins: volunteerLateMins, veryLateMins: volunteerVeryLateMins, close: volunteerCloseTime },
+            }}
+          />
 
           <Card>
             <CardHeader>
