@@ -487,15 +487,18 @@ export default function ReportsAttendance() {
 
       <div className="flex flex-wrap gap-4 items-center text-sm bg-white p-4 rounded-lg border border-border">
         <span className="font-semibold text-gray-700 mr-2">Legend:</span>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-green-500"></div> P - Present</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-amber-500"></div> L - Late</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-orange-500"></div> LL - Very Late</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-red-500"></div> A - Absent</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-purple-500"></div> S - Sick</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-indigo-400"></div> HD - Half Day</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-400"></div> H - Holiday</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-300"></div> SUN - Sunday</div>
-        <div className="flex items-center gap-1.5"><div className="w-4 h-4 rounded-sm bg-gray-800"></div> FC - Forced Closure</div>
+        {[
+          ['\u{1F7E2}', 'P - Present'],
+          ['\u{1F7E0}', `L - Late (${'\u2264'}5 min)`],
+          ['\u{1F7E0}', 'LL - Very Late (>5 min)'],
+          ['\u{1F534}', 'A - Absent'],
+          ['\u{1F7E3}', 'S - Sick'],
+          ['\u{1F535}', 'HD - Half Day'],
+          ['\u26AA', 'H - Holiday'],
+          ['\u25EF', 'SUN - Sunday'],
+        ].map(([icon, label]) => (
+          <div key={label} className="flex items-center gap-1.5"><span>{icon}</span> {label}</div>
+        ))} 
       </div>
     </div>
   );
