@@ -5,7 +5,10 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Camera, CheckCircle2, RefreshCw, Trash2, X, ShieldAlert } from 'lucide-react';
+import {
+  Search, Camera, CheckCircle2, RefreshCw, Trash2, X, ShieldAlert,
+  ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Check,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -22,6 +25,8 @@ type PersonType = 'student' | 'staff' | 'volunteer';
 type Pose = 'front' | 'right' | 'left' | 'up' | 'down' | 'burst';
 type Person = { id: string; type: PersonType; code: string; name: string; sub: string };
 type Captured = { pose: Pose; descriptor: number[]; quality: number };
+type Dir = 'left' | 'right' | 'up' | 'down';
+type Guide = { arrow: Dir | null; msg: string; tone: 'ok' | 'warn' | 'idle'; progress: number | null };
 
 const db: any = supabase; // untyped access, so the new face_embeddings table needs no generated types
 
@@ -37,6 +42,15 @@ const BURST_TARGET = 6;      // frames captured for children
 const MIN_TO_SAVE = 3;       // minimum captures needed to save an enrollment
 const MIN_QUALITY = 0.45;
 const MIN_FACE_WIDTH = 90;   // px in the video frame
+
+const ARROW_POS: Record<Dir, string> = {
+  left: 'left-3 top-1/2 -translate-y-1/2',
+  right: 'right-3 top-1/2 -translate-y-1/2',
+  up: 'top-3 left-1/2 -translate-x-1/2',
+  down: 'bottom-14 left-1/2 -translate-x-1/2',
+};
+
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 // ---------- pose helpers (measured on the raw camera frame) ----------
 function poseMetrics(pts: faceapi.Point[]) {
@@ -105,6 +119,7 @@ export default function FaceEnroll() {
   const [conflict, setConflict] = useState<{ name: string } | null>(null);
   const [consentGiven, setConsentGiven] = useState(false);
   const [guardianName, setGuardianName] = useState('');
+  const [flash, setFlash] = useState(false);
   const [live, setLive] = useState({ faces: 0, turn: null as number | null, pitch: null as number | null, width: 0, ok: false });
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -115,6 +130,7 @@ export default function FaceEnroll() {
   const lastBurstRef = useRef(0);
   const baselinePitchRef = useRef<number | null>(null);
   const capturedRef = useRef<Captured[]>([]);
+  const prevCountRef = useRef(0);
   const ctl = useRef({ mode, stepIdx, burstRunning, auto });
   ctl.current = { mode, stepIdx, burstRunning, auto };
 
@@ -310,6 +326,19 @@ export default function FaceEnroll() {
     return () => window.clearInterval(id);
   }, [selected, status, captureNow]);
 
+  // ----- success flash + vibration each time a capture is taken -----
+  useEffect(() => {
+    const prev = prevCountRef.current;
+    prevCountRef.current = captured.length;
+    if (captured.length > prev) {
+      setFlash(true);
+      navigator.vibrate?.(60);
+      const t = window.setTimeout(() => setFlash(false), 700);
+      return () => window.clearTimeout(t);
+    }
+    setFlash(false);
+  }, [captured.length]);
+
   // ----- actions -----
   const openCapture = (p: Person) => {
     capturedRef.current = [];
@@ -439,13 +468,82 @@ export default function FaceEnroll() {
   const currentStep = mode === 'guided' && stepIdx < GUIDED.length ? GUIDED[stepIdx] : null;
   const consentOk = selected?.type !== 'student' || (consentGiven && guardianName.trim().length > 0);
 
-  const liveMessage = () => {
-    if (live.faces === 0) return 'No face detected';
-    if (live.faces > 1) return 'More than one face: only the person being enrolled should be in frame';
-    if (live.width < MIN_FACE_WIDTH) return 'Move closer to the camera';
-    if (currentStep) return live.ok ? 'Hold still…' : currentStep.hint;
-    return 'Face detected';
+  // The front camera is shown mirrored (like a mirror); the rear camera is not.
+  // So "the person's right" appears on the screen's right for the front camera and on the left for the rear one.
+  const toScreen = (side: 'left' | 'right'): Dir =>
+    facing === 'user' ? side : side === 'left' ? 'right' : 'left';
+
+  const getGuide = (): Guide => {
+    if (live.faces === 0) return { arrow: null, msg: 'No face detected: look at the camera', tone: 'idle', progress: null };
+    if (live.faces > 1) return { arrow: null, msg: 'Only one person should be in the frame', tone: 'warn', progress: null };
+    if (live.width < MIN_FACE_WIDTH) return { arrow: null, msg: 'Move closer to the camera', tone: 'warn', progress: null };
+
+    if (mode === 'burst') {
+      if (!consentOk) return { arrow: null, msg: 'Complete the consent box above to begin', tone: 'warn', progress: null };
+      return {
+        arrow: null,
+        msg: burstRunning ? 'Capturing… let the child look around' : 'Face found: press Start capturing',
+        tone: 'ok',
+        progress: null,
+      };
+    }
+
+    if (guidedDone) return { arrow: null, msg: 'All poses captured: press Save enrollment', tone: 'ok', progress: 1 };
+
+    const pose = GUIDED[stepIdx].pose;
+    const turn = live.turn ?? 0.5;
+    const pitch = live.pitch ?? 0.5;
+    const base = baselinePitchRef.current;
+
+    switch (pose) {
+      case 'front':
+        if (live.ok) return { arrow: null, msg: 'Perfect: hold still', tone: 'ok', progress: 1 };
+        return {
+          arrow: toScreen(turn < 0.5 ? 'left' : 'right'),
+          msg: 'Look straight at the camera',
+          tone: 'warn',
+          progress: clamp01(1 - (Math.abs(turn - 0.5) - 0.08) / 0.2),
+        };
+      case 'right':
+        if (live.ok) return { arrow: null, msg: 'Good: hold still', tone: 'ok', progress: 1 };
+        return {
+          arrow: toScreen('right'),
+          msg: turn > 0.44 ? 'Turn your head to your right' : 'A little more to your right',
+          tone: 'warn',
+          progress: clamp01((0.5 - turn) / 0.14),
+        };
+      case 'left':
+        if (live.ok) return { arrow: null, msg: 'Good: hold still', tone: 'ok', progress: 1 };
+        return {
+          arrow: toScreen('left'),
+          msg: turn < 0.56 ? 'Turn your head to your left' : 'A little more to your left',
+          tone: 'warn',
+          progress: clamp01((turn - 0.5) / 0.14),
+        };
+      case 'up': {
+        if (turn <= 0.36 || turn >= 0.64) {
+          return { arrow: toScreen(turn < 0.5 ? 'left' : 'right'), msg: 'Face the camera, then lift your chin', tone: 'warn', progress: null };
+        }
+        if (live.ok) return { arrow: null, msg: 'Good: hold still', tone: 'ok', progress: 1 };
+        const lifted = base !== null ? clamp01((base - pitch) / 0.06) : 0;
+        return { arrow: 'up', msg: lifted > 0.5 ? 'A little more: lift your chin' : 'Lift your chin up', tone: 'warn', progress: lifted };
+      }
+      case 'down': {
+        if (turn <= 0.36 || turn >= 0.64) {
+          return { arrow: toScreen(turn < 0.5 ? 'left' : 'right'), msg: 'Face the camera, then lower your chin', tone: 'warn', progress: null };
+        }
+        if (live.ok) return { arrow: null, msg: 'Good: hold still', tone: 'ok', progress: 1 };
+        const lowered = base !== null ? clamp01((pitch - base) / 0.06) : 0;
+        return { arrow: 'down', msg: lowered > 0.5 ? 'A little more: lower your chin' : 'Lower your chin down', tone: 'warn', progress: lowered };
+      }
+      default:
+        return { arrow: null, msg: 'Face detected', tone: 'ok', progress: null };
+    }
   };
+
+  const guide = getGuide();
+  const ringClass = guide.tone === 'ok' ? 'border-green-400' : guide.tone === 'warn' ? 'border-amber-300' : 'border-white/50';
+  const barClass = guide.tone === 'ok' ? 'bg-green-600/85' : guide.tone === 'warn' ? 'bg-amber-600/85' : 'bg-black/65';
 
   if (!isAdmin) {
     return (
@@ -585,14 +683,45 @@ export default function FaceEnroll() {
                     {errorMsg}
                   </div>
                 )}
+
                 {status === 'ready' && (
-                  <div
-                    className={`absolute bottom-0 inset-x-0 px-3 py-1.5 text-xs text-white ${
-                      live.ok ? 'bg-green-600/80' : 'bg-black/60'
-                    }`}
-                  >
-                    {liveMessage()}
-                  </div>
+                  <>
+                    {/* face guide ring: white = waiting, amber = adjust, green = in position */}
+                    <div
+                      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[34%] h-[78%] rounded-[50%] border-4 pointer-events-none transition-colors ${ringClass}`}
+                    />
+
+                    {/* direction arrow */}
+                    {guide.arrow && (
+                      <div
+                        className={`absolute pointer-events-none flex items-center justify-center rounded-full w-14 h-14 bg-black/50 animate-pulse text-amber-300 ${ARROW_POS[guide.arrow]}`}
+                      >
+                        {guide.arrow === 'left' && <ArrowLeft className="w-9 h-9" strokeWidth={3} />}
+                        {guide.arrow === 'right' && <ArrowRight className="w-9 h-9" strokeWidth={3} />}
+                        {guide.arrow === 'up' && <ArrowUp className="w-9 h-9" strokeWidth={3} />}
+                        {guide.arrow === 'down' && <ArrowDown className="w-9 h-9" strokeWidth={3} />}
+                      </div>
+                    )}
+
+                    {/* captured flash */}
+                    {flash && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-green-500/30 pointer-events-none animate-in fade-in zoom-in duration-200">
+                        <div className="rounded-full bg-green-500 p-4">
+                          <Check className="w-14 h-14 text-white" strokeWidth={4} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* message + progress bar */}
+                    <div className={`absolute bottom-0 inset-x-0 text-white ${barClass}`}>
+                      <div className="px-3 py-2 text-sm font-semibold text-center">{guide.msg}</div>
+                      {guide.progress !== null && (
+                        <div className="h-1.5 bg-white/25">
+                          <div className="h-full bg-white transition-all duration-200" style={{ width: `${Math.round(guide.progress * 100)}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
 
