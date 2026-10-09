@@ -47,6 +47,19 @@ export default function ScanAttendance() {
   const settingsRef = React.useRef(settings);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
 
+  const { data: overrides = [] } = useQuery({
+    queryKey: ['attendance-overrides'],
+    queryFn: async () => {
+      if (!isSupabaseConfigured) return [];
+      const { data, error } = await supabase.from('attendance_overrides').select('*');
+      if (error) throw error;
+      return data ?? [];
+    }
+  });
+
+  const overridesRef = React.useRef<any[]>(overrides);
+  useEffect(() => { overridesRef.current = overrides; }, [overrides]);
+
   const { data: todayHoliday } = useQuery({
     queryKey: ['holiday-today', todayDateStr],
     queryFn: async () => {
@@ -66,8 +79,21 @@ export default function ScanAttendance() {
     : isSunday ? 'Weekly Holiday'
     : null;
 
-  const getTimingForRole = (role: PersonRole) => {
+  const getTimingForRole = (role: PersonRole, personId?: string) => {
     const settings = settingsRef.current;
+    const override = personId
+      ? overridesRef.current.find((o: any) =>
+          o.person_type === role &&
+          o.person_id === personId &&
+          (!o.valid_until || o.valid_until >= todayDateStr))
+      : undefined;
+    if (override) {
+      return {
+        startTime: String(override.start_time).slice(0, 5),
+        lateMins: override.late_threshold_minutes,
+        veryLateMins: override.very_late_threshold_minutes,
+      };
+    }
     if (role === 'staff') {
       return {
         startTime: settings?.staff_start_time?.slice(0, 5) || DEFAULT_START_TIME,
@@ -198,8 +224,8 @@ export default function ScanAttendance() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [closureReason]);
 
-  const getStatusForTime = (role: PersonRole): AttendanceStatus => {
-    const { startTime, lateMins, veryLateMins } = getTimingForRole(role);
+  const getStatusForTime = (role: PersonRole, personId?: string): AttendanceStatus => {
+    const { startTime, lateMins, veryLateMins } = getTimingForRole(role, personId);
     const now = new Date();
     const [startHour, startMin] = startTime.split(':').map(Number);
     const startTotalMins = startHour * 60 + startMin;
@@ -293,7 +319,7 @@ export default function ScanAttendance() {
         return;
       }
 
-      const status = getStatusForTime(person.role);
+      const status = getStatusForTime(person.role, person.id);
       const nowIso = new Date().toISOString();
 
       if (person.role === 'student') {

@@ -20,6 +20,8 @@ const AddVolunteer = lazy(() => import('@/pages/volunteers/new'));
 const VolunteerProfile = lazy(() => import('@/pages/volunteers/[id]'));
 const ScanAttendance = lazy(() => import('@/pages/attendance/Scan'));
 const ManualAttendance = lazy(() => import('@/pages/attendance/Manual'));
+const FaceEnroll = lazy(() => import('@/pages/attendance/FaceEnroll'));
+const FaceKiosk = lazy(() => import('@/pages/attendance/FaceKiosk'));
 const CalendarAttendance = lazy(() => import('@/pages/attendance/Calendar'));
 const ReportsAttendance = lazy(() => import('@/pages/attendance/Reports'));
 const HolidayManager = lazy(() => import('@/pages/attendance/Holidays'));
@@ -104,7 +106,9 @@ function App() {
 
                 <Route path="/attendance">
                   <Route path="scan" element={<RequireRole allow={ADMIN_STAFF}><ScanAttendance /></RequireRole>} />
+                  <Route path="face-kiosk" element={<RequireRole allow={ADMIN_STAFF}><FaceKiosk /></RequireRole>} />
                   <Route path="manual" element={<RequireRole allow={ADMIN_ONLY}><ManualAttendance /></RequireRole>} />
+                  <Route path="face-enroll" element={<RequireRole allow={ADMIN_ONLY}><FaceEnroll /></RequireRole>} />
                   <Route path="calendar" element={<RequireRole allow={ADMIN_VIEWER}><CalendarAttendance /></RequireRole>} />
                   <Route path="reports" element={<RequireRole allow={ADMIN_VIEWER}><ReportsAttendance /></RequireRole>} />
                   <Route path="holidays" element={<RequireRole allow={ADMIN_ONLY}><HolidayManager /></RequireRole>} />

@@ -217,6 +217,7 @@ export type Database = {
           photo_url: string | null;
           center_id: string | null;
           status: 'Active' | 'Inactive' | null;
+          attendance_required: boolean;
           created_at: string;
         };
         Insert: {
@@ -231,6 +232,7 @@ export type Database = {
           photo_url?: string | null;
           center_id?: string | null;
           status?: 'Active' | 'Inactive' | null;
+          attendance_required?: boolean;
           created_at?: string;
         };
         Update: {
@@ -245,6 +247,7 @@ export type Database = {
           photo_url?: string | null;
           center_id?: string | null;
           status?: 'Active' | 'Inactive' | null;
+          attendance_required?: boolean;
           created_at?: string;
         };
         Relationships: [];

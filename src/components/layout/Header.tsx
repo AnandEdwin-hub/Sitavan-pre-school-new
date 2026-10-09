@@ -16,6 +16,8 @@ export function Header({ setMobileOpen }: HeaderProps) {
     if (path.startsWith('/students/')) return 'Student Profile';
     if (path === '/attendance/scan') return 'Scan Attendance';
     if (path === '/attendance/manual') return 'Manual Override';
+    if (path === '/attendance/face-enroll') return 'Face Enrollment';
+    if (path === '/attendance/face-kiosk') return 'Face Scan';
     if (path === '/attendance/calendar') return 'Attendance Calendar';
     if (path === '/attendance/reports') return 'Attendance Reports';
     if (path === '/qr-badges') return 'QR Badges';

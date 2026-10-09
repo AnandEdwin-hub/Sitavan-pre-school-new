@@ -160,9 +160,19 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
                   Scan In
                 </Link>
               )}
+              {(isAdmin || isStaff) && (
+                <Link to="/attendance/face-kiosk" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/face-kiosk'))}>
+                  Face Scan
+                </Link>
+              )}
               {isAdmin && (
                 <Link to="/attendance/manual" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/manual'))}>
                   Manual Override
+                </Link>
+              )}
+              {isAdmin && (
+                <Link to="/attendance/face-enroll" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/face-enroll'))}>
+                  Face Enrollment
                 </Link>
               )}
               {(isAdmin || isViewer) && (

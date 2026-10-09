@@ -75,6 +75,7 @@
   "dependencies": {
     "@supabase/supabase-js": "2.110.0",
     "@tailwindcss/typography": "^0.5.20",
+    "@vladmandic/face-api": "^1.7.15",
     "html5-qrcode": "2.3.8",
     "qrcode.react": "4.2.0",
     "react-router-dom": "7.18.1",
