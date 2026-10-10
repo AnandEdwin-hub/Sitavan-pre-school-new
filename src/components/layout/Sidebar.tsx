@@ -21,15 +21,72 @@ interface SidebarProps {
   setMobileOpen: (open: boolean) => void;
 }
 
+type Section = 'students' | 'staff' | 'volunteers' | 'attendance';
+
+const sectionForPath = (path: string): Section | null => {
+  if (path.startsWith('/students')) return 'students';
+  if (path.startsWith('/staff')) return 'staff';
+  if (path.startsWith('/volunteers')) return 'volunteers';
+  if (path.startsWith('/attendance')) return 'attendance';
+  return null;
+};
+
 export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, isStaff, isViewer } = useAuth();
   const queryClient = useQueryClient();
-  const [studentsOpen, setStudentsOpen] = React.useState(true);
-  const [staffOpen, setStaffOpen] = React.useState(false);
-  const [volunteersOpen, setVolunteersOpen] = React.useState(false);
-  const [attendanceOpen, setAttendanceOpen] = React.useState(true);
+  const [openSection, setOpenSection] = React.useState<Section | null>(() =>
+    sectionForPath(location.pathname)
+  );
+
+  // Open the section that contains the current page (refresh / navigation)
+  React.useEffect(() => {
+    const current = sectionForPath(location.pathname);
+    if (current) setOpenSection(current);
+  }, [location.pathname]);
+
+  const toggle = (section: Section) =>
+    setOpenSection((cur) => (cur === section ? null : section));
+
+  const studentsOpen = openSection === 'students';
+  const staffOpen = openSection === 'staff';
+  const volunteersOpen = openSection === 'volunteers';
+  const attendanceOpen = openSection === 'attendance';
+
+  // Highlight the parent header when the current page is inside it
+  const headerClass = (section: Section) =>
+    `flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg ${
+      sectionForPath(location.pathname) === section ? 'bg-sidebar-accent' : ''
+    }`;
+
+  // Attendance items grouped; hidden by role, empty groups dropped
+  const attendanceGroups = [
+    {
+      label: 'Mark',
+      items: [
+        { to: '/attendance/scan', label: 'Scan In', show: isAdmin || isStaff },
+        { to: '/attendance/face-kiosk', label: 'Face Scan', show: isAdmin || isStaff },
+        { to: '/attendance/manual', label: 'Manual Override', show: isAdmin },
+      ],
+    },
+    {
+      label: 'Review',
+      items: [
+        { to: '/attendance/calendar', label: 'Calendar View', show: isAdmin || isViewer },
+        { to: '/attendance/reports', label: 'Reports', show: isAdmin || isViewer },
+      ],
+    },
+    {
+      label: 'Setup',
+      items: [
+        { to: '/attendance/face-enroll', label: 'Face Enrollment', show: isAdmin },
+        { to: '/attendance/holidays', label: 'Holiday Manager', show: isAdmin },
+      ],
+    },
+  ]
+    .map((g) => ({ ...g, items: g.items.filter((i) => i.show) }))
+    .filter((g) => g.items.length > 0);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -64,8 +121,8 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         {/* Students Group */}
         <div className="pt-2">
           <button
-            onClick={() => setStudentsOpen(!studentsOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+            onClick={() => toggle('students')}
+            className={headerClass('students')}
           >
             <div className="flex items-center gap-3">
               <Users className="w-5 h-5" />
@@ -91,8 +148,8 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         {(isAdmin || isViewer) && (
         <div className="pt-2">
           <button
-            onClick={() => setStaffOpen(!staffOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+            onClick={() => toggle('staff')}
+            className={headerClass('staff')}
           >
             <div className="flex items-center gap-3">
               <UserCog className="w-5 h-5" />
@@ -118,8 +175,8 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         {/* Volunteers Group */}
         <div className="pt-2">
           <button
-            onClick={() => setVolunteersOpen(!volunteersOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+            onClick={() => toggle('volunteers')}
+            className={headerClass('volunteers')}
           >
             <div className="flex items-center gap-3">
               <HeartHandshake className="w-5 h-5" />
@@ -142,10 +199,11 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         </div>
 
         {/* Attendance Group */}
+        {attendanceGroups.length > 0 && (
         <div className="pt-2">
           <button
-            onClick={() => setAttendanceOpen(!attendanceOpen)}
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent rounded-lg"
+            onClick={() => toggle('attendance')}
+            className={headerClass('attendance')}
           >
             <div className="flex items-center gap-3">
               <CalendarCheck className="w-5 h-5" />
@@ -154,45 +212,30 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
             {attendanceOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
           {attendanceOpen && (
-            <div className="mt-1 space-y-1 pl-10">
-              {(isAdmin || isStaff) && (
-                <Link to="/attendance/scan" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/scan'))}>
-                  Scan In
-                </Link>
-              )}
-              {(isAdmin || isStaff) && (
-                <Link to="/attendance/face-kiosk" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/face-kiosk'))}>
-                  Face Scan
-                </Link>
-              )}
-              {isAdmin && (
-                <Link to="/attendance/manual" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/manual'))}>
-                  Manual Override
-                </Link>
-              )}
-              {isAdmin && (
-                <Link to="/attendance/face-enroll" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/face-enroll'))}>
-                  Face Enrollment
-                </Link>
-              )}
-              {(isAdmin || isViewer) && (
-                <Link to="/attendance/calendar" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/calendar'))}>
-                  Calendar View
-                </Link>
-              )}
-              {(isAdmin || isViewer) && (
-                <Link to="/attendance/reports" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/reports'))}>
-                  Reports
-                </Link>
-              )}
-              {isAdmin && (
-                <Link to="/attendance/holidays" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/attendance/holidays'))}>
-                  Holiday Manager
-                </Link>
-              )}
+            <div className="mt-1 pl-10">
+              {attendanceGroups.map((group, idx) => (
+                <div key={group.label} className="space-y-1">
+                  {attendanceGroups.length > 1 && (
+                    <div className={`px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 ${idx === 0 ? 'pt-1' : 'pt-3'}`}>
+                      {group.label}
+                    </div>
+                  )}
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileOpen(false)}
+                      className={navItemClass(isActive(item.to))}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              ))}
             </div>
           )}
         </div>
+        )}
 
         {isAdmin && (
           <>
