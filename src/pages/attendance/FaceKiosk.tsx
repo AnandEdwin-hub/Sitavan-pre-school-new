@@ -121,7 +121,7 @@ function checkLiveness(
   live.base = Math.max(ear, live.base * 0.98); // recent "eyes open" level
   if (live.base < 0.2) return 'pending'; // eyes not clearly visible yet
 
-  if (ear < live.base * 0.86) {
+  if (ear < live.base * 0.90) {
     live.closed = true; // eyelids dropped
   } else if (live.closed && ear > live.base * 0.93) {
     live.blinked = true; // eyelids back up: one full blink
