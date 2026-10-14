@@ -20,6 +20,7 @@ export function Header({ setMobileOpen }: HeaderProps) {
     if (path === '/attendance/face-kiosk') return 'Face Scan';
     if (path === '/attendance/calendar') return 'Attendance Calendar';
     if (path === '/attendance/reports') return 'Attendance Reports';
+    if (path === '/finance') return 'Finance';
     if (path === '/qr-badges') return 'QR Badges';
     if (path === '/settings') return 'Settings';
     return '';

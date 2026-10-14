@@ -25,6 +25,7 @@ const FaceKiosk = lazy(() => import('@/pages/attendance/FaceKiosk'));
 const CalendarAttendance = lazy(() => import('@/pages/attendance/Calendar'));
 const ReportsAttendance = lazy(() => import('@/pages/attendance/Reports'));
 const HolidayManager = lazy(() => import('@/pages/attendance/Holidays'));
+const Finance = lazy(() => import('@/pages/finance/index'));
 const QRBadges = lazy(() => import('@/pages/QRBadges'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -114,6 +115,7 @@ function App() {
                   <Route path="holidays" element={<RequireRole allow={ADMIN_ONLY}><HolidayManager /></RequireRole>} />
                 </Route>
 
+                <Route path="/finance" element={<RequireRole allow={ALL}><Finance /></RequireRole>} />
                 <Route path="/qr-badges" element={<RequireRole allow={ADMIN_ONLY}><QRBadges /></RequireRole>} />
                 <Route path="/settings" element={<RequireRole allow={ADMIN_ONLY}><Settings /></RequireRole>} />
 

@@ -7,6 +7,7 @@ import {
   HeartHandshake,
   CalendarCheck,
   QrCode,
+  Wallet,
   Settings,
   LogOut,
   ChevronDown,
@@ -236,6 +237,13 @@ export function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
           )}
         </div>
         )}
+
+        <div className="pt-2">
+          <Link to="/finance" onClick={() => setMobileOpen(false)} className={navItemClass(isActive('/finance'))}>
+            <Wallet className="w-5 h-5" />
+            Finance
+          </Link>
+        </div>
 
         {isAdmin && (
           <>
