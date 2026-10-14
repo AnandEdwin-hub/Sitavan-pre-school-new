@@ -1,8 +1,30 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowDownCircle, ArrowUpCircle, Wallet, Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,6 +48,30 @@ interface LedgerRow {
   party: string | null;
   category: string | null;
   balance: number;
+}
+
+interface LedgerRecord {
+  id: number;
+  entry_date: string;
+  period: string;
+  entry_type: 'credit' | 'expense';
+  amount: number;
+  description: string | null;
+  party: string | null;
+  category_id: number | null;
+  pledge_id: number | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  sort_order: number;
+}
+
+interface Pledge {
+  id: number;
+  pledger: string;
+  pledged_for: string;
 }
 
 interface OverviewRow {
@@ -59,6 +105,217 @@ const monthLabel = (period: string) =>
 const dateLabel = (d: string) =>
   new Date(`${d}T00:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
+const todayStr = () => new Date().toLocaleDateString('en-CA');
+
+const selectClass =
+  'h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring';
+
+function EntryDialog({
+  initial,
+  categories,
+  pledges,
+  onClose,
+  onSaved,
+}: {
+  initial: LedgerRecord | null;
+  categories: Category[];
+  pledges: Pledge[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { toast } = useToast();
+  const isEdit = !!initial;
+  const [type, setType] = useState<'expense' | 'credit'>(initial?.entry_type ?? 'expense');
+  const [date, setDate] = useState(initial?.entry_date ?? todayStr());
+  const [month, setMonth] = useState((initial?.period ?? todayStr()).slice(0, 7));
+  const [monthTouched, setMonthTouched] = useState(isEdit);
+  const [amount, setAmount] = useState(initial ? String(initial.amount) : '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [categoryId, setCategoryId] = useState(initial?.category_id ? String(initial.category_id) : '');
+  const [pledgeId, setPledgeId] = useState(initial?.pledge_id ? String(initial.pledge_id) : '');
+  const [saving, setSaving] = useState(false);
+
+  const fail = (msg: string) => toast({ variant: 'destructive', title: 'Check the form', description: msg });
+
+  const save = async () => {
+    const amt = Number(amount);
+    if (!date) return fail('Please choose the date.');
+    if (!month) return fail('Please choose the month this entry belongs to.');
+    if (!(amt > 0)) return fail('Please enter an amount greater than 0.');
+    if (type === 'expense') {
+      if (!description.trim()) return fail('Please describe what the money was spent on.');
+      if (!categoryId) return fail('Please choose a category.');
+    } else if (!pledgeId) {
+      return fail('Please choose who the money was received from.');
+    }
+
+    const pledge = pledges.find((p) => String(p.id) === pledgeId);
+    const payload = {
+      entry_date: date,
+      period: `${month}-01`,
+      entry_type: type,
+      amount: amt,
+      description: description.trim() || null,
+      party: type === 'credit' ? pledge?.pledger ?? null : null,
+      category_id: type === 'expense' ? Number(categoryId) : null,
+      pledge_id: type === 'credit' ? Number(pledgeId) : null,
+    };
+
+    setSaving(true);
+    try {
+      const table = (supabase as any).from('fin_ledger');
+      const { error } = isEdit
+        ? await table.update(payload).eq('id', initial!.id)
+        : await table.insert(payload);
+      if (error) throw error;
+      toast({ title: isEdit ? 'Entry updated' : 'Entry added' });
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Could not save', description: e.message || 'Something went wrong' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Edit entry' : 'Add entry'}</DialogTitle>
+          <DialogDescription>
+            {isEdit ? 'Change the details and save.' : 'Record money spent or money received.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2">
+            {(['expense', 'credit'] as const).map((t) => (
+              <Button
+                key={t}
+                type="button"
+                variant={type === t ? 'default' : 'outline'}
+                disabled={isEdit && type !== t}
+                onClick={() => setType(t)}
+              >
+                {t === 'expense' ? 'Money spent' : 'Money received'}
+              </Button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="fin-date">Date</Label>
+              <Input
+                id="fin-date"
+                type="date"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  if (!monthTouched && e.target.value) setMonth(e.target.value.slice(0, 7));
+                }}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="fin-month">Belongs to month</Label>
+              <Input
+                id="fin-month"
+                type="month"
+                value={month}
+                onChange={(e) => {
+                  setMonth(e.target.value);
+                  setMonthTouched(true);
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="fin-amount">Amount (₹)</Label>
+            <Input
+              id="fin-amount"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.01"
+              placeholder="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+
+          {type === 'expense' ? (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="fin-desc">What was it for?</Label>
+                <Input
+                  id="fin-desc"
+                  placeholder="e.g. Milk 4 Litres"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="fin-cat">Category</Label>
+                <select
+                  id="fin-cat"
+                  className={selectClass}
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                >
+                  <option value="">Choose a category</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="fin-pledger">Received from</Label>
+                <select
+                  id="fin-pledger"
+                  className={selectClass}
+                  value={pledgeId}
+                  onChange={(e) => setPledgeId(e.target.value)}
+                >
+                  <option value="">Choose who paid</option>
+                  {pledges.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.pledger} ({monthLabel(p.pledged_for)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="fin-note">Note (optional)</Label>
+                <Input
+                  id="fin-note"
+                  placeholder="e.g. GPAY"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={save} disabled={saving}>
+            {saving ? 'Saving...' : isEdit ? 'Save changes' : 'Add entry'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function SummaryCard({
   title,
   value,
@@ -83,7 +340,21 @@ function SummaryCard({
   );
 }
 
-function LedgerTab({ rows }: { rows: LedgerRow[] }) {
+function LedgerTab({
+  rows,
+  isAdmin,
+  categoryOptions,
+  pledges,
+}: {
+  rows: LedgerRow[];
+  isAdmin: boolean;
+  categoryOptions: Category[];
+  pledges: Pledge[];
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [dialog, setDialog] = useState<{ record: LedgerRecord | null } | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [month, setMonth] = useState('all');
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -115,11 +386,45 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
   const spent = filtered.reduce((s, r) => s + num(r.expense), 0);
   const isAll = month === 'all' && category === 'all' && !search.trim();
 
-  const selectClass =
-    'h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring';
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['fin-ledger'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-overview'] });
+  };
+
+  const openEdit = async (id: number) => {
+    const { data, error } = await (supabase as any).from('fin_ledger').select('*').eq('id', id).single();
+    if (error || !data) {
+      toast({ variant: 'destructive', title: 'Could not open entry', description: error?.message });
+      return;
+    }
+    setDialog({ record: { ...data, amount: num(data.amount) } as LedgerRecord });
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId == null) return;
+    const { error } = await (supabase as any).from('fin_ledger').delete().eq('id', deleteId);
+    setDeleteId(null);
+    if (error) {
+      toast({ variant: 'destructive', title: 'Could not delete', description: error.message });
+      return;
+    }
+    toast({ title: 'Entry deleted' });
+    refresh();
+  };
+
+  const colCount = isAdmin ? 7 : 6;
 
   return (
     <div className="space-y-4">
+      {isAdmin && (
+        <div className="flex justify-end">
+          <Button onClick={() => setDialog({ record: null })}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add entry
+          </Button>
+        </div>
+      )}
+
       <div className="grid gap-3 sm:grid-cols-3">
         <SummaryCard
           title="Received"
@@ -142,7 +447,7 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <select className={selectClass} value={month} onChange={(e) => setMonth(e.target.value)}>
+        <select className={`${selectClass} sm:w-auto`} value={month} onChange={(e) => setMonth(e.target.value)}>
           <option value="all">All months</option>
           {months.map((m) => (
             <option key={m} value={m}>
@@ -150,7 +455,7 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
             </option>
           ))}
         </select>
-        <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select className={`${selectClass} sm:w-auto`} value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="all">All categories</option>
           <option value="credits">Money received</option>
           {categories.map((c) => (
@@ -182,12 +487,13 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
                   <TableHead className="text-right">Received</TableHead>
                   <TableHead className="text-right">Spent</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
+                  {isAdmin && <TableHead className="w-[90px]" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                    <TableCell colSpan={colCount} className="py-10 text-center text-muted-foreground">
                       No entries match these filters.
                     </TableCell>
                   </TableRow>
@@ -204,6 +510,28 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
                     <TableCell className="text-right text-emerald-700">{inr(r.credit)}</TableCell>
                     <TableCell className="text-right">{inr(r.expense)}</TableCell>
                     <TableCell className="text-right font-medium">{inr(r.balance)}</TableCell>
+                    {isAdmin && (
+                      <TableCell className="whitespace-nowrap text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          aria-label="Edit entry"
+                          onClick={() => openEdit(r.id)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          aria-label="Delete entry"
+                          onClick={() => setDeleteId(r.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -215,12 +543,39 @@ function LedgerTab({ rows }: { rows: LedgerRow[] }) {
                   <TableCell className="text-right font-semibold text-emerald-700">{inr(received)}</TableCell>
                   <TableCell className="text-right font-semibold">{inr(spent)}</TableCell>
                   <TableCell />
+                  {isAdmin && <TableCell />}
                 </TableRow>
               </TableFooter>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      {dialog && (
+        <EntryDialog
+          key={dialog.record?.id ?? 'new'}
+          initial={dialog.record}
+          categories={categoryOptions}
+          pledges={pledges}
+          onClose={() => setDialog(null)}
+          onSaved={refresh}
+        />
+      )}
+
+      <AlertDialog open={deleteId != null} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the entry and changes the balance. It cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -339,6 +694,32 @@ function OverviewTab({ rows }: { rows: OverviewRow[] }) {
 }
 
 export default function Finance() {
+  const { isAdmin } = useAuth();
+  const categoriesQuery = useQuery({
+    queryKey: ['fin-categories'],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('fin_categories')
+        .select('id,name,sort_order')
+        .eq('active', true)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Category[];
+    },
+  });
+  const pledgesQuery = useQuery({
+    queryKey: ['fin-pledges-list'],
+    enabled: isAdmin,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('fin_pledges')
+        .select('id,pledger,pledged_for')
+        .order('pledged_for', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Pledge[];
+    },
+  });
   const ledger = useQuery({
     queryKey: ['fin-ledger'],
     queryFn: () => fetchView<LedgerRow>('fin_ledger_v', 'id'),
@@ -368,7 +749,12 @@ export default function Finance() {
         <TabsTrigger value="overview">Overview</TabsTrigger>
       </TabsList>
       <TabsContent value="ledger">
-        <LedgerTab rows={ledger.data ?? []} />
+        <LedgerTab
+          rows={ledger.data ?? []}
+          isAdmin={isAdmin}
+          categoryOptions={categoriesQuery.data ?? []}
+          pledges={pledgesQuery.data ?? []}
+        />
       </TabsContent>
       <TabsContent value="overview">
         <OverviewTab rows={overview.data ?? []} />
