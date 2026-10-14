@@ -1,6 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDownCircle, ArrowUpCircle, Wallet, Search, Plus, Pencil, Trash2 } from 'lucide-react';
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Wallet,
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  Target,
+  Clock,
+  Gift,
+  Printer,
+} from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -72,6 +84,33 @@ interface Pledge {
   id: number;
   pledger: string;
   pledged_for: string;
+}
+
+interface PledgeRow {
+  id: number;
+  pledger: string;
+  pledged_for: string;
+  pledged_amount: number;
+  disbursed: number;
+  balance_due: number;
+}
+
+interface PledgeRecord {
+  id: number;
+  pledger: string;
+  pledged_amount: number;
+  email: string | null;
+}
+
+interface InKindRow {
+  id: number;
+  kind: 'material' | 'printing';
+  donated_on: string | null;
+  donor: string | null;
+  item: string;
+  uom: string | null;
+  quantity: number | null;
+  nominal_value: number | null;
 }
 
 interface OverviewRow {
@@ -516,6 +555,7 @@ function LedgerTab({
     queryClient.invalidateQueries({ queryKey: ['fin-overview'] });
     queryClient.invalidateQueries({ queryKey: ['fin-categories'] });
     queryClient.invalidateQueries({ queryKey: ['fin-pledges-list'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-pledges'] });
   };
 
   const openEdit = async (id: number) => {
@@ -820,6 +860,347 @@ function OverviewTab({ rows }: { rows: OverviewRow[] }) {
   );
 }
 
+function PledgeDialog({
+  record,
+  onClose,
+  onSaved,
+}: {
+  record: PledgeRecord;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { toast } = useToast();
+  const [name, setName] = useState(record.pledger === 'Unassigned' ? '' : record.pledger);
+  const [amount, setAmount] = useState(String(record.pledged_amount));
+  const [email, setEmail] = useState(record.email ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    const amt = Number(amount);
+    if (!name.trim()) {
+      toast({ variant: 'destructive', title: 'Check the form', description: 'Please type the donor name.' });
+      return;
+    }
+    if (!(amt >= 0)) {
+      toast({ variant: 'destructive', title: 'Check the form', description: 'Please enter a valid pledged amount.' });
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await (supabase as any)
+        .from('fin_pledges')
+        .update({ pledger: name.trim(), pledged_amount: amt, email: email.trim() || null })
+        .eq('id', record.id);
+      if (error) throw error;
+      // keep the name on the received entries in step with the donor name
+      const { error: err2 } = await (supabase as any)
+        .from('fin_ledger')
+        .update({ party: name.trim() })
+        .eq('pledge_id', record.id);
+      if (err2) throw err2;
+      toast({ title: 'Donor updated' });
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Could not save', description: e.message || 'Something went wrong' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit donor</DialogTitle>
+          <DialogDescription>Change the donor name, the amount pledged, or the email.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="pl-name">Donor name</Label>
+            <Input id="pl-name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pl-amt">Amount pledged (₹)</Label>
+            <Input
+              id="pl-amt"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pl-email">Email (optional)</Label>
+            <Input id="pl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? 'Saving...' : 'Save changes'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PledgesTab({ rows, isAdmin }: { rows: PledgeRow[]; isAdmin: boolean }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState<PledgeRecord | null>(null);
+
+  const totalPledged = rows.reduce((s, r) => s + num(r.pledged_amount), 0);
+  const totalReceived = rows.reduce((s, r) => s + num(r.disbursed), 0);
+  const totalDue = totalPledged - totalReceived;
+
+  const openEdit = async (id: number) => {
+    const { data, error } = await (supabase as any)
+      .from('fin_pledges')
+      .select('id,pledger,pledged_amount,email')
+      .eq('id', id)
+      .single();
+    if (error || !data) {
+      toast({ variant: 'destructive', title: 'Could not open donor', description: error?.message });
+      return;
+    }
+    setEditing({ ...data, pledged_amount: num(data.pledged_amount) } as PledgeRecord);
+  };
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['fin-pledges'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-pledges-list'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-ledger'] });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <SummaryCard
+          title="Total pledged"
+          value={totalPledged}
+          icon={<Target className="h-5 w-5" />}
+          tone="bg-primary/10 text-primary"
+        />
+        <SummaryCard
+          title="Received so far"
+          value={totalReceived}
+          icon={<ArrowDownCircle className="h-5 w-5" />}
+          tone="bg-emerald-100 text-emerald-700"
+        />
+        <SummaryCard
+          title="Still due"
+          value={totalDue}
+          icon={<Clock className="h-5 w-5" />}
+          tone="bg-amber-100 text-amber-700"
+        />
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Donor</TableHead>
+                  <TableHead className="whitespace-nowrap">Month covered</TableHead>
+                  <TableHead className="text-right">Pledged</TableHead>
+                  <TableHead className="text-right">Received</TableHead>
+                  <TableHead className="text-right">Still due</TableHead>
+                  <TableHead className="min-w-[140px]">Progress</TableHead>
+                  {isAdmin && <TableHead className="w-[60px]" />}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => {
+                  const pledged = num(r.pledged_amount);
+                  const received = num(r.disbursed);
+                  const pct = pledged > 0 ? Math.min(100, Math.round((received / pledged) * 100)) : 0;
+                  const unassigned = r.pledger === 'Unassigned';
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-medium">
+                        {unassigned ? <span className="italic text-muted-foreground">Not assigned yet</span> : r.pledger}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{monthLabel(r.pledged_for)}</TableCell>
+                      <TableCell className="text-right">{inr(pledged)}</TableCell>
+                      <TableCell className="text-right text-emerald-700">{inr(received)}</TableCell>
+                      <TableCell className="text-right">{inr(pledged - received)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                            <div className="h-full rounded-full bg-emerald-600" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="w-9 text-right text-xs text-muted-foreground">{pct}%</span>
+                        </div>
+                      </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            aria-label="Edit donor"
+                            onClick={() => openEdit(r.id)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={2} className="font-semibold">
+                    Total
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">{inr(totalPledged)}</TableCell>
+                  <TableCell className="text-right font-semibold text-emerald-700">{inr(totalReceived)}</TableCell>
+                  <TableCell className="text-right font-semibold">{inr(totalDue)}</TableCell>
+                  <TableCell />
+                  {isAdmin && <TableCell />}
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {editing && (
+        <PledgeDialog key={editing.id} record={editing} onClose={() => setEditing(null)} onSaved={refresh} />
+      )}
+    </div>
+  );
+}
+
+function InKindTab({ rows }: { rows: InKindRow[] }) {
+  const materials = rows.filter((r) => r.kind === 'material');
+  const printing = rows.filter((r) => r.kind === 'printing');
+
+  const groups = useMemo(() => {
+    const map = new Map<string, { donor: string; date: string | null; items: InKindRow[] }>();
+    for (const r of materials) {
+      const key = `${r.donated_on ?? ''}|${r.donor ?? ''}`;
+      let g = map.get(key);
+      if (!g) {
+        g = { donor: r.donor ?? 'Unknown donor', date: r.donated_on, items: [] };
+        map.set(key, g);
+      }
+      g.items.push(r);
+    }
+    return Array.from(map.values()).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
+  }, [materials]);
+
+  const sumValue = (list: InKindRow[]) => list.reduce((s, r) => s + num(r.nominal_value), 0);
+  const materialsTotal = sumValue(materials);
+  const printingTotal = sumValue(printing);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <SummaryCard
+          title="Materials donated"
+          value={materialsTotal}
+          icon={<Gift className="h-5 w-5" />}
+          tone="bg-primary/10 text-primary"
+        />
+        <SummaryCard
+          title="Printing saved"
+          value={printingTotal}
+          icon={<Printer className="h-5 w-5" />}
+          tone="bg-amber-100 text-amber-700"
+        />
+        <SummaryCard
+          title="Total in-kind value"
+          value={materialsTotal + printingTotal}
+          icon={<Wallet className="h-5 w-5" />}
+          tone="bg-emerald-100 text-emerald-700"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Values are estimates in rupees. Items without a value are shown with a dash.
+      </p>
+
+      {groups.map((g) => (
+        <Card key={`${g.date}|${g.donor}`}>
+          <CardContent className="p-0">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b px-4 py-3">
+              <div>
+                <p className="font-semibold">{g.donor}</p>
+                <p className="text-xs text-muted-foreground">{g.date ? dateLabel(g.date) : ''}</p>
+              </div>
+              <p className="text-sm font-semibold">₹ {inr(sumValue(g.items))}</p>
+            </div>
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Item</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead>Unit</TableHead>
+                    <TableHead className="text-right">Value (₹)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {g.items.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="min-w-[200px]">{r.item}</TableCell>
+                      <TableCell className="text-right">{r.quantity != null ? inr(r.quantity) : '–'}</TableCell>
+                      <TableCell>{r.uom ?? ''}</TableCell>
+                      <TableCell className="text-right">{r.nominal_value != null ? inr(r.nominal_value) : '–'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+
+      {printing.length > 0 && (
+        <Card>
+          <CardContent className="p-0">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b px-4 py-3">
+              <p className="font-semibold">Printing savings</p>
+              <p className="text-sm font-semibold">₹ {inr(printingTotal)}</p>
+            </div>
+            <div className="overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Donor</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead className="text-right">Pages</TableHead>
+                    <TableHead className="text-right">Saved (₹)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {printing.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="whitespace-nowrap">{r.donated_on ? dateLabel(r.donated_on) : ''}</TableCell>
+                      <TableCell>{r.donor}</TableCell>
+                      <TableCell className="min-w-[200px]">{r.item}</TableCell>
+                      <TableCell className="text-right">{r.quantity != null ? inr(r.quantity) : '–'}</TableCell>
+                      <TableCell className="text-right">{r.nominal_value != null ? inr(r.nominal_value) : '–'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 export default function Finance() {
   const { isAdmin } = useAuth();
   const categoriesQuery = useQuery({
@@ -855,13 +1236,21 @@ export default function Finance() {
     queryKey: ['fin-overview'],
     queryFn: () => fetchView<OverviewRow>('fin_overview_v', 'period'),
   });
+  const pledgeRows = useQuery({
+    queryKey: ['fin-pledges'],
+    queryFn: () => fetchView<PledgeRow>('fin_pledges_v', 'pledged_for'),
+  });
+  const inKind = useQuery({
+    queryKey: ['fin-in-kind'],
+    queryFn: () => fetchView<InKindRow>('fin_in_kind_v', 'id'),
+  });
 
-  if (ledger.isLoading || overview.isLoading) {
+  if (ledger.isLoading || overview.isLoading || pledgeRows.isLoading || inKind.isLoading) {
     return <div className="py-16 text-center text-muted-foreground">Loading finance data...</div>;
   }
 
-  if (ledger.error || overview.error) {
-    const err = (ledger.error || overview.error) as Error;
+  if (ledger.error || overview.error || pledgeRows.error || inKind.error) {
+    const err = (ledger.error || overview.error || pledgeRows.error || inKind.error) as Error;
     return (
       <div className="py-16 text-center text-destructive">
         Could not load finance data. {err.message}
@@ -874,6 +1263,8 @@ export default function Finance() {
       <TabsList>
         <TabsTrigger value="ledger">Ledger</TabsTrigger>
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="pledges">Pledges</TabsTrigger>
+        <TabsTrigger value="inkind">In-kind</TabsTrigger>
       </TabsList>
       <TabsContent value="ledger">
         <LedgerTab
@@ -885,6 +1276,12 @@ export default function Finance() {
       </TabsContent>
       <TabsContent value="overview">
         <OverviewTab rows={overview.data ?? []} />
+      </TabsContent>
+      <TabsContent value="pledges">
+        <PledgesTab rows={pledgeRows.data ?? []} isAdmin={isAdmin} />
+      </TabsContent>
+      <TabsContent value="inkind">
+        <InKindTab rows={inKind.data ?? []} />
       </TabsContent>
     </Tabs>
   );
