@@ -105,6 +105,8 @@ const monthLabel = (period: string) =>
 const dateLabel = (d: string) =>
   new Date(`${d}T00:00:00`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
+const NEW = '__new__';
+
 const todayStr = () => new Date().toLocaleDateString('en-CA');
 
 const selectClass =
@@ -133,7 +135,24 @@ function EntryDialog({
   const [description, setDescription] = useState(initial?.description ?? '');
   const [categoryId, setCategoryId] = useState(initial?.category_id ? String(initial.category_id) : '');
   const [pledgeId, setPledgeId] = useState(initial?.pledge_id ? String(initial.pledge_id) : '');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryAsset, setNewCategoryAsset] = useState(false);
+  const [newDonorName, setNewDonorName] = useState('');
+  const [newDonorAmount, setNewDonorAmount] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Donor names only; the month is shown only when the same name has more than one pledge.
+  const pledgeOptions = useMemo(() => {
+    const real = pledges.filter((p) => p.pledger !== 'Unassigned' || String(p.id) === pledgeId);
+    const counts: Record<string, number> = {};
+    real.forEach((p) => {
+      counts[p.pledger] = (counts[p.pledger] ?? 0) + 1;
+    });
+    return real.map((p) => ({
+      id: p.id,
+      label: counts[p.pledger] > 1 ? `${p.pledger} (${monthLabel(p.pledged_for)})` : p.pledger,
+    }));
+  }, [pledges, pledgeId]);
 
   const fail = (msg: string) => toast({ variant: 'destructive', title: 'Check the form', description: msg });
 
@@ -145,24 +164,75 @@ function EntryDialog({
     if (type === 'expense') {
       if (!description.trim()) return fail('Please describe what the money was spent on.');
       if (!categoryId) return fail('Please choose a category.');
-    } else if (!pledgeId) {
-      return fail('Please choose who the money was received from.');
+      if (categoryId === NEW && !newCategoryName.trim()) return fail('Please type the name of the new category.');
+    } else {
+      if (!pledgeId) return fail('Please choose who the money was received from.');
+      if (pledgeId === NEW && !newDonorName.trim()) return fail('Please type the name of the new donor.');
     }
 
-    const pledge = pledges.find((p) => String(p.id) === pledgeId);
-    const payload = {
-      entry_date: date,
-      period: `${month}-01`,
-      entry_type: type,
-      amount: amt,
-      description: description.trim() || null,
-      party: type === 'credit' ? pledge?.pledger ?? null : null,
-      category_id: type === 'expense' ? Number(categoryId) : null,
-      pledge_id: type === 'credit' ? Number(pledgeId) : null,
-    };
-
     setSaving(true);
+    let createdCategoryId: number | null = null;
+    let createdPledgeId: number | null = null;
     try {
+      let catId: number | null = null;
+      if (type === 'expense') {
+        if (categoryId === NEW) {
+          const name = newCategoryName.trim();
+          const existing = categories.find((c) => c.name.toLowerCase() === name.toLowerCase());
+          if (existing) {
+            catId = existing.id;
+          } else {
+            const maxSort = categories.reduce((m, c) => Math.max(m, c.sort_order), 0);
+            const { data, error } = await (supabase as any)
+              .from('fin_categories')
+              .insert({ name, is_asset: newCategoryAsset, sort_order: maxSort + 10 })
+              .select('id')
+              .single();
+            if (error) throw error;
+            catId = data.id as number;
+            createdCategoryId = catId;
+          }
+        } else {
+          catId = Number(categoryId);
+        }
+      }
+
+      let pId: number | null = null;
+      let partyName: string | null = null;
+      if (type === 'credit') {
+        if (pledgeId === NEW) {
+          const name = newDonorName.trim();
+          const { data, error } = await (supabase as any)
+            .from('fin_pledges')
+            .insert({
+              pledger: name,
+              pledged_for: `${month}-01`,
+              pledged_amount: Number(newDonorAmount) > 0 ? Number(newDonorAmount) : 0,
+              pledged_on: todayStr(),
+            })
+            .select('id')
+            .single();
+          if (error) throw error;
+          pId = data.id as number;
+          createdPledgeId = pId;
+          partyName = name;
+        } else {
+          pId = Number(pledgeId);
+          partyName = pledges.find((p) => String(p.id) === pledgeId)?.pledger ?? null;
+        }
+      }
+
+      const payload = {
+        entry_date: date,
+        period: `${month}-01`,
+        entry_type: type,
+        amount: amt,
+        description: description.trim() || null,
+        party: type === 'credit' ? partyName : null,
+        category_id: type === 'expense' ? catId : null,
+        pledge_id: type === 'credit' ? pId : null,
+      };
+
       const table = (supabase as any).from('fin_ledger');
       const { error } = isEdit
         ? await table.update(payload).eq('id', initial!.id)
@@ -172,6 +242,9 @@ function EntryDialog({
       onSaved();
       onClose();
     } catch (e: any) {
+      // Undo anything created for this entry so no empty category or donor is left behind.
+      if (createdCategoryId != null) await (supabase as any).from('fin_categories').delete().eq('id', createdCategoryId);
+      if (createdPledgeId != null) await (supabase as any).from('fin_pledges').delete().eq('id', createdPledgeId);
       toast({ variant: 'destructive', title: 'Could not save', description: e.message || 'Something went wrong' });
     } finally {
       setSaving(false);
@@ -269,8 +342,31 @@ function EntryDialog({
                       {c.name}
                     </option>
                   ))}
+                  <option value={NEW}>+ Add new category…</option>
                 </select>
               </div>
+              {categoryId === NEW && (
+                <div className="space-y-3 rounded-md border border-dashed p-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fin-newcat">New category name</Label>
+                    <Input
+                      id="fin-newcat"
+                      placeholder="e.g. Medical"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={newCategoryAsset}
+                      onChange={(e) => setNewCategoryAsset(e.target.checked)}
+                    />
+                    This is a long-lasting item (asset), like furniture or equipment
+                  </label>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -283,13 +379,42 @@ function EntryDialog({
                   onChange={(e) => setPledgeId(e.target.value)}
                 >
                   <option value="">Choose who paid</option>
-                  {pledges.map((p) => (
+                  {pledgeOptions.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.pledger} ({monthLabel(p.pledged_for)})
+                      {p.label}
                     </option>
                   ))}
+                  <option value={NEW}>+ New donor…</option>
                 </select>
               </div>
+              {pledgeId === NEW && (
+                <div className="space-y-3 rounded-md border border-dashed p-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fin-newdonor">Donor name</Label>
+                    <Input
+                      id="fin-newdonor"
+                      placeholder="Full name"
+                      value={newDonorName}
+                      onChange={(e) => setNewDonorName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fin-newdonor-amt">Amount they have pledged (₹, optional)</Label>
+                    <Input
+                      id="fin-newdonor-amt"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      placeholder="Leave blank if not known"
+                      value={newDonorAmount}
+                      onChange={(e) => setNewDonorAmount(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Their pledge will be saved for {month ? monthLabel(`${month}-01`) : 'the month above'}.
+                  </p>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label htmlFor="fin-note">Note (optional)</Label>
                 <Input
@@ -389,6 +514,8 @@ function LedgerTab({
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['fin-ledger'] });
     queryClient.invalidateQueries({ queryKey: ['fin-overview'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-categories'] });
+    queryClient.invalidateQueries({ queryKey: ['fin-pledges-list'] });
   };
 
   const openEdit = async (id: number) => {
