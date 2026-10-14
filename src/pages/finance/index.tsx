@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowDownCircle,
@@ -12,6 +13,8 @@ import {
   Clock,
   Gift,
   Printer,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -1201,6 +1204,354 @@ function InKindTab({ rows }: { rows: InKindRow[] }) {
   );
 }
 
+function ReportsTab({ ledger, inKind }: { ledger: LedgerRow[]; inKind: InKindRow[] }) {
+  const periods = useMemo(() => Array.from(new Set(ledger.map((r) => r.period))).sort(), [ledger]);
+  const [from, setFrom] = useState(periods[0] ?? '');
+  const [to, setTo] = useState(periods[periods.length - 1] ?? '');
+
+  const a = from <= to ? from : to;
+  const b = from <= to ? to : from;
+  const label = a === b ? monthLabel(a) : `${monthLabel(a)} – ${monthLabel(b)}`;
+
+  const st = useMemo(() => {
+    const inRange = ledger.filter((r) => r.period >= a && r.period <= b);
+    const opening = ledger
+      .filter((r) => r.period < a)
+      .reduce((sum, r) => sum + num(r.credit) - num(r.expense), 0);
+    const received = inRange
+      .filter((r) => r.entry_type === 'credit')
+      .sort((x, y) => x.entry_date.localeCompare(y.entry_date) || x.id - y.id);
+    const expenses = inRange
+      .filter((r) => r.entry_type === 'expense')
+      .sort((x, y) => x.entry_date.localeCompare(y.entry_date) || x.id - y.id);
+    const totalReceived = received.reduce((sum, r) => sum + num(r.credit), 0);
+    const totalSpent = expenses.reduce((sum, r) => sum + num(r.expense), 0);
+
+    const catMap = new Map<string, number>();
+    for (const r of expenses) {
+      const k = r.category ?? 'Other';
+      catMap.set(k, (catMap.get(k) ?? 0) + num(r.expense));
+    }
+    const byCategory = Array.from(catMap.entries()).sort((x, y) => y[1] - x[1]);
+
+    const endOfRange = a
+      ? new Date(new Date(`${b}T00:00:00`).getFullYear(), new Date(`${b}T00:00:00`).getMonth() + 1, 0).toLocaleDateString('en-CA')
+      : '';
+    const inKindRows = inKind.filter((r) => r.donated_on && r.donated_on >= a && r.donated_on <= endOfRange);
+    const kindMap = new Map<string, { date: string; donor: string; count: number; label: string; value: number }>();
+    for (const r of inKindRows) {
+      const key = r.kind === 'material' ? `m|${r.donated_on}|${r.donor}` : `p|${r.id}`;
+      const g = kindMap.get(key);
+      if (g) {
+        g.value += num(r.nominal_value);
+        g.count += 1;
+      } else {
+        kindMap.set(key, {
+          date: r.donated_on ?? '',
+          donor: r.donor ?? '',
+          count: 1,
+          label: r.kind === 'printing' ? `Printing: ${r.item}` : '',
+          value: num(r.nominal_value),
+        });
+      }
+    }
+    const kindList = Array.from(kindMap.values())
+      .map((g) => ({
+        date: g.date,
+        donor: g.donor,
+        text: g.label || `${g.count} ${g.count === 1 ? 'item' : 'items'}`,
+        value: g.value,
+      }))
+      .sort((x, y) => x.date.localeCompare(y.date));
+    const kindTotal = kindList.reduce((sum, g) => sum + g.value, 0);
+
+    return {
+      opening,
+      received,
+      expenses,
+      totalReceived,
+      totalSpent,
+      closing: opening + totalReceived - totalSpent,
+      byCategory,
+      kindList,
+      kindTotal,
+    };
+  }, [ledger, inKind, a, b]);
+
+  const printPdf = () => {
+    const prev = document.title;
+    document.title = `Sitavan Pre-School Statement ${label}`;
+    const restore = () => {
+      document.title = prev;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+    window.print();
+  };
+
+  const exportExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const summary = [
+      ['Sitavan Pre-School, Mount Abu'],
+      ['Statement of receipts and expenses'],
+      [label],
+      [],
+      ['Opening balance', st.opening],
+      ['Money received', st.totalReceived],
+      ['Money spent', st.totalSpent],
+      ['Closing balance', st.closing],
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summary);
+    wsSummary['!cols'] = [{ wch: 28 }, { wch: 16 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+    const recRows = st.received.map((r) => [dateLabel(r.entry_date), r.party ?? '', r.description ?? '', num(r.credit)]);
+    const wsRec = XLSX.utils.aoa_to_sheet([
+      ['Date', 'Received from', 'Note', 'Amount'],
+      ...recRows,
+      ['', '', 'Total', st.totalReceived],
+    ]);
+    wsRec['!cols'] = [{ wch: 14 }, { wch: 30 }, { wch: 20 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, wsRec, 'Received');
+
+    const expRows = st.expenses.map((r) => [dateLabel(r.entry_date), r.description ?? '', r.category ?? '', num(r.expense)]);
+    const wsExp = XLSX.utils.aoa_to_sheet([
+      ['Date', 'Description', 'Category', 'Amount'],
+      ...expRows,
+      ['', '', 'Total', st.totalSpent],
+    ]);
+    wsExp['!cols'] = [{ wch: 14 }, { wch: 70 }, { wch: 24 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, wsExp, 'Expenses');
+
+    const catRows = st.byCategory.map(([name, amt]) => [
+      name,
+      amt,
+      st.totalSpent ? Number(((amt / st.totalSpent) * 100).toFixed(1)) : 0,
+    ]);
+    const wsCat = XLSX.utils.aoa_to_sheet([['Category', 'Amount', '% of spending'], ...catRows, ['Total', st.totalSpent, 100]]);
+    wsCat['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, wsCat, 'By category');
+
+    if (st.kindList.length > 0) {
+      const wsKind = XLSX.utils.aoa_to_sheet([
+        ['Date', 'Donor', 'Details', 'Estimated value'],
+        ...st.kindList.map((g) => [dateLabel(g.date), g.donor, g.text, g.value]),
+        ['', '', 'Total', st.kindTotal],
+      ]);
+      wsKind['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 50 }, { wch: 16 }];
+      XLSX.utils.book_append_sheet(wb, wsKind, 'In-kind');
+    }
+
+    XLSX.writeFile(wb, `Sitavan_Statement_${a.slice(0, 7)}_to_${b.slice(0, 7)}.xlsx`);
+  };
+
+  const rupee = (n: number) => `₹ ${inr(n)}`;
+  const th = 'border-b border-gray-400 px-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wide';
+  const td = 'border-b border-gray-200 px-2 py-1.5 align-top';
+
+  return (
+    <div className="space-y-4">
+      <style>{`@media print { .md\\:pl-64 { padding-left: 0 !important; } @page { size: A4; margin: 12mm; } }`}</style>
+
+      <div className="no-print flex flex-wrap items-end gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="rep-from">From month</Label>
+          <select id="rep-from" className={`${selectClass} sm:w-auto`} value={from} onChange={(e) => setFrom(e.target.value)}>
+            {periods.map((p) => (
+              <option key={p} value={p}>
+                {monthLabel(p)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="rep-to">To month</Label>
+          <select id="rep-to" className={`${selectClass} sm:w-auto`} value={to} onChange={(e) => setTo(e.target.value)}>
+            {periods.map((p) => (
+              <option key={p} value={p}>
+                {monthLabel(p)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Button onClick={printPdf}>
+          <Download className="mr-2 h-4 w-4" />
+          Download PDF
+        </Button>
+        <Button variant="outline" onClick={exportExcel}>
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          Download Excel
+        </Button>
+      </div>
+      <p className="no-print text-xs text-muted-foreground">
+        For the PDF, a print window opens. Choose <strong>Save as PDF</strong> as the printer, then Save.
+      </p>
+
+      <div className="rounded-lg border bg-white p-6 text-sm text-black print:rounded-none print:border-0 print:p-0">
+        <div className="flex items-center gap-4 border-b-2 border-gray-800 pb-4">
+          <img src="/logo.png" alt="Sitavan Pre-School" className="h-16 w-16 object-contain" />
+          <div>
+            <h2 className="text-xl font-bold">Sitavan Pre-School, Mount Abu</h2>
+            <p className="font-medium">Statement of receipts and expenses</p>
+            <p className="text-gray-600">{label}</p>
+          </div>
+        </div>
+
+        <table className="mt-4 w-full max-w-md">
+          <tbody>
+            <tr>
+              <td className={td}>Opening balance</td>
+              <td className={`${td} text-right`}>{rupee(st.opening)}</td>
+            </tr>
+            <tr>
+              <td className={td}>Money received</td>
+              <td className={`${td} text-right`}>{rupee(st.totalReceived)}</td>
+            </tr>
+            <tr>
+              <td className={td}>Money spent</td>
+              <td className={`${td} text-right`}>{rupee(st.totalSpent)}</td>
+            </tr>
+            <tr className="font-bold">
+              <td className="px-2 py-2">Closing balance</td>
+              <td className="px-2 py-2 text-right">{rupee(st.closing)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 className="mb-1 mt-6 font-bold">Money received</h3>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className={th}>Date</th>
+              <th className={th}>Received from</th>
+              <th className={th}>Note</th>
+              <th className={`${th} text-right`}>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {st.received.length === 0 && (
+              <tr>
+                <td colSpan={4} className={`${td} text-gray-500`}>
+                  Nothing received in this period.
+                </td>
+              </tr>
+            )}
+            {st.received.map((r) => (
+              <tr key={r.id} className="break-inside-avoid">
+                <td className={`${td} whitespace-nowrap`}>{dateLabel(r.entry_date)}</td>
+                <td className={td}>{r.party}</td>
+                <td className={td}>{r.description}</td>
+                <td className={`${td} text-right`}>{inr(r.credit)}</td>
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td colSpan={3} className="px-2 py-1.5">
+                Total received
+              </td>
+              <td className="px-2 py-1.5 text-right">{inr(st.totalReceived)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 className="mb-1 mt-6 font-bold">Spending by category</h3>
+        <table className="w-full max-w-lg">
+          <thead>
+            <tr>
+              <th className={th}>Category</th>
+              <th className={`${th} text-right`}>Amount</th>
+              <th className={`${th} text-right`}>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {st.byCategory.map(([name, amt]) => (
+              <tr key={name} className="break-inside-avoid">
+                <td className={td}>{name}</td>
+                <td className={`${td} text-right`}>{inr(amt)}</td>
+                <td className={`${td} text-right`}>
+                  {st.totalSpent ? ((amt / st.totalSpent) * 100).toFixed(1) : '0.0'}%
+                </td>
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td className="px-2 py-1.5">Total spent</td>
+              <td className="px-2 py-1.5 text-right">{inr(st.totalSpent)}</td>
+              <td />
+            </tr>
+          </tbody>
+        </table>
+
+        {st.kindList.length > 0 && (
+          <>
+            <h3 className="mb-1 mt-6 font-bold">Donations in kind (estimated value)</h3>
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={th}>Date</th>
+                  <th className={th}>Donor</th>
+                  <th className={th}>Details</th>
+                  <th className={`${th} text-right`}>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {st.kindList.map((g, i) => (
+                  <tr key={i} className="break-inside-avoid">
+                    <td className={`${td} whitespace-nowrap`}>{dateLabel(g.date)}</td>
+                    <td className={td}>{g.donor}</td>
+                    <td className={td}>{g.text}</td>
+                    <td className={`${td} text-right`}>{g.value ? inr(g.value) : '–'}</td>
+                  </tr>
+                ))}
+                <tr className="font-semibold">
+                  <td colSpan={3} className="px-2 py-1.5">
+                    Total value
+                  </td>
+                  <td className="px-2 py-1.5 text-right">{inr(st.kindTotal)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </>
+        )}
+
+        <h3 className="mb-1 mt-6 font-bold">All expenses</h3>
+        <table className="w-full">
+          <thead className="print:table-header-group">
+            <tr>
+              <th className={th}>Date</th>
+              <th className={th}>Description</th>
+              <th className={th}>Category</th>
+              <th className={`${th} text-right`}>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {st.expenses.map((r) => (
+              <tr key={r.id} className="break-inside-avoid">
+                <td className={`${td} whitespace-nowrap`}>{dateLabel(r.entry_date)}</td>
+                <td className={td}>{r.description}</td>
+                <td className={`${td} whitespace-nowrap`}>{r.category}</td>
+                <td className={`${td} text-right`}>{inr(r.expense)}</td>
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td colSpan={3} className="px-2 py-1.5">
+                Total spent
+              </td>
+              <td className="px-2 py-1.5 text-right">{inr(st.totalSpent)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="mt-12 flex justify-between gap-8 break-inside-avoid">
+          <div className="w-1/2 border-t border-gray-800 pt-1 text-xs">Prepared by (name and signature)</div>
+          <div className="w-1/2 border-t border-gray-800 pt-1 text-xs">Approved by (name and signature)</div>
+        </div>
+        <p className="mt-4 text-xs text-gray-500">
+          Generated on {dateLabel(todayStr())}. Amounts are in Indian rupees (₹).
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Finance() {
   const { isAdmin } = useAuth();
   const categoriesQuery = useQuery({
@@ -1260,11 +1611,12 @@ export default function Finance() {
 
   return (
     <Tabs defaultValue="ledger" className="space-y-4">
-      <TabsList>
+      <TabsList className="no-print">
         <TabsTrigger value="ledger">Ledger</TabsTrigger>
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="pledges">Pledges</TabsTrigger>
         <TabsTrigger value="inkind">In-kind</TabsTrigger>
+        <TabsTrigger value="reports">Reports</TabsTrigger>
       </TabsList>
       <TabsContent value="ledger">
         <LedgerTab
@@ -1282,6 +1634,9 @@ export default function Finance() {
       </TabsContent>
       <TabsContent value="inkind">
         <InKindTab rows={inKind.data ?? []} />
+      </TabsContent>
+      <TabsContent value="reports">
+        <ReportsTab ledger={ledger.data ?? []} inKind={inKind.data ?? []} />
       </TabsContent>
     </Tabs>
   );
