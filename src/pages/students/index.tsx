@@ -44,6 +44,9 @@ export default function StudentsOverview() {
   const active = students.filter(s => s.status === 'Active').length;
   const onLeave = students.filter(s => s.status === 'On Leave').length;
 
+  const getAge = (dob?: string | null, age?: number | null) =>
+    dob ? Math.floor((Date.now() - new Date(dob).getTime()) / 31557600000) : (age ?? null);
+
   const StatusBadge = ({ status }: { status: string | null }) => {
     const colors: Record<string, string> = {
       'Active': 'bg-green-100 text-green-700',
@@ -142,6 +145,7 @@ export default function StudentsOverview() {
                 <th className="px-6 py-3 font-medium">Roll No</th>
                 <th className="px-6 py-3 font-medium">Name</th>
                 <th className="px-6 py-3 font-medium">Class</th>
+                <th className="px-6 py-3 font-medium">Age</th>
                 <th className="px-6 py-3 font-medium">Group</th>
                 <th className="px-6 py-3 font-medium">Gender</th>
                 <th className="px-6 py-3 font-medium">Status</th>
@@ -151,11 +155,11 @@ export default function StudentsOverview() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">Loading students...</td>
+                  <td colSpan={8} className="px-6 py-8 text-center text-muted-foreground">Loading students...</td>
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">No students found matching your filters.</td>
+                  <td colSpan={8} className="px-6 py-8 text-center text-muted-foreground">No students found matching your filters.</td>
                 </tr>
               ) : (
                 filteredStudents.map((student) => (
@@ -166,6 +170,7 @@ export default function StudentsOverview() {
                       {student.father_name && <div className="text-xs text-muted-foreground mt-0.5">{student.father_name}</div>}
                     </td>
                     <td className="px-6 py-4">{student.class}</td>
+                    <td className="px-6 py-4">{getAge(student.dob, student.age) ?? '-'}</td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-600">{student.group}</span>
                     </td>
