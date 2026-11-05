@@ -11,6 +11,11 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 const PRESENT_STATUSES = ['Present', 'Late', 'Very Late', 'Half Day'];
 const NON_WORKING = ['Holiday', 'Weekly Holiday'];
+const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+  'Very Late': { label: 'LL', cls: 'bg-orange-100 text-orange-700' },
+  'Late': { label: 'L', cls: 'bg-amber-100 text-amber-700' },
+  'Absent': { label: 'A', cls: 'bg-red-100 text-red-700' },
+};
 
 export default function Dashboard() {
   const { isViewer } = useAuth();
@@ -40,7 +45,42 @@ export default function Dashboard() {
     },
   });
 
-  const { data: monthAttendance = [] } = useQuery({
+  const todayKey = format(today, 'yyyy-MM-dd');
+
+const { data: staffToday = [] } = useQuery({
+  queryKey: ['dash-staff-attendance-today', todayKey],
+  queryFn: async () => {
+    if (!isSupabaseConfigured) return [];
+    const { data, error } = await supabase
+      .from('staff_attendance')
+      .select('id, person_id, person_type, status, scanned_in_at, notes')
+      .eq('date', todayKey);
+    if (error) throw error;
+    return data || [];
+  },
+});
+
+const { data: staffList = [] } = useQuery({
+  queryKey: ['dash-staff-names'],
+  queryFn: async () => {
+    if (!isSupabaseConfigured) return [];
+    const { data, error } = await supabase.from(peopleTable('staff')).select('id, full_name');
+    if (error) throw error;
+    return data || [];
+  },
+});
+
+const { data: volunteerList = [] } = useQuery({
+  queryKey: ['dash-volunteer-names'],
+  queryFn: async () => {
+    if (!isSupabaseConfigured) return [];
+    const { data, error } = await supabase.from(peopleTable('volunteers')).select('id, full_name');
+    if (error) throw error;
+    return data || [];
+  },
+});
+
+const { data: monthAttendance = [] } = useQuery({
     queryKey: ['attendance-month'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_ATTENDANCE_MONTH;
@@ -87,6 +127,41 @@ export default function Dashboard() {
   
   const presentTodayCount = todayAttendance.filter(a => PRESENT_STATUSES.includes(a.status)).length;
   const absentTodayCount = todayAttendance.filter(a => a.status === 'Absent').length;
+
+const lateAbsentToday = useMemo(() => {
+  const rank: Record<string, number> = { 'Very Late': 0, 'Late': 1, 'Absent': 2 };
+  const timeOf = (ts?: string | null) => (ts ? format(new Date(ts), 'hh:mm a') : null);
+  const rows: { id: string; name: string; sub: string; status: string; detail: string }[] = [];
+
+  todayAttendance.forEach((r: any) => {
+    if (!(r.status in rank)) return;
+    const s: any = students.find((x: any) => x.id === r.student_id);
+    if (!s) return;
+    rows.push({
+      id: `s-${r.id}`,
+      name: s.full_name,
+      sub: `Student • ${s.class} - ${s.group}`,
+      status: r.status,
+      detail: r.status === 'Absent' ? (r.notes || '') : (timeOf(r.scanned_at) || 'Manual'),
+    });
+  });
+
+  staffToday.forEach((r: any) => {
+    if (!(r.status in rank)) return;
+    const isVol = r.person_type === 'volunteer';
+    const p: any = (isVol ? volunteerList : staffList).find((x: any) => x.id === r.person_id);
+    if (!p) return;
+    rows.push({
+      id: `p-${r.id}`,
+      name: p.full_name,
+      sub: isVol ? 'Volunteer' : 'Staff',
+      status: r.status,
+      detail: r.status === 'Absent' ? (r.notes || '') : (timeOf(r.scanned_in_at) || 'Manual'),
+    });
+  });
+
+  return rows.sort((a, b) => rank[a.status] - rank[b.status] || a.name.localeCompare(b.name));
+}, [todayAttendance, staffToday, students, staffList, volunteerList]);
 
   const monthAvg = useMemo(() => {
     const recs = monthAttendance.filter(a => !NON_WORKING.includes(a.status));
@@ -197,33 +272,24 @@ export default function Dashboard() {
 
         <Card className="md:col-span-3 lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Scans</CardTitle>
+            <CardTitle>Late & Absent Today</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {todayAttendance.slice(0, 5).map((record) => {
-                const student = students.find(s => s.id === record.student_id);
-                if (!student) return null;
-                return (
-                  <div key={record.id} className="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
-                    <div>
-                      <p className="font-medium text-sm text-foreground">{student.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{student.class} - {student.group} • {record.scanned_at ? format(new Date(record.scanned_at), 'hh:mm a') : 'Manual'}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium
-                      ${record.status === 'Present' ? 'bg-green-100 text-green-700' : ''}
-                      ${record.status === 'Late' ? 'bg-amber-100 text-amber-700' : ''}
-                      ${record.status === 'Absent' ? 'bg-red-100 text-red-700' : ''}
-                      ${record.status === 'Half Day' ? 'bg-blue-100 text-blue-700' : ''}
-                    `}>
-                      {record.status}
-                    </span>
+            <div className="space-y-4 max-h-[420px] overflow-auto">
+              {lateAbsentToday.map((row) => (
+                <div key={row.id} className="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{row.name}</p>
+                    <p className="text-xs text-muted-foreground">{row.sub}{row.detail ? ` • ${row.detail}` : ''}</p>
                   </div>
-                );
-              })}
-              {todayAttendance.length === 0 && (
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_BADGE[row.status].cls}`}>
+                    {STATUS_BADGE[row.status].label}
+                  </span>
+                </div>
+              ))}
+              {lateAbsentToday.length === 0 && (
                 <div className="text-center py-6 text-muted-foreground text-sm">
-                  No attendance recorded today yet.
+                  No late or absent people today.
                 </div>
               )}
             </div>
