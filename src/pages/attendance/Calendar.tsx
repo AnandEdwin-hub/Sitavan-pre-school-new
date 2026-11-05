@@ -56,7 +56,7 @@ export default function CalendarAttendance() {
       if (!isSupabaseConfigured) return [];
       const { data } = await supabase
         .from('attendance')
-        .select('student_id, date, status')
+        .select('student_id, date, status, scanned_at, notes')
         .gte('date', format(monthStart, 'yyyy-MM-dd'))
         .lte('date', format(monthEnd, 'yyyy-MM-dd'));
       return data || [];
@@ -81,7 +81,7 @@ export default function CalendarAttendance() {
       if (!isSupabaseConfigured) return [];
       const { data } = await supabase
         .from('staff_attendance')
-        .select('person_id, date, status')
+        .select('person_id, date, status, scanned_in_at, notes')
         .eq('person_type', 'staff')
         .gte('date', format(monthStart, 'yyyy-MM-dd'))
         .lte('date', format(monthEnd, 'yyyy-MM-dd'));
@@ -162,6 +162,29 @@ export default function CalendarAttendance() {
     }
     return map;
   }, [view, studentAttendance, staffAttendance, volunteerAttendance]);
+
+  const detailMap = useMemo(() => {
+    const map: Record<string, { time?: string; note?: string }> = {};
+    const add = (key: string, ts?: string | null, note?: string | null) => {
+      map[key] = { time: ts ? format(new Date(ts), 'h:mm a') : undefined, note: note?.trim() || undefined };
+    };
+    if (view === 'students') {
+      studentAttendance.forEach((r: any) => add(`${r.student_id}_${r.date}`, r.scanned_at, r.notes));
+    } else if (view === 'staff') {
+      staffAttendance.forEach((r: any) => add(`${r.person_id}_${r.date}`, r.scanned_in_at, r.notes));
+    } else {
+      volunteerAttendance.forEach((r: any) => add(`${r.person_id}_${r.date}`, r.scanned_in_at, r.notes));
+    }
+    return map;
+  }, [view, studentAttendance, staffAttendance, volunteerAttendance]);
+
+  const getHoverText = (name: string, personId: string, day: Date, dateStr: string, status?: string) => {
+    const d = detailMap[`${personId}_${dateStr}`];
+    const base = `${name} - ${format(day, 'dd MMM')}: `;
+    if (status === 'Very Late' && d?.time) return `${base}Very Late ${d.time}`;
+    if (status === 'Absent') return `${base}Absent${d?.note ? `: ${d.note}` : ''}`;
+    return `${base}${status || 'No Record'}`;
+  };
 
   const isLoading = view === 'students' ? studentAttLoading : view === 'staff' ? staffAttLoading : volAttLoading;
 
@@ -279,7 +302,7 @@ export default function CalendarAttendance() {
                           <td key={dateStr} className="border-b border-r border-border p-1 text-center">
                             <div
                               className={`w-full h-8 rounded-sm flex items-center justify-center text-[10px] font-bold shadow-sm transition-all hover:opacity-80 cursor-default ${getColor(status)}`}
-                              title={`${person.full_name} - ${format(day, 'dd MMM')}: ${status || 'No Record'}`}
+                              title={getHoverText(person.full_name, person.id, day, dateStr, status)}
                             >
                               {getLetter(status)}
                             </div>
