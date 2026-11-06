@@ -15,7 +15,7 @@ import { StudentBadge, BadgePerson } from '@/components/badges/PersonBadge';
 export default function StudentProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isViewer } = useAuth();
+  const { isViewer, isAdmin } = useAuth();
 
   type StudentWithBadgeFields = Student & { photo_position?: number | null };
 
@@ -62,7 +62,7 @@ export default function StudentProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Student Profile</h2>
-        {!isViewer && (<Button variant="outline" className="bg-white">
+        {isAdmin && (<Button variant="outline" className="bg-white" onClick={() => navigate(`/students/${id}/edit`)}>
           <Edit className="w-4 h-4 mr-2" />
           Edit Profile
         </Button>)}

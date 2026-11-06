@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -40,6 +40,8 @@ export default function AddStudent() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id } = useParams();
+  const isEdit = !!id;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(studentSchema),
@@ -53,7 +55,37 @@ export default function AddStudent() {
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  useEffect(() => {
+  if (!id || !isSupabaseConfigured) return;
+  supabase.from('students').select('*').eq('id', id).single().then(({ data: s, error }) => {
+    if (error || !s) {
+      toast({ variant: "destructive", title: "Error", description: "Could not load student" });
+      return;
+    }
+    form.reset({
+      roll_no: s.roll_no ?? '',
+      full_name: s.full_name ?? '',
+      class: s.class ?? 'NUR',
+      group: s.group ?? 'BEG',
+      gender: s.gender ?? undefined,
+      dob: s.dob ?? '',
+      doj: s.doj ?? '',
+      age: s.age ?? undefined,
+      father_name: s.father_name ?? '',
+      father_mobile: s.father_mobile ?? '',
+      mother_name: s.mother_name ?? '',
+      mother_mobile: s.mother_mobile ?? '',
+      aadhar_number: s.aadhar_number ?? '',
+      caste_cert: !!s.caste_cert,
+      regular_school: s.regular_school ?? '',
+      annual_fees: s.annual_fees ?? undefined,
+      remarks: s.remarks ?? '',
+      status: s.status ?? 'Active',
+    });
+  });
+}, [id]);
+
+const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
       if (!isSupabaseConfigured) {
@@ -62,6 +94,18 @@ export default function AddStudent() {
           toast({ title: "Student added", description: "Mock data saved successfully." });
           navigate('/students');
         }, 1000);
+        return;
+      }
+
+      if (isEdit) {
+        const { roll_no, ...rest } = data;
+        const payload: any = { ...rest };
+        if (!payload.dob) payload.dob = null;
+        if (!payload.doj) payload.doj = null;
+        const { error: updError } = await supabase.from('students').update(payload).eq('id', id);
+        if (updError) throw updError;
+        toast({ title: "Student updated", description: "Changes saved." });
+        navigate(`/students/${id}`);
         return;
       }
 
@@ -86,7 +130,7 @@ export default function AddStudent() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Add New Student</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">{isEdit ? 'Edit Student' : 'Add New Student'}</h2>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -100,7 +144,7 @@ export default function AddStudent() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="roll_no">Roll Number *</Label>
-                <Input id="roll_no" {...form.register('roll_no')} placeholder="e.g. SPS001" />
+                <Input id="roll_no" {...form.register('roll_no')} placeholder="e.g. SPS001" readOnly={isEdit} className={isEdit ? 'bg-gray-100' : ''} />
                 {form.formState.errors.roll_no && <p className="text-xs text-destructive">{form.formState.errors.roll_no.message}</p>}
               </div>
 
@@ -113,7 +157,7 @@ export default function AddStudent() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Class *</Label>
-                  <Select onValueChange={(val) => form.setValue('class', val as any)} defaultValue={form.getValues('class')}>
+                  <Select onValueChange={(val) => form.setValue('class', val as any)} value={form.watch('class')}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select class" />
                     </SelectTrigger>
@@ -129,7 +173,7 @@ export default function AddStudent() {
                 </div>
                 <div className="space-y-2">
                   <Label>Group *</Label>
-                  <Select onValueChange={(val) => form.setValue('group', val as any)} defaultValue={form.getValues('group')}>
+                  <Select onValueChange={(val) => form.setValue('group', val as any)} value={form.watch('group')}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select group" />
                     </SelectTrigger>
@@ -148,7 +192,7 @@ export default function AddStudent() {
 
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select onValueChange={(val) => form.setValue('status', val as any)} defaultValue={form.getValues('status')}>
+                <Select onValueChange={(val) => form.setValue('status', val as any)} value={form.watch('status')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -187,7 +231,7 @@ export default function AddStudent() {
 
               <div className="space-y-2">
                 <Label>Gender</Label>
-                <Select onValueChange={(val) => form.setValue('gender', val as any)}>
+                <Select onValueChange={(val) => form.setValue('gender', val as any)} value={form.watch('gender') ?? undefined}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -260,7 +304,7 @@ export default function AddStudent() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
           <Button type="submit" disabled={isSubmitting}>
             <Save className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Saving...' : 'Save Student Profile'}
+            {isSubmitting ? 'Saving...' : isEdit ? 'Save Changes' : 'Save Student Profile'}
           </Button>
         </div>
       </form>

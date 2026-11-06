@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function StudentsOverview() {
   const navigate = useNavigate();
-  const { isViewer } = useAuth();
+  const { isViewer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -183,7 +183,7 @@ export default function StudentsOverview() {
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/students/${student.id}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {!isViewer && (<Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                        {isAdmin && (<Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100" onClick={() => navigate('/students/' + student.id + '/edit')}>
                           <Edit className="w-4 h-4" />
                         </Button>)}
                       </div>

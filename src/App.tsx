@@ -91,6 +91,7 @@ function App() {
                   <Route index element={<RequireRole allow={ALL}><StudentsOverview /></RequireRole>} />
                   <Route path="new" element={<RequireRole allow={ADMIN_STAFF}><AddStudent /></RequireRole>} />
                   <Route path=":id" element={<RequireRole allow={ALL}><StudentProfile /></RequireRole>} />
+                  <Route path=":id/edit" element={<RequireRole allow={ADMIN_ONLY}><AddStudent /></RequireRole>} />
                 </Route>
 
                 <Route path="/staff">
