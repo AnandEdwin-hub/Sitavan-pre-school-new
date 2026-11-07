@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,6 +29,8 @@ export default function AddVolunteer() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id } = useParams();
+  const isEdit = !!id;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(volunteerSchema),
@@ -39,6 +41,26 @@ export default function AddVolunteer() {
     },
   });
 
+  useEffect(() => {
+    if (!id || !isSupabaseConfigured) return;
+    supabase.from('volunteers').select('*').eq('id', id).single().then(({ data: v, error }) => {
+      if (error || !v) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load volunteer' });
+        return;
+      }
+      form.reset({
+        volunteer_code: v.volunteer_code ?? '',
+        full_name: v.full_name ?? '',
+        mobile: v.mobile ?? '',
+        email: v.email ?? '',
+        organization: v.organization ?? '',
+        school_class: v.school_class ?? '',
+        doj: v.doj ?? '',
+        status: v.status ?? 'Active',
+      });
+    });
+  }, [id]);
+
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -47,6 +69,18 @@ export default function AddVolunteer() {
           toast({ title: 'Volunteer added', description: 'Mock data saved successfully.' });
           navigate('/volunteers');
         }, 1000);
+        return;
+      }
+
+      if (isEdit) {
+        const { volunteer_code, ...rest } = data;
+        const payload: any = { ...rest };
+        if (!payload.doj) payload.doj = null;
+        if (!payload.email) payload.email = null;
+        const { error: updError } = await supabase.from('volunteers').update(payload).eq('id', id);
+        if (updError) throw updError;
+        toast({ title: 'Volunteer updated', description: 'Changes saved.' });
+        navigate('/volunteers/' + id);
         return;
       }
 
@@ -72,7 +106,7 @@ export default function AddVolunteer() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Add New Volunteer</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">{isEdit ? 'Edit Volunteer' : 'Add New Volunteer'}</h2>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -84,7 +118,7 @@ export default function AddVolunteer() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="volunteer_code">Volunteer Code *</Label>
-              <Input id="volunteer_code" {...form.register('volunteer_code')} placeholder="e.g. SITVL2601" className="uppercase" />
+              <Input id="volunteer_code" {...form.register('volunteer_code')} placeholder="e.g. SITVL2601" readOnly={isEdit} className={isEdit ? 'uppercase bg-gray-100' : 'uppercase'} />
               {form.formState.errors.volunteer_code && <p className="text-xs text-destructive">{form.formState.errors.volunteer_code.message}</p>}
             </div>
 
@@ -124,7 +158,7 @@ export default function AddVolunteer() {
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select onValueChange={(val) => form.setValue('status', val as any)} defaultValue={form.getValues('status')}>
+                <Select onValueChange={(val) => form.setValue('status', val as any)} value={form.watch('status')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
@@ -142,7 +176,7 @@ export default function AddVolunteer() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
           <Button type="submit" disabled={isSubmitting}>
             <Save className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Saving...' : 'Save Volunteer Profile'}
+            {isSubmitting ? 'Saving...' : isEdit ? 'Save Changes' : 'Save Volunteer Profile'}
           </Button>
         </div>
       </form>

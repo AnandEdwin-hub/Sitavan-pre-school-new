@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function VolunteersOverview() {
   const navigate = useNavigate();
-  const { isViewer } = useAuth();
+  const { isViewer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -23,7 +23,9 @@ export default function VolunteersOverview() {
       if (!isSupabaseConfigured) return MOCK_VOLUNTEERS as Volunteer[];
       const { data, error } = await supabase.from(peopleTable('volunteers')).select('*').order('volunteer_code');
       if (error) throw error;
-      return data as Volunteer[];
+      const { data: teachers } = await (supabase as any).from(peopleTable('staff')).select('*').eq('staff_category', 'Volunteer Teacher').order('staff_code');
+      const teacherRows = (teachers || []).map((t: any) => ({ ...t, volunteer_code: t.staff_code, organization: 'Vol Tchr', school_class: null, _isStaff: true }));
+      return [...(data as any[]), ...teacherRows] as Volunteer[];
     },
   });
 
@@ -45,7 +47,7 @@ export default function VolunteersOverview() {
     };
     const colorClass = status && colors[status] ? colors[status] : 'bg-gray-100 text-gray-700';
     return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+      <span className={'px-2.5 py-0.5 rounded-full text-xs font-medium ' + colorClass}>
         {status || 'Unknown'}
       </span>
     );
@@ -55,12 +57,14 @@ export default function VolunteersOverview() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Volunteers</h2>
-        {!isViewer && (<Button asChild>
-          <Link to="/volunteers/new">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Volunteer
-          </Link>
-        </Button>)}
+        {!isViewer && (
+          <Button asChild>
+            <Link to="/volunteers/new">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Volunteer
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
@@ -130,7 +134,7 @@ export default function VolunteersOverview() {
                     <td className="px-6 py-4 font-medium text-foreground">{person.volunteer_code}</td>
                     <td className="px-6 py-4 font-medium text-foreground">{person.full_name}</td>
                     <td className="px-6 py-4 text-xs text-muted-foreground">
-                      {person.organization || '-'}{person.school_class ? ` • ${person.school_class}` : ''}
+                      {person.organization || '-'}{person.school_class ? ' • ' + person.school_class : ''}
                     </td>
                     {!isViewer && <td className="px-6 py-4">{person.mobile || '-'}</td>}
                     <td className="px-6 py-4">
@@ -138,12 +142,14 @@ export default function VolunteersOverview() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/volunteers/${person.id}`)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate((person as any)._isStaff ? '/staff/' + person.id : '/volunteers/' + person.id)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {!isViewer && (<Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                          <Edit className="w-4 h-4" />
-                        </Button>)}
+                        {isAdmin && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100" onClick={() => navigate(((person as any)._isStaff ? '/staff/' : '/volunteers/') + person.id + '/edit')}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>

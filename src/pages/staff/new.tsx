@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,7 +20,7 @@ const staffSchema = z.object({
   email: z.string().email('Invalid email').optional().or(z.literal('')).nullable(),
   qualification: z.string().optional().nullable(),
   doj: z.string().optional().nullable(),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
+  status: z.enum(['Active', 'Inactive', 'Resigned']).default('Active'),
 });
 
 type FormValues = z.infer<typeof staffSchema>;
@@ -29,6 +29,8 @@ export default function AddStaff() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { id } = useParams();
+  const isEdit = !!id;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(staffSchema),
@@ -39,6 +41,26 @@ export default function AddStaff() {
       status: 'Active',
     },
   });
+
+  useEffect(() => {
+    if (!id || !isSupabaseConfigured) return;
+    supabase.from('staff').select('*').eq('id', id).single().then(({ data: s, error }) => {
+      if (error || !s) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load staff member' });
+        return;
+      }
+      form.reset({
+        staff_code: s.staff_code ?? '',
+        full_name: s.full_name ?? '',
+        designation: (s.designation ?? 'Teacher') as any,
+        mobile: s.mobile ?? '',
+        email: s.email ?? '',
+        qualification: s.qualification ?? '',
+        doj: s.doj ?? '',
+        status: s.status ?? 'Active',
+      });
+    });
+  }, [id]);
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -51,8 +73,20 @@ export default function AddStaff() {
         return;
       }
 
+      if (isEdit) {
+        const { staff_code, ...rest } = data;
+        const payload: any = { ...rest };
+        if (!payload.doj) payload.doj = null;
+        if (!payload.email) payload.email = null;
+        const { error: updError } = await supabase.from('staff').update(payload).eq('id', id);
+        if (updError) throw updError;
+        toast({ title: 'Staff updated', description: 'Changes saved.' });
+        navigate('/staff/' + id);
+        return;
+      }
+
       const { error } = await supabase.from('staff').insert({
-        ...data,
+        ...(data as any),
         center_id: '00000000-0000-0000-0000-000000000001',
       });
       if (error) throw error;
@@ -72,7 +106,7 @@ export default function AddStaff() {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Add New Staff Member</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">{isEdit ? 'Edit Staff Member' : 'Add New Staff Member'}</h2>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -85,12 +119,12 @@ export default function AddStaff() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="staff_code">Staff Code *</Label>
-                <Input id="staff_code" {...form.register('staff_code')} placeholder="e.g. SITST2601" className="uppercase" />
+                <Input id="staff_code" {...form.register('staff_code')} placeholder="e.g. SITST2601" readOnly={isEdit} className={isEdit ? 'uppercase bg-gray-100' : 'uppercase'} />
                 {form.formState.errors.staff_code && <p className="text-xs text-destructive">{form.formState.errors.staff_code.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Designation *</Label>
-                <Select onValueChange={(val) => form.setValue('designation', val as any)} defaultValue={form.getValues('designation')}>
+                <Select onValueChange={(val) => form.setValue('designation', val as any)} value={form.watch('designation')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select designation" />
                   </SelectTrigger>
@@ -134,13 +168,14 @@ export default function AddStaff() {
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select onValueChange={(val) => form.setValue('status', val as any)} defaultValue={form.getValues('status')}>
+                <Select onValueChange={(val) => form.setValue('status', val as any)} value={form.watch('status')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Resigned">Resigned</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -152,7 +187,7 @@ export default function AddStaff() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
           <Button type="submit" disabled={isSubmitting}>
             <Save className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Saving...' : 'Save Staff Profile'}
+            {isSubmitting ? 'Saving...' : isEdit ? 'Save Changes' : 'Save Staff Profile'}
           </Button>
         </div>
       </form>

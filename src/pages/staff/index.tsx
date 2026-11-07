@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function StaffOverview() {
   const navigate = useNavigate();
-  const { isViewer } = useAuth();
+  const { isViewer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Active');
 
@@ -21,9 +21,9 @@ export default function StaffOverview() {
     queryKey: ['staff'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STAFF as Staff[];
-       const { data, error } = await supabase.from(peopleTable('staff')).select('*').order('staff_code');
+      const { data, error } = await supabase.from(peopleTable('staff')).select('*').order('staff_code');
       if (error) throw error;
-      return data as Staff[];
+      return (data as any[]).filter((s) => s.staff_category !== 'Volunteer Teacher') as Staff[];
     },
   });
 
@@ -46,7 +46,7 @@ export default function StaffOverview() {
     };
     const colorClass = status && colors[status] ? colors[status] : 'bg-gray-100 text-gray-700';
     return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+      <span className={'px-2.5 py-0.5 rounded-full text-xs font-medium ' + colorClass}>
         {status || 'Unknown'}
       </span>
     );
@@ -144,11 +144,11 @@ export default function StaffOverview() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/staff/${person.id}`)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate('/staff/' + person.id)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        {!isViewer && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                        {isAdmin && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600 hover:text-gray-900 hover:bg-gray-100" onClick={() => navigate('/staff/' + person.id + '/edit')}>
                             <Edit className="w-4 h-4" />
                           </Button>
                         )}

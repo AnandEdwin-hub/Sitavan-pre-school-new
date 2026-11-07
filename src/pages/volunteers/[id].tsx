@@ -15,7 +15,7 @@ import { VolunteerCardV2, BadgePerson } from '@/components/badges/PersonBadge';
 export default function VolunteerProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isViewer } = useAuth();
+  const { isViewer, isAdmin } = useAuth();
 
   type VolunteerWithBadgeFields = Volunteer & { photo_position?: number | null };
 
@@ -60,8 +60,8 @@ export default function VolunteerProfile() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-2xl font-bold tracking-tight text-foreground flex-1">Volunteer Profile</h2>
-        {!isViewer && (
-          <Button variant="outline" className="bg-white">
+        {isAdmin && (
+          <Button variant="outline" className="bg-white" onClick={() => navigate('/volunteers/' + id + '/edit')}>
             <Edit className="w-4 h-4 mr-2" />
             Edit Profile
           </Button>

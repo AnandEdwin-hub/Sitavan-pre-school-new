@@ -98,12 +98,14 @@ function App() {
                   <Route index element={<RequireRole allow={ADMIN_VIEWER}><StaffOverview /></RequireRole>} />
                   <Route path="new" element={<RequireRole allow={ADMIN_ONLY}><AddStaff /></RequireRole>} />
                   <Route path=":id" element={<RequireRole allow={ADMIN_VIEWER}><StaffProfile /></RequireRole>} />
+                  <Route path=":id/edit" element={<RequireRole allow={ADMIN_ONLY}><AddStaff /></RequireRole>} />
                 </Route>
 
                 <Route path="/volunteers">
                   <Route index element={<RequireRole allow={ALL}><VolunteersOverview /></RequireRole>} />
                   <Route path="new" element={<RequireRole allow={ADMIN_STAFF}><AddVolunteer /></RequireRole>} />
                   <Route path=":id" element={<RequireRole allow={ALL}><VolunteerProfile /></RequireRole>} />
+                  <Route path=":id/edit" element={<RequireRole allow={ADMIN_ONLY}><AddVolunteer /></RequireRole>} />
                 </Route>
 
                 <Route path="/attendance">
