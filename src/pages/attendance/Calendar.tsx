@@ -44,7 +44,7 @@ export default function CalendarAttendance() {
     queryKey: ['students-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return MOCK_STUDENTS;
-      const { data } = await supabase.from(peopleTable('students')).select('id, roll_no, full_name, class, group').order('roll_no');
+      const { data } = await supabase.from(peopleTable('students')).select('id, roll_no, full_name, class, group').eq('status', 'Active').order('roll_no');
       return data || [];
     },
     enabled: view === 'students',
@@ -69,7 +69,7 @@ export default function CalendarAttendance() {
     queryKey: ['staff-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').eq('attendance_required', true).order('staff_code');
+      const { data } = await supabase.from(peopleTable('staff')).select('id, staff_code, full_name, designation').eq('attendance_required', true).eq('status', 'Active').order('staff_code');
       return data || [];
     },
     enabled: view === 'staff',
@@ -95,7 +95,7 @@ export default function CalendarAttendance() {
     queryKey: ['volunteers-cal'],
     queryFn: async () => {
       if (!isSupabaseConfigured) return [];
-      const { data } = await supabase.from(peopleTable('volunteers')).select('id, volunteer_code, full_name, organization').order('volunteer_code');
+      const { data } = await supabase.from(peopleTable('volunteers')).select('id, volunteer_code, full_name, organization').eq('status', 'Active').order('volunteer_code');
       return data || [];
     },
     enabled: view === 'volunteers',

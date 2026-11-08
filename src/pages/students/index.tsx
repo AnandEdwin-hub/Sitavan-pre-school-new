@@ -18,7 +18,7 @@ export default function StudentsOverview() {
   const { isViewer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('Active');
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['students'],

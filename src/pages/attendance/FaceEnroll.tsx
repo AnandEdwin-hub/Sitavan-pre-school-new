@@ -140,9 +140,9 @@ export default function FaceEnroll() {
     queryFn: async (): Promise<Person[]> => {
       if (!isSupabaseConfigured) return [];
       const [st, sf, vo] = await Promise.all([
-        db.from('students').select('id, roll_no, full_name, class, group').order('full_name'),
+        db.from('students').select('id, roll_no, full_name, class, group').eq('status', 'Active').order('full_name'),
         db.from('staff').select('id, staff_code, full_name, designation').eq('status', 'Active').eq('attendance_required', true).order('full_name'),
-        db.from('volunteers').select('id, volunteer_code, full_name, organization, school_class').order('full_name'),
+        db.from('volunteers').select('id, volunteer_code, full_name, organization, school_class').eq('status', 'Active').order('full_name'),
       ]);
       if (st.error) throw st.error;
       if (sf.error) throw sf.error;

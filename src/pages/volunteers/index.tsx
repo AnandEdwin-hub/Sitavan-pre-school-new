@@ -15,7 +15,7 @@ export default function VolunteersOverview() {
   const navigate = useNavigate();
   const { isViewer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('Active');
 
   const { data: volunteers = [], isLoading } = useQuery({
     queryKey: ['volunteers'],
