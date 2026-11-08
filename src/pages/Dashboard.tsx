@@ -64,7 +64,7 @@ const { data: staffList = [] } = useQuery({
   queryKey: ['dash-staff-names'],
   queryFn: async () => {
     if (!isSupabaseConfigured) return [];
-    const { data, error } = await supabase.from(peopleTable('staff')).select('id, full_name');
+    const { data, error } = await supabase.from(peopleTable('staff')).select('id, full_name').eq('status', 'Active');
     if (error) throw error;
     return data || [];
   },
@@ -74,7 +74,7 @@ const { data: volunteerList = [] } = useQuery({
   queryKey: ['dash-volunteer-names'],
   queryFn: async () => {
     if (!isSupabaseConfigured) return [];
-    const { data, error } = await supabase.from(peopleTable('volunteers')).select('id, full_name');
+    const { data, error } = await supabase.from(peopleTable('volunteers')).select('id, full_name').eq('status', 'Active');
     if (error) throw error;
     return data || [];
   },
@@ -125,8 +125,9 @@ const { data: monthAttendance = [] } = useQuery({
   const activeStudents = students.filter(s => s.status === 'Active');
   const totalStudentsCount = activeStudents.length;
   
-  const presentTodayCount = todayAttendance.filter(a => PRESENT_STATUSES.includes(a.status)).length;
-  const absentTodayCount = todayAttendance.filter(a => a.status === 'Absent').length;
+  const activeStudentIds = new Set(activeStudents.map((s: any) => s.id));
+  const presentTodayCount = todayAttendance.filter(a => activeStudentIds.has(a.student_id) && PRESENT_STATUSES.includes(a.status)).length;
+  const absentTodayCount = todayAttendance.filter(a => activeStudentIds.has(a.student_id) && a.status === 'Absent').length;
 
 const lateAbsentToday = useMemo(() => {
   const rank: Record<string, number> = { 'Very Late': 0, 'Late': 1, 'Absent': 2 };
@@ -136,7 +137,7 @@ const lateAbsentToday = useMemo(() => {
   todayAttendance.forEach((r: any) => {
     if (!(r.status in rank)) return;
     const s: any = students.find((x: any) => x.id === r.student_id);
-    if (!s) return;
+    if (!s || s.status !== 'Active') return;
     rows.push({
       id: `s-${r.id}`,
       name: s.full_name,
